@@ -1,5 +1,5 @@
-use ctre::motor_control::*;
 use crate::util::config::drive::talon;
+use ctre::motor_control::*;
 
 pub trait Factory {
     fn create(id: i32) -> TalonSRX;
@@ -46,10 +46,7 @@ impl Factory for motor_type::CtreCim {
             talon::CURRENT_LIMIT_DURATION_MS,
             talon::TALON_CONFIG_TIMEOUT_MS,
         );
-        talon.config_continuous_current_limit(
-            talon::CURRENT_LIMIT,
-            talon::TALON_CONFIG_TIMEOUT_MS,
-        );
+        talon.config_continuous_current_limit(talon::CURRENT_LIMIT, talon::TALON_CONFIG_TIMEOUT_MS);
         talon.enable_current_limit(true);
 
         talon.config_nominal_output_forward(0.0, 10);
@@ -73,10 +70,7 @@ impl Factory for motor_type::Ctre775Pro {
             talon::CURRENT_LIMIT_DURATION_MS,
             talon::TALON_CONFIG_TIMEOUT_MS,
         );
-        talon.config_continuous_current_limit(
-            talon::CURRENT_LIMIT,
-            talon::TALON_CONFIG_TIMEOUT_MS,
-        );
+        talon.config_continuous_current_limit(talon::CURRENT_LIMIT, talon::TALON_CONFIG_TIMEOUT_MS);
         talon.enable_current_limit(true);
         talon
     }

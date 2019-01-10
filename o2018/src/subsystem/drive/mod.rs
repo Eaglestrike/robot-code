@@ -1,13 +1,12 @@
+use crate::subsystem::drive::drive_side::{DriveSide, PwmDriveSide, TalonDriveSide};
+use crate::util::config::drive::pwm::*;
+use crate::util::config::drive::*;
+use crate::util::talon_factory::*;
 use navx::AHRS;
 use wpilib::encoder::{Encoder, EncodingType};
 use wpilib::pneumatics::{Action, DoubleSolenoid};
 use wpilib::pwm::PwmSpeedController;
 use wpilib::spi::Port::MXP;
-
-use crate::subsystem::drive::drive_side::{DriveSide, PwmDriveSide, TalonDriveSide};
-use crate::util::config::drive::*;
-use crate::util::config::drive::pwm::*;
-use crate::util::talon_factory::*;
 
 mod drive_side;
 
@@ -36,8 +35,10 @@ impl<T: DriveSide> Drive<T> {
     }
 
     pub fn set_velocity(&mut self, left: f64, right: f64) {
-        self.left_drive_side.set_velocity(left.min(MAX_VELOCITY).max(-MAX_VELOCITY));
-        self.right_drive_side.set_velocity(right.min(MAX_VELOCITY).max(-MAX_VELOCITY));
+        self.left_drive_side
+            .set_velocity(left.min(MAX_VELOCITY).max(-MAX_VELOCITY));
+        self.right_drive_side
+            .set_velocity(right.min(MAX_VELOCITY).max(-MAX_VELOCITY));
     }
 
     #[cfg(gear_shifter)]
@@ -73,8 +74,11 @@ impl Drive<TalonDriveSide> {
                 motor_type::CtreCim::create(RIGHT_SLAVE),
             ),
             ahrs: AHRS::from_spi_minutiae(MXP, 500_000, 60),
-            gear_shifter: DoubleSolenoid::new(shifter::LOW_GEAR_CHANNEL, shifter::HIGH_GEAR_CHANNEL)
-                .expect("Unable to create gear shifter!"),
+            gear_shifter: DoubleSolenoid::new(
+                shifter::LOW_GEAR_CHANNEL,
+                shifter::HIGH_GEAR_CHANNEL,
+            )
+            .expect("Unable to create gear shifter!"),
         }
     }
 }
@@ -93,8 +97,11 @@ impl Drive<drive_side::PwmDriveSide> {
                 RIGHT_K_ACCELERATION,
             ),
             ahrs: AHRS::from_spi_minutiae(MXP, 500_000, 60),
-            gear_shifter: DoubleSolenoid::new(shifter::LOW_GEAR_CHANNEL, shifter::HIGH_GEAR_CHANNEL)
-                .expect("Unable to create gear shifter!"),
+            gear_shifter: DoubleSolenoid::new(
+                shifter::LOW_GEAR_CHANNEL,
+                shifter::HIGH_GEAR_CHANNEL,
+            )
+            .expect("Unable to create gear shifter!"),
         }
     }
 }
@@ -108,8 +115,10 @@ pub struct DualPwm {
 impl DualPwm {
     pub fn new(motor_a: i32, motor_b: i32, encoder_a: i32, encoder_b: i32) -> Self {
         DualPwm {
-            master: PwmSpeedController::new_talon(motor_a).expect("Unable to create subsystem.drive pwm"),
-            slave: PwmSpeedController::new_talon(motor_b).expect("Unable to create subsystem.drive pwm"),
+            master: PwmSpeedController::new_talon(motor_a)
+                .expect("Unable to create subsystem.drive pwm"),
+            slave: PwmSpeedController::new_talon(motor_b)
+                .expect("Unable to create subsystem.drive pwm"),
             encoder: Encoder::new(encoder_a, encoder_b, EncodingType::K1X)
                 .expect("Unable to create subsystem.drive encoder"),
         }
@@ -133,7 +142,10 @@ impl DualPwm {
     /// is. Used in pwm testing.
     #[allow(dead_code)]
     pub fn voltage(&mut self) -> f64 {
-        self.master.get().expect("Unable to read from subsystem.drive pwm") * 5.0
+        self.master
+            .get()
+            .expect("Unable to read from subsystem.drive pwm")
+            * 5.0
     }
 
     pub fn position(&self) -> i32 {
