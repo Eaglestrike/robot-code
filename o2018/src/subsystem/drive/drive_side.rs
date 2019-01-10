@@ -1,5 +1,5 @@
 use super::DualPwm;
-use crate::util::config;
+use crate::util::config::drive;
 use ctre::motor_control::*;
 
 pub trait DriveSide {
@@ -32,7 +32,7 @@ impl TalonDriveSide {
             0.0,
         );
         self.master
-            .config_kf(config::drive_side::LOW_GEAR_VEL_PID_IDX, 0.279_714_286, 10);
+            .config_kf(drive::talon::LOW_GEAR_VEL_PID_IDX, 0.279_714_286, 10);
         self.master.config_kp(0, 0.5, 10);
         self.master.config_ki(0, 0.0, 10);
         self.master.config_kd(0, 2.5, 10);
@@ -76,12 +76,12 @@ impl DriveSide for TalonDriveSide {
         // we have to use this function to get position so that sensorPhase is taken into account
         // undocumented behavior in Phoenix
         f64::from(self.master.get_selected_sensor_position(0).unwrap())
-            * config::drive::DRIVE_ENCODER_FEET_PER_TICK
+            * drive::ENCODER_METERS_PER_TICK
     }
 
     fn velocity(&self) -> f64 {
         f64::from(self.master.get_selected_sensor_velocity(0).unwrap())
-            * config::drive::DRIVE_ENCODER_FEET_PER_TICK
+            * drive::ENCODER_METERS_PER_TICK
     }
 }
 
@@ -112,7 +112,7 @@ impl DriveSide for PwmDriveSide {
 
     fn set_velocity(&mut self, feet_per_second: f64) {
         self.pwm
-            .set(self.k_velocity * feet_per_second * config::drive::DRIVE_ENCODER_TICKS_PER_FOOT)
+            .set(self.k_velocity * feet_per_second * drive::ENCODER_METERS_PER_TICK)
     }
 
     fn position_ticks(&self) -> i32 {
@@ -120,10 +120,10 @@ impl DriveSide for PwmDriveSide {
     }
 
     fn position(&self) -> f64 {
-        self.pwm.position() as f64 * config::drive::DRIVE_ENCODER_FEET_PER_TICK
+        self.pwm.position() as f64 * drive::ENCODER_METERS_PER_TICK
     }
 
     fn velocity(&self) -> f64 {
-        self.pwm.rate() * config::drive::DRIVE_ENCODER_FEET_PER_TICK
+        self.pwm.rate() * drive::ENCODER_METERS_PER_TICK
     }
 }

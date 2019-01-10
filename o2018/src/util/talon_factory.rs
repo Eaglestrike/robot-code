@@ -1,5 +1,5 @@
-use crate::util::config;
 use ctre::motor_control::*;
+use crate::util::config::drive::talon;
 
 pub trait Factory {
     fn create(id: i32) -> TalonSRX;
@@ -33,22 +33,22 @@ impl Factory for motor_type::CtreCim {
         talon.config_selected_feedback_sensor(
             FeedbackDevice::CTRE_MagEncoder_Relative,
             0,
-            config::drive_side::TALON_CONFIG_TIMEOUT_MS,
+            talon::TALON_CONFIG_TIMEOUT_MS,
         );
-        talon.set_selected_sensor_position(0, 0, config::drive_side::TALON_CONFIG_TIMEOUT_MS);
-        talon.set_quadrature_position(0, config::drive_side::TALON_CONFIG_TIMEOUT_MS);
+        talon.set_selected_sensor_position(0, 0, talon::TALON_CONFIG_TIMEOUT_MS);
+        talon.set_quadrature_position(0, talon::TALON_CONFIG_TIMEOUT_MS);
 
         talon.config_peak_current_limit(
-            config::drive_side::CURRENT_LIMIT_THRESHOLD,
-            config::drive_side::TALON_CONFIG_TIMEOUT_MS,
+            talon::CURRENT_LIMIT_THRESHOLD,
+            talon::TALON_CONFIG_TIMEOUT_MS,
         );
         talon.config_peak_current_duration(
-            config::drive_side::CURRENT_LIMIT_DURATION_MS,
-            config::drive_side::TALON_CONFIG_TIMEOUT_MS,
+            talon::CURRENT_LIMIT_DURATION_MS,
+            talon::TALON_CONFIG_TIMEOUT_MS,
         );
         talon.config_continuous_current_limit(
-            config::drive_side::CURRENT_LIMIT,
-            config::drive_side::TALON_CONFIG_TIMEOUT_MS,
+            talon::CURRENT_LIMIT,
+            talon::TALON_CONFIG_TIMEOUT_MS,
         );
         talon.enable_current_limit(true);
 
@@ -66,16 +66,16 @@ impl Factory for motor_type::Ctre775Pro {
         apply_common_config(&talon);
 
         talon.config_peak_current_limit(
-            config::drive_side::CURRENT_LIMIT_THRESHOLD,
-            config::drive_side::TALON_CONFIG_TIMEOUT_MS,
+            talon::CURRENT_LIMIT_THRESHOLD,
+            talon::TALON_CONFIG_TIMEOUT_MS,
         );
         talon.config_peak_current_duration(
-            config::drive_side::CURRENT_LIMIT_DURATION_MS,
-            config::drive_side::TALON_CONFIG_TIMEOUT_MS,
+            talon::CURRENT_LIMIT_DURATION_MS,
+            talon::TALON_CONFIG_TIMEOUT_MS,
         );
         talon.config_continuous_current_limit(
-            config::drive_side::CURRENT_LIMIT,
-            config::drive_side::TALON_CONFIG_TIMEOUT_MS,
+            talon::CURRENT_LIMIT,
+            talon::TALON_CONFIG_TIMEOUT_MS,
         );
         talon.enable_current_limit(true);
         talon

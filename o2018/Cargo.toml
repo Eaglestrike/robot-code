@@ -5,3 +5,11 @@ authors = ["Josh Hejna <josh.hejna@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+ctre = "0.6.1"
+navx = { git = "https://github.com/Eaglestrike/navx-rs.git"}
+wpilib = "0.3.1"
+
+[package.metadata.frc]
+team-number = 114
+rio-address = "10.1.14.2"
+target-dir = "./target"

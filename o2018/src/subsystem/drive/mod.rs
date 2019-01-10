@@ -1,15 +1,13 @@
-use crate::subsystem::drive::drive_commands::{MoveCommand, MoveType};
-use crate::subsystem::drive::drive_side::{DriveSide, PwmDriveSide, TalonDriveSide};
-use crate::util::config::drive::WHEELBASE_WIDTH_FT;
-use crate::util::config::drive_side::pwm::*;
-use crate::util::config::drive_side::{LEFT_MASTER, LEFT_SLAVE, RIGHT_MASTER, RIGHT_SLAVE};
-use crate::util::config::gear_shifter::*;
-use crate::util::talon_factory::*;
 use navx::AHRS;
 use wpilib::encoder::{Encoder, EncodingType};
 use wpilib::pneumatics::{Action, DoubleSolenoid};
 use wpilib::pwm::PwmSpeedController;
 use wpilib::spi::Port::MXP;
+
+use crate::subsystem::drive::drive_side::{DriveSide, PwmDriveSide, TalonDriveSide};
+use crate::util::config::drive::*;
+use crate::util::config::drive::pwm::*;
+use crate::util::talon_factory::*;
 
 mod drive_side;
 
@@ -31,30 +29,35 @@ pub struct Drive<T: DriveSide> {
 }
 
 impl<T: DriveSide> Drive<T> {
-
-    pub fn execute_drive_command(&mut self, cmd: &MoveCommand) {
-        match cmd.move_type() {
-            MoveType::Velocity => {
-                self.left_drive_side.set_velocity(cmd.left());
-                self.right_drive_side.set_velocity(cmd.right());
-            }
-            MoveType::Percent => {
-                self.left_drive_side.set_percent(cmd.left());
-                self.right_drive_side.set_percent(cmd.right());
-            }
-        }
+    /// Set the drive percent outputs
+    pub fn set(&mut self, left: f64, right: f64) {
+        self.left_drive_side.set_percent(left.min(1.0).max(-1.0));
+        self.right_drive_side.set_percent(right.min(1.0).max(-1.0));
     }
 
+    pub fn set_velocity(&mut self, left: f64, right: f64) {
+        self.left_drive_side.set_velocity(left.min(MAX_VELOCITY).max(-MAX_VELOCITY));
+        self.right_drive_side.set_velocity(right.min(MAX_VELOCITY).max(-MAX_VELOCITY));
+    }
+
+    #[cfg(gear_shifter)]
     pub fn set_gear(&mut self, state: Action) {
         self.gear_shifter
             .set(state)
             .expect("Unable to set gear shifter!")
     }
 
+    /// Get the current gear the robot is in. If the gear shifter is not enabled, this function
+    /// will return `Action::Off`.
+    #[inline(always)]
     pub fn gear(&self) -> Action {
-        self.gear_shifter
-            .get()
-            .expect("Unable to get gear shifter state!")
+        if cfg!(gear_shifter) {
+            Action::Off
+        } else {
+            self.gear_shifter
+                .get()
+                .expect("Unable to get gear shifter state!")
+        }
     }
 }
 
@@ -70,7 +73,7 @@ impl Drive<TalonDriveSide> {
                 motor_type::CtreCim::create(RIGHT_SLAVE),
             ),
             ahrs: AHRS::from_spi_minutiae(MXP, 500_000, 60),
-            gear_shifter: DoubleSolenoid::new(LOW_GEAR_CHANNEL, HIGH_GEAR_CHANNEL)
+            gear_shifter: DoubleSolenoid::new(shifter::LOW_GEAR_CHANNEL, shifter::HIGH_GEAR_CHANNEL)
                 .expect("Unable to create gear shifter!"),
         }
     }
@@ -90,7 +93,7 @@ impl Drive<drive_side::PwmDriveSide> {
                 RIGHT_K_ACCELERATION,
             ),
             ahrs: AHRS::from_spi_minutiae(MXP, 500_000, 60),
-            gear_shifter: DoubleSolenoid::new(LOW_GEAR_CHANNEL, HIGH_GEAR_CHANNEL)
+            gear_shifter: DoubleSolenoid::new(shifter::LOW_GEAR_CHANNEL, shifter::HIGH_GEAR_CHANNEL)
                 .expect("Unable to create gear shifter!"),
         }
     }
@@ -128,6 +131,7 @@ impl DualPwm {
 
     /// Get my guess at the average motor voltage. I do not completely know what the base voltage
     /// is. Used in pwm testing.
+    #[allow(dead_code)]
     pub fn voltage(&mut self) -> f64 {
         self.master.get().expect("Unable to read from subsystem.drive pwm") * 5.0
     }

@@ -33,7 +33,6 @@ pub mod controls {
 }
 
 pub mod drive {
-
     /// ID of the master talon on the left side of the robot
     pub const LEFT_MASTER: i32 = -1;
 
@@ -46,6 +45,9 @@ pub mod drive {
     /// ID of the slave talon on the right side of the robot
     pub const RIGHT_SLAVE: i32 = -1;
 
+    /// The number of meters per tick of the drive encoders
+    pub const ENCODER_METERS_PER_TICK: f64 = -1.0;
+
     /// Maximum allowed velocity when being controlled by the operator
     pub const MAX_VELOCITY: f64 = 6.0;
 
@@ -54,7 +56,6 @@ pub mod drive {
 
     /// Talon specific settings
     pub mod talon {
-
         //TODO: What exactly does this do?
         /// Something related to subsystem.drive PID constants, but I honestly have no idea what this does.
         pub const LOW_GEAR_VEL_PID_IDX: i32 = 0;
@@ -84,21 +85,19 @@ pub mod drive {
         pub const RIGHT_K_VELOCITY: f64 = 0.0;
         pub const RIGHT_K_ACCELERATION: f64 = 0.0;
     }
-}
 
-// TODO: Find out if we will have a gear shifter
-/// Make sure this can easily be disabled in code.
-pub mod gear_shifter {
+    /// TODO: Find out if we will have a gear shifter!
+    /// If we use the gear shifter, add `--features gear_shifter` when building.
+    /// Gear shifter for the drive base.
+    pub mod shifter {
 
-    /// If this robot is equipped with a gear shifter
-    pub const ENABLED: bool = true;
+        /// Gear shifter solenoid channel ID for high gear
+        pub const HIGH_GEAR_CHANNEL: i32 = 0;
 
-    ///
-    pub const HIGH_GEAR_CHANNEL: i32 = 0;
+        /// Gear shifter solenoid channel ID for low gear
+        pub const LOW_GEAR_CHANNEL: i32 = 1;
 
-    ///
-    pub const LOW_GEAR_CHANNEL: i32 = 1;
-
-    /// Ratio of the high gear speed to the low gear speed.
-    pub const HIGH_LOW_GEAR_RATIO: f64 = 0.0;
+        /// Ratio of the high gear speed to the low gear speed
+        pub const HIGH_LOW_GEAR_RATIO: f64 = 0.0;
+    }
 }
