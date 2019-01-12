@@ -5,3 +5,9 @@ authors = ["Josh Hejna <josh.hejna@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+
+[workspace]
+members = [
+    ".",
+    "elevator-loops"
+]

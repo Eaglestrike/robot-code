@@ -1,0 +1,10 @@
+[package]
+name = "elevator-loops"
+version = "0.1.0"
+authors = ["Josh Hejna <josh.hejna@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+control-sim = {path = "../../first-party/controls"}
+serde = "1.0"
+serde_derive = "1.0"
