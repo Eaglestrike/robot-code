@@ -33,8 +33,9 @@ impl ElevatorPIDLoop {
     pub const MAX_HEIGHT: si::Meter<f64> = const_unit!(2.1336);
     pub const MIN_HEIGHT: si::Meter<f64> = const_unit!(-0.02);
     pub const DT: si::Second<f64> = const_unit!(1. / 200.);
-    pub const KP: si::VoltPerMeter<f64> = const_unit!(115.0);
-    pub const KD: units::VoltSecondPerMeter<f64> = const_unit!(15.);
+    pub const KP: si::VoltPerMeter<f64> = const_unit!(300.0);
+    pub const KD: units::VoltSecondPerMeter<f64> = const_unit!(30.);
+    pub const KF: si::Volt<f64> = const_unit!(1.5);
 
     pub fn new() -> Self {
         Self {
@@ -49,9 +50,9 @@ impl ElevatorPIDLoop {
     pub fn acc(volt: si::Volt<f64>, vel: si::MeterPerSecond<f64>) -> si::MeterPerSecond2<f64> {
         #![allow(non_snake_case)]
         let m = 18.1437 * si::KG;
-        let r = 0.0508 * si::M;
-        let G = 26.6666666; // how much slower the output is than input
-        let R = 12. * si::V / (134. * si::A * 2.); // 2x 775pro
+        let r = 0.0254 * si::M;
+        let G = 14.12; // how much slower the output is than input
+        let R = 12. * si::V / (134. * si::A * 3.); // 3x 775pro
         let Kt = 0.71 * si::N * si::M / (134. * si::A); // the 2s cancel
         let Kv = (1961.40101115 /*rad*/ / si::S) / (12. * si::V);
 
@@ -84,7 +85,7 @@ impl ElevatorPIDLoop {
         };
         let err = filtered_goal - (encoder - self.zero_offset);
         let v = clamp(
-            err * Self::KP + ((err - self.last_err) / Self::DT) * Self::KD,
+            err * Self::KP + ((err - self.last_err) / Self::DT) * Self::KD + Self::KF,
             -12. * si::V,
             12. * si::V,
         );
@@ -133,7 +134,7 @@ impl HarnessAble for ElevatorPIDLoop {
         let mut pos = s.pos;
         let mut vel = s.vel;
         while elapsed < dur {
-            vel += ElevatorPIDLoop::acc(r, vel) * Self::SIMUL_DT;
+            vel += (ElevatorPIDLoop::acc(r, vel) - 9.81 * si::MPS2) * Self::SIMUL_DT;
             pos += vel * Self::SIMUL_DT;
             elapsed += Self::SIMUL_DT;
         }
@@ -209,6 +210,12 @@ mod test {
         );
         harness.use_csv("harness.csv");
         harness.shim_mut().controller_mut().set_goal(2. * si::M);
-        harness.run_time(10. * si::S);
+        harness.run_time(5. * si::S);
+        harness.shim_mut().controller_mut().set_goal(1.4 * si::M);
+        harness.run_time(0.1 * si::S);
+        harness.shim_mut().controller_mut().set_goal(0.7 * si::M);
+        harness.run_time(5. * si::S);
+
+
     }
 }
