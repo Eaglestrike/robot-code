@@ -8,6 +8,8 @@ edition = "2018"
 ctre = "0.6.1"
 navx = { git = "https://github.com/Eaglestrike/navx-rs.git"}
 wpilib = "0.3.1"
+crossbeam-channel = "0.3.6"
+parking_lot = "0.7.1"
 
 [package.metadata.frc]
 team-number = 114
