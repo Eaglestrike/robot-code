@@ -1,5 +1,5 @@
 # 2018 Code Design
-*Note: This document is a work in progress. If you have questions, please ask!* 
+*Note: This document is a work in progress. If you have questions, please ask!* <br>
 **With the exception of Aris and Josh, any changes to this document must be submit in the form of a pull request!**
 
 ## Subsystems
