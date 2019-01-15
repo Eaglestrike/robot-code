@@ -22,6 +22,27 @@ Each subsystem should have a `create_receiver` method which returns a `BusReader
 respective subsystem's broadcast channel. The bus should be created when `new` is called as to ensure
 `create_receiver` can be used directly after creation.
 
+#### State Struct Pattern
+All state (anything that may be updated at runtime) for a subsystem shall be contained in a single struct.
+For example:
+```rust
+mod drive {
+  struct State {
+    speed : f64,
+    gear: HIGH,
+  }
+}
+
+```
+
+This way, all state updates can be handled cleanly using struct update syntax. 
+```rust
+new_state = State {
+  gear: LOW,
+  ..old_state
+}
+```
+
 ### Components
 Each subsystem may include, in it directory, multiple rust modules or structs, known as components.
 For instance, the drive subsystem may own the `DriveSides`, which may in turn own the motors. These
