@@ -1,18 +1,25 @@
 # 2018 Code Design
 *Note: This document is a work in progress. If you have questions, please ask!* <br>
-**With the exception of Aris and Josh, any changes to this document must be submit in the form of a pull request!**
+**With the exception of Aris and Josh, any changes to this document must be submit in the form of a pull
+request!**
 
 ## Subsystems
 The code shall be divided into subsystems, which are our primary unit of encapsulation for conceptual, 
-structural, and execution purposes. Each subsystem shall be given its own module within the `subsystem` module in the form of either a file or folder containing the system and it's relevant components. Each subsystem will be given it's own thread shortly after creation. 
-This year if a task requires it's own thread, it should be considered a subsystem to better facilitate code layout and interfacing with the parent subsystem. Use this as a general rule of thumb, but there will very likely be exceptions which come up that make more sense from a concurrency prespective to separate.
+structural, and execution purposes. Each subsystem shall be given its own module within the `subsystem` module
+in the form of either a file or folder containing the system and it's relevant components. Each subsystem will
+be given it's own thread shortly after creation.
 
-### Subsystem Internals
+This year if a task requires it's own thread, it should be considered a subsystem to better facilitate code
+layout and interfacing with the parent subsystem. Use this as a general rule of thumb, but there will may be
+exceptions which come up that make more sense from a concurrency prespective to separate.
+
+### Subsystem Interface
 Each subsystem should have a `new` associated function, which should take in all needed `Sender`s
 and return a tuple of `Self` and the `Sender` for the associated command queue.
 
 Each subsystem should have a `run` method, which takes `self` and runs the subsystem, looping
-and sleeping (or, more probably, waiting for a new command or update) as necessary.
+and sleeping (or, more probably, waiting for a new command or update) as necessary. This method
+will be run in its own thread, and should be written to take advantage of concurrent execution. 
 
 Each subsystem should have an enum containing all commands it knows how to process. Variants of this enum
 will be what is sent over the subsystem's command queue.
@@ -22,7 +29,7 @@ Each subsystem should have a `create_receiver` method which returns a `BusReader
 respective subsystem's broadcast channel. The bus should be created when `new` is called as to ensure
 `create_receiver` can be used directly after creation.
 
-#### State Struct Pattern
+### State Struct Pattern
 All state (anything that may be updated at runtime) for a subsystem shall be contained in a single struct.
 For example:
 ```rust
