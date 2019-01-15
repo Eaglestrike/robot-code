@@ -3,8 +3,8 @@
 
 ## Subsystems
 The code shall be divided into subsystems, which are our primary unit of encapsulation for conceptual, 
-structural, and execution purposes. Each subsystem shall be given its own module (probably in a new
-directory) and its own thread.
+structural, and execution purposes. Each subsystem shall be given its own module within the subsystem package in the form of either a file or folder containing the system and it's relevant components. Each subsystem will be given it's own thread shortly after creation. 
+This year if a task requires it's own thread, it should be considered a subsystem to better facilitate code layout and interfacing with the parent subsystem. Use this as a general rule of thumb, but there will very likely be exceptions which come up that make more sense from a concurrency prespective to separate.
 
 ### Subsystem Internals
 Each subsystem should have a `new` associated function, which should take in all needed `Sender`s
