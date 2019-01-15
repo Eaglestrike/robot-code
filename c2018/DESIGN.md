@@ -1,5 +1,6 @@
 # 2018 Code Design
 *Note: This document is a work in progress. If you have questions, please ask!* 
+**With the exception of Aris and Josh, any changes to this document must be submit in the form of a pull request!**
 
 ## Subsystems
 The code shall be divided into subsystems, which are our primary unit of encapsulation for conceptual, 
