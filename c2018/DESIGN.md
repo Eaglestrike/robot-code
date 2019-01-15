@@ -25,15 +25,28 @@ respective subsystem's broadcast channel. The bus should be created when `new` i
 Each subsystem may include, in it directory, multiple rust modules or structs, known as components.
 For instance, the drive subsystem may own the `DriveSides`, which may in turn own the motors. These
 components are not intended to "think", but merely to execute commands called in the form of methods.
+All components must reside within a subsystem. Access should be private and relevant information can
+be shared using the subsystem broadcast and instruction channels. While the definition of a component
+is clarified in this section, there will be no component struct or trait as they are only contained within
+their subsystems or some form of utility file and the current design has no need for extraneous abstraction.
 
 ### Layout
 *Note: This section is even more indeterminate than everything else.* 
 
-- Controller (takes controls and tells others what to do)
-- Drive (moves robot)
+- Controller
+  - Gets inputs from driver station and delegates instructions to the other subsystems
+  - Manages when auton routines should be used and canceled
+- Drive
+  - Moves the robot
+  - Monitors the position of the robot through dead reckoning
 - Hatch
-- Cargo (ball)
-- Vision?
+  - Hatch ejection system (unknown at this point)
+  - Elevator
+- Cargo
+  - Intake the cargo balls
+  - Shoot or eject the balls into goals
+- Vision
+  - Monitor the robot's relative position to targets and broadcasts the information to the relevant subsystems
 
 
 ### Communication
