@@ -8,14 +8,18 @@ directory) and its own thread.
 
 ### Subsystem Internals
 Each subsystem should have a `new` associated function, which should take in all needed `Sender`s
-and return a tuple of `Self`, the `Sender` for the associated command queue, and a `Receiver` for
-the associated bus broadcast channel.
+and return a tuple of `Self` and the `Sender` for the associated command queue.
 
 Each subsystem should have a `run` method, which takes `self` and runs the subsystem, looping
 and sleeping (or, more probably, waiting for a new command or update) as necessary.
 
 Each subsystem should have an enum containing all commands it knows how to process. Variants of this enum
 will be what is sent over the subsystem's command queue.
+
+Each subsystem will contain a bus broadcast channel to convery messages to other subsystems.
+Each subsystem should have a `create_receiver` method which returns a `BusReader` connected to the
+respective subsystem's broadcast channel. The bus should be created when `new` is called as to ensure
+`create_receiver` can be used directly after creation.
 
 ### Components
 Each subsystem may include, in it directory, multiple rust modules or structs, known as components.
