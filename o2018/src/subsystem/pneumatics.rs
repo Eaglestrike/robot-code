@@ -1,9 +1,10 @@
-use bus::{BusReader, Bus};
-use crossbeam_channel::{Receiver, Sender, unbounded};
-use wpilib::AnalogInput;
-use wpilib::pneumatics::Compressor;
 use std::thread;
 use std::time::Duration;
+
+use bus::BusReader;
+use crossbeam_channel::{unbounded, Receiver, Sender};
+use wpilib::pneumatics::Compressor;
+use wpilib::AnalogInput;
 
 use crate::util::config::pneumatics::*;
 
@@ -15,11 +16,9 @@ pub struct Pneumatics {
     compressor: Compressor,
     pressure_sensor: PressureSensor,
     receiver: Receiver<Instruction>,
-    bus: Bus<()>,
 }
 
 impl Pneumatics {
-
     fn new() -> (Self, Sender<Instruction>) {
         let pressure_in = AnalogInput::new(PNEUMATIC_PRESSURE_SENSOR_ID)
             .expect("Unable to create analog input for the pneumatics sensor!");
@@ -32,7 +31,6 @@ impl Pneumatics {
             compressor: Compressor::new().expect("Unable to connect to the compressor!"),
             pressure_sensor: PressureSensor(pressure_in),
             receiver,
-            bus: Bus::new(1),
         };
 
         (pneumatics, sender)
@@ -63,27 +61,40 @@ pub enum Instruction {
     MinPressure(f64),
     PressureMargin(f64),
 }
+
 // TODO: Decide if this should be moved to the config or remain in the subsystem.
 /// Update rate for compressing. Much lower than other threads since it is not as important and
 /// does not react as fast as many of the other subsystems.
 const UPDATE_RATE: Duration = Duration::from_millis(100);
 
 impl Subsystem<()> for Pneumatics {
-
     fn run(&mut self) {
+        let mut enabled = true;
         loop {
+            for item in self.receiver.try_iter() {
+                match item {
+                    Instruction::MinPressure(val) => self.activation_pressure = val.min(100.0),
+                    Instruction::PressureMargin(val) => self.pressure_margin = val,
+                    Instruction::Disable => {
+                        self.compressor.stop();
+                        enabled = false
+                    }
+                    Instruction::Enable => enabled = true,
+                }
+            }
 
-
-            if self.activation_pressure < 0.0 {
-                self.compressor.start();
-            } else if self.pressure() < self.activation_pressure
-                && !self.compressor.closed_loop_control()
-            {
-                self.compressor.start();
-            } else if self.pressure() > self.activation_pressure + self.pressure_margin
-                && self.compressor.closed_loop_control()
-            {
-                self.compressor.stop();
+            if enabled {
+                if self.activation_pressure < 0.0 {
+                    self.compressor.start();
+                } else if self.pressure() < self.activation_pressure
+                    && !self.compressor.closed_loop_control()
+                {
+                    self.compressor.start();
+                } else if self.pressure() > self.activation_pressure + self.pressure_margin
+                    && self.compressor.closed_loop_control()
+                {
+                    self.compressor.stop();
+                }
             }
 
             thread::sleep(UPDATE_RATE);
@@ -91,7 +102,7 @@ impl Subsystem<()> for Pneumatics {
     }
 
     fn create_receiver(&mut self) -> BusReader<()> {
-        self.bus.add_rx()
+        unimplemented!("The pneumatics system does not send any data!")
     }
 }
 

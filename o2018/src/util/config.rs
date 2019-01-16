@@ -14,7 +14,6 @@ use std::time::Duration;
 /// Tick duration for most situations
 pub const TICK_RATE: Duration = Duration::from_millis(5);
 
-
 pub mod pneumatics {
 
     ///

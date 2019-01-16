@@ -11,14 +11,13 @@ use wpilib::pneumatics::{Action, DoubleSolenoid};
 use wpilib::pwm::PwmSpeedController;
 use wpilib::spi::Port::MXP;
 
-use bus::{BusReader, Bus};
-use crossbeam_channel::{Receiver, Sender, unbounded};
+use bus::{Bus, BusReader};
+use crossbeam_channel::{unbounded, Receiver, Sender};
 use std::thread;
 
 mod drive_side;
-//pub mod control;
 
-#[derive(Debug, PartialEq, Default, Clone)]
+#[derive(Debug, PartialEq, Default, Copy, Clone)]
 pub struct Pose {
     pub x: f64,
     pub y: f64,
@@ -28,6 +27,12 @@ pub struct Pose {
     distance_accumulated: f64,
 }
 
+#[derive(Debug, Copy, Clone)]
+pub enum Instruction {
+    GearShift(Action),
+    Velocity(f64, f64),
+    Percentage(f64, f64),
+}
 pub struct Drive<T: DriveSide> {
     left_drive_side: T,
     right_drive_side: T,
@@ -37,50 +42,7 @@ pub struct Drive<T: DriveSide> {
     pose_broadcaster: Bus<Pose>,
 }
 
-#[derive(Debug, Copy, Clone)]
-pub enum Instruction {
-    GearShift(Action),
-    Velocity(f64, f64),
-    Percentage(f64, f64),
-}
-
-impl<T: DriveSide> Subsystem<Pose> for Drive<T> {
-
-    fn run(&mut self) {
-        let mut latest_pose = Pose::default();
-
-        loop {
-            thread::sleep(TICK_RATE);
-
-            for item in self.receiver.try_iter() {
-                match item {
-                    Instruction::GearShift(a) => self.gear_shifter.set(a).expect("Unable to set gear shifter!"),
-                    Instruction::Percentage(left, right) => {
-                        self.left_drive_side.set_percent(left.min(1.0).max(-1.0));
-                        self.right_drive_side.set_percent(right.min(1.0).max(-1.0));
-                    }
-                    Instruction::Velocity(left, right) => {
-                        self.left_drive_side
-                            .set_velocity(left.min(MAX_VELOCITY).max(-MAX_VELOCITY));
-                        self.right_drive_side
-                            .set_velocity(right.min(MAX_VELOCITY).max(-MAX_VELOCITY));
-                    },
-                }
-            }
-
-            latest_pose = self.generate_pose(&latest_pose);
-            send_bus!(self.pose_broadcaster, latest_pose.clone());
-
-        }
-    }
-
-    fn create_receiver(&mut self) -> BusReader<Pose> {
-        self.pose_broadcaster.add_rx()
-    }
-}
-
 impl<T: DriveSide> Drive<T> {
-
     /// Generates the next pose from the previous pose and current gyro data
     fn generate_pose(&self, previous: &Pose) -> Pose {
         let new_heading = self.ahrs.yaw() as f64;
@@ -158,6 +120,42 @@ impl Drive<drive_side::PwmDriveSide> {
         };
 
         (drive, sender)
+    }
+}
+
+impl<T: DriveSide> Subsystem<Pose> for Drive<T> {
+    fn run(&mut self) {
+        let mut latest_pose = Pose::default();
+
+        loop {
+            thread::sleep(TICK_RATE);
+
+            for item in self.receiver.try_iter() {
+                match item {
+                    Instruction::GearShift(a) => self
+                        .gear_shifter
+                        .set(a)
+                        .expect("Unable to set gear shifter!"),
+                    Instruction::Percentage(left, right) => {
+                        self.left_drive_side.set_percent(left.min(1.0).max(-1.0));
+                        self.right_drive_side.set_percent(right.min(1.0).max(-1.0));
+                    }
+                    Instruction::Velocity(left, right) => {
+                        self.left_drive_side
+                            .set_velocity(left.min(MAX_VELOCITY).max(-MAX_VELOCITY));
+                        self.right_drive_side
+                            .set_velocity(right.min(MAX_VELOCITY).max(-MAX_VELOCITY));
+                    }
+                }
+            }
+
+            latest_pose = self.generate_pose(&latest_pose);
+            send_bus!(self.pose_broadcaster, latest_pose.clone());
+        }
+    }
+
+    fn create_receiver(&mut self) -> BusReader<Pose> {
+        self.pose_broadcaster.add_rx()
     }
 }
 
