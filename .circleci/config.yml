@@ -1,14 +1,24 @@
-version: 2.1
+version: 2
 jobs:
   build:
     docker:
-      - image: circleci/rust:1.31
+    - image: circleci/rust:1.31
     steps:
-      - checkout
-      - restore_cache:
-          key: v1-{{ checksum "Cargo.lock" }}
-      - run: cargo build
-      - save_cache:
-          key: v1-{{ checksum "Cargo.lock" }}
-          paths:
-            - target
+    - checkout
+    - restore_cache:
+        keys:
+          - v1-{{ checksum "Cargo.lock" }}-{{ .Branch }}-{{ .Revision }}
+          - v1-{{ checksum "Cargo.lock" }}-{{ .Branch }}-
+          - v1-{{ checksum "Cargo.lock" }}-
+          - v1-
+    - run:
+        command: cargo build
+    - save_cache:
+        key: v1-{{ checksum "Cargo.lock" }}-{{ .Branch }}-{{ .Revision }}
+        paths:
+        - target
+workflows:
+  version: 2
+  workflow:
+    jobs:
+    - build
