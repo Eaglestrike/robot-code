@@ -1,16 +1,24 @@
-use crate::subsystem::drive::drive_side::{DriveSide, PwmDriveSide, TalonDriveSide};
-use crate::util::config::drive::pwm::*;
-use crate::util::config::drive::*;
+use self::drive_side::{DriveSide, PwmDriveSide, TalonDriveSide};
+use crate::subsystem::Subsystem;
+use crate::util::config::drive::{pwm::*, *};
+use crate::util::config::{BUS_SIZE, TICK_RATE};
 use crate::util::talon_factory::*;
+
 use navx::AHRS;
+
 use wpilib::encoder::{Encoder, EncodingType};
 use wpilib::pneumatics::{Action, DoubleSolenoid};
 use wpilib::pwm::PwmSpeedController;
 use wpilib::spi::Port::MXP;
 
-mod drive_side;
+use bus::{BusReader, Bus};
+use crossbeam_channel::{Receiver, Sender, unbounded};
+use std::thread;
 
-#[derive(Debug, PartialEq)]
+mod drive_side;
+//pub mod control;
+
+#[derive(Debug, PartialEq, Default, Clone)]
 pub struct Pose {
     pub x: f64,
     pub y: f64,
@@ -25,46 +33,83 @@ pub struct Drive<T: DriveSide> {
     right_drive_side: T,
     ahrs: AHRS,
     gear_shifter: DoubleSolenoid,
+    receiver: Receiver<Instruction>,
+    pose_broadcaster: Bus<Pose>,
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum Instruction {
+    GearShift(Action),
+    Velocity(f64, f64),
+    Percentage(f64, f64),
+}
+
+impl<T: DriveSide> Subsystem<Pose> for Drive<T> {
+
+    fn run(&mut self) {
+        let mut latest_pose = Pose::default();
+
+        loop {
+            thread::sleep(TICK_RATE);
+
+            for item in self.receiver.try_iter() {
+                match item {
+                    Instruction::GearShift(a) => self.gear_shifter.set(a).expect("Unable to set gear shifter!"),
+                    Instruction::Percentage(left, right) => {
+                        self.left_drive_side.set_percent(left.min(1.0).max(-1.0));
+                        self.right_drive_side.set_percent(right.min(1.0).max(-1.0));
+                    }
+                    Instruction::Velocity(left, right) => {
+                        self.left_drive_side
+                            .set_velocity(left.min(MAX_VELOCITY).max(-MAX_VELOCITY));
+                        self.right_drive_side
+                            .set_velocity(right.min(MAX_VELOCITY).max(-MAX_VELOCITY));
+                    },
+                }
+            }
+
+            latest_pose = self.generate_pose(&latest_pose);
+            send_bus!(self.pose_broadcaster, latest_pose.clone());
+
+        }
+    }
+
+    fn create_receiver(&mut self) -> BusReader<Pose> {
+        self.pose_broadcaster.add_rx()
+    }
 }
 
 impl<T: DriveSide> Drive<T> {
-    /// Set the drive percent outputs
-    pub fn set(&mut self, left: f64, right: f64) {
-        self.left_drive_side.set_percent(left.min(1.0).max(-1.0));
-        self.right_drive_side.set_percent(right.min(1.0).max(-1.0));
-    }
 
-    pub fn set_velocity(&mut self, left: f64, right: f64) {
-        self.left_drive_side
-            .set_velocity(left.min(MAX_VELOCITY).max(-MAX_VELOCITY));
-        self.right_drive_side
-            .set_velocity(right.min(MAX_VELOCITY).max(-MAX_VELOCITY));
-    }
+    /// Generates the next pose from the previous pose and current gyro data
+    fn generate_pose(&self, previous: &Pose) -> Pose {
+        let new_heading = self.ahrs.yaw() as f64;
+        let angle = (new_heading + previous.heading) / 2.0;
 
-    #[cfg(gear_shifter)]
-    pub fn set_gear(&mut self, state: Action) {
-        self.gear_shifter
-            .set(state)
-            .expect("Unable to set gear shifter!")
-    }
+        let left_distance = self.left_drive_side.position();
+        let right_distance = self.right_drive_side.position();
 
-    /// Get the current gear the robot is in. If the gear shifter is not enabled, this function
-    /// will return `Action::Off`.
-    #[inline(always)]
-    pub fn gear(&self) -> Action {
-        if cfg!(gear_shifter) {
-            Action::Off
-        } else {
-            self.gear_shifter
-                .get()
-                .expect("Unable to get gear shifter state!")
+        let left_velocity = self.left_drive_side.velocity();
+        let right_velocity = self.right_drive_side.velocity();
+
+        let distance = (left_distance + right_distance) / 2.0 - previous.distance_accumulated;
+
+        Pose {
+            x: previous.x + distance * angle.cos(),
+            y: previous.y + distance * angle.sin(),
+            heading: new_heading,
+            velocity: (left_velocity + right_velocity) / 2.0,
+            angular_velocity: right_velocity - left_velocity / DRIVE_BASE_WHEEL_WIDTH * 2.0,
+            distance_accumulated: (left_distance + right_distance) / 2.0,
         }
     }
 }
 
 impl Drive<TalonDriveSide> {
-    pub fn new() -> Self {
-        Self {
+    pub fn new() -> (Self, Sender<Instruction>) {
+        let (sender, receiver) = unbounded();
+
+        let drive = Drive {
             left_drive_side: TalonDriveSide::new(
                 motor_type::CtreCim::create(LEFT_MASTER),
                 motor_type::CtreCim::create(LEFT_SLAVE),
@@ -79,13 +124,19 @@ impl Drive<TalonDriveSide> {
                 shifter::HIGH_GEAR_CHANNEL,
             )
             .expect("Unable to create gear shifter!"),
-        }
+            receiver,
+            pose_broadcaster: Bus::new(BUS_SIZE),
+        };
+
+        (drive, sender)
     }
 }
 
 impl Drive<drive_side::PwmDriveSide> {
-    pub fn new() -> Self {
-        Self {
+    pub fn new() -> (Self, Sender<Instruction>) {
+        let (sender, receiver) = unbounded();
+
+        let drive = Drive {
             left_drive_side: PwmDriveSide::new(
                 DualPwm::new(LEFT_MASTER, LEFT_SLAVE, LEFT_ENCODER_A, LEFT_ENCODER_B),
                 LEFT_K_VELOCITY,
@@ -102,7 +153,11 @@ impl Drive<drive_side::PwmDriveSide> {
                 shifter::HIGH_GEAR_CHANNEL,
             )
             .expect("Unable to create gear shifter!"),
-        }
+            receiver,
+            pose_broadcaster: Bus::new(BUS_SIZE),
+        };
+
+        (drive, sender)
     }
 }
 

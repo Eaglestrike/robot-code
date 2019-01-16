@@ -1,41 +1,42 @@
+use bus::{BusReader, Bus};
+use crossbeam_channel::{Receiver, Sender, unbounded};
 use wpilib::AnalogInput;
 use wpilib::pneumatics::Compressor;
+use std::thread;
+use std::time::Duration;
 
 use crate::util::config::pneumatics::*;
+
+use super::Subsystem;
 
 pub struct Pneumatics {
     pressure_margin: f64,
     activation_pressure: f64,
     compressor: Compressor,
     pressure_sensor: PressureSensor,
+    receiver: Receiver<Instruction>,
+    bus: Bus<()>,
 }
 
 impl Pneumatics {
-    pub fn new() -> Self {
-        let pressure_in = AnalogInput::new(PNEUMATIC_PRESSURE_SENSOR_ID).expect("Unable to create analog input for the pneumatics sensor!");
 
-        Self {
+    fn new() -> (Self, Sender<Instruction>) {
+        let pressure_in = AnalogInput::new(PNEUMATIC_PRESSURE_SENSOR_ID)
+            .expect("Unable to create analog input for the pneumatics sensor!");
+
+        let (sender, receiver) = unbounded();
+
+        let pneumatics = Pneumatics {
             pressure_margin: DEFAULT_PRESSURE_MARGIN,
             activation_pressure: DEFAULT_ACTIVATION_PRESSURE,
             compressor: Compressor::new().expect("Unable to connect to the compressor!"),
             pressure_sensor: PressureSensor(pressure_in),
-        }
-    }
+            receiver,
+            bus: Bus::new(1),
+        };
 
-// TODO: Aris put this in a thread and make things work!
-//    fn tick(&mut self) {
-//        if self.activation_pressure < 0.0 {
-//            self.compressor.start();
-//        } else if self.get_pressure() < self.activation_pressure
-//            && !self.compressor.get_closed_loop_control()
-//        {
-//            self.compressor.start();
-//        } else if (self.get_pressure() > (self.activation_pressure + self.pressure_margin))
-//            && self.compressor.get_closed_loop_control()
-//        {
-//            self.compressor.stop();
-//        }
-//    }
+        (pneumatics, sender)
+    }
 
     #[allow(dead_code)]
     pub fn pressure(&self) -> f64 {
@@ -56,12 +57,54 @@ impl Pneumatics {
     }
 }
 
-struct PressureSensor (AnalogInput);
+pub enum Instruction {
+    Enable,
+    Disable,
+    MinPressure(f64),
+    PressureMargin(f64),
+}
+// TODO: Decide if this should be moved to the config or remain in the subsystem.
+/// Update rate for compressing. Much lower than other threads since it is not as important and
+/// does not react as fast as many of the other subsystems.
+const UPDATE_RATE: Duration = Duration::from_millis(100);
+
+impl Subsystem<()> for Pneumatics {
+
+    fn run(&mut self) {
+        loop {
+
+
+            if self.activation_pressure < 0.0 {
+                self.compressor.start();
+            } else if self.pressure() < self.activation_pressure
+                && !self.compressor.closed_loop_control()
+            {
+                self.compressor.start();
+            } else if self.pressure() > self.activation_pressure + self.pressure_margin
+                && self.compressor.closed_loop_control()
+            {
+                self.compressor.stop();
+            }
+
+            thread::sleep(UPDATE_RATE);
+        }
+    }
+
+    fn create_receiver(&mut self) -> BusReader<()> {
+        self.bus.add_rx()
+    }
+}
+
+struct PressureSensor(AnalogInput);
 
 impl PressureSensor {
+    #[inline(always)]
     fn get(&self) -> f64 {
         const VCC: f64 = TYPICAL_PNEUMATIC_SUPPLY_VOLTAGE;
-        let voltage = self.0.voltage().expect("Unable to get data from pressure sensor!");
+        let voltage = self
+            .0
+            .voltage()
+            .expect("Unable to get data from pressure sensor!");
         250.0 * (voltage / VCC) - 25.0
     }
 }

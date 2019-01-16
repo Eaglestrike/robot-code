@@ -7,6 +7,14 @@
  *  YOU MUST USE THE CORRECT UNITS UNLESS OTHERWISE SPECIFIED IN VARIABLE NAME!
  */
 
+/// The number of messages a broadcast bus can hold before stalling. Each subsystem contains one.
+pub const BUS_SIZE: usize = 1024;
+
+use std::time::Duration;
+/// Tick duration for most situations
+pub const TICK_RATE: Duration = Duration::from_millis(5);
+
+
 pub mod pneumatics {
 
     ///
@@ -54,6 +62,10 @@ pub mod drive {
     /// Maximum allowed acceleration when being controlled by the operator
     pub const MAX_ACCELERATION: f64 = 4.0;
 
+    /// Distance between the wheels on each drive side. This value will be tweaked later when we do
+    /// tests for calibration which will account for wheel skid.
+    pub const DRIVE_BASE_WHEEL_WIDTH: f64 = -1.0;
+
     /// Talon specific settings
     pub mod talon {
         //TODO: What exactly does this do?
@@ -86,8 +98,6 @@ pub mod drive {
         pub const RIGHT_K_ACCELERATION: f64 = 0.0;
     }
 
-    /// TODO: Find out if we will have a gear shifter!
-    /// If we use the gear shifter, add `--features gear_shifter` when building.
     /// Gear shifter for the drive base.
     pub mod shifter {
 
