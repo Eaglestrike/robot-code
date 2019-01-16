@@ -14,6 +14,9 @@ use std::time::Duration;
 /// Tick duration for most situations
 pub const TICK_RATE: Duration = Duration::from_millis(5);
 
+/// Openmct websocket address
+pub const OPENMCT_URL: &str = "ws://localhost:8080/update";
+
 pub mod pneumatics {
 
     ///

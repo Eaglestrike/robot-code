@@ -21,6 +21,7 @@ macro_rules! send_bus {
 
 #[macro_use]
 pub mod drive;
+pub mod dashboard;
 pub mod pneumatics;
 
 /// A generic subsystem object. B is the enum type of information sent by the bus broadcaster for
