@@ -12,7 +12,7 @@ jobs:
           - v1-{{ checksum "Cargo.lock" }}-
           - v1-
     - run:
-        command: cargo build
+        command: cargo check
     - save_cache:
         key: v1-{{ checksum "Cargo.lock" }}-{{ .Branch }}-{{ .Revision }}
         paths:
