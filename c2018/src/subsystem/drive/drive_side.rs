@@ -120,7 +120,8 @@ impl DriveSide for PwmDriveSide {
     }
 
     fn position(&self) -> f64 {
-        self.pwm.position() as f64 * drive::ENCODER_METERS_PER_TICK
+        let position: f64 = self.pwm.position().into();
+        position * drive::ENCODER_METERS_PER_TICK
     }
 
     fn velocity(&self) -> f64 {

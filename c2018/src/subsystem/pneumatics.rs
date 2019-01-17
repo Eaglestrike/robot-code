@@ -84,10 +84,9 @@ impl Subsystem<()> for Pneumatics {
             }
 
             if enabled {
-                if self.activation_pressure < 0.0 {
-                    self.compressor.start();
-                } else if self.pressure() < self.activation_pressure
-                    && !self.compressor.closed_loop_control()
+                if self.activation_pressure < 0.0
+                    || (self.pressure() < self.activation_pressure
+                        && !self.compressor.closed_loop_control())
                 {
                     self.compressor.start();
                 } else if self.pressure() > self.activation_pressure + self.pressure_margin

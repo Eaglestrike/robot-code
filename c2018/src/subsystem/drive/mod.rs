@@ -45,7 +45,7 @@ pub struct Drive<T: DriveSide> {
 impl<T: DriveSide> Drive<T> {
     /// Generates the next pose from the previous pose and current gyro data
     fn generate_pose(&self, previous: &Pose) -> Pose {
-        let new_heading = self.ahrs.yaw() as f64;
+        let new_heading: f64 = self.ahrs.yaw().into();
         let angle = (new_heading + previous.heading) / 2.0;
 
         let left_distance = self.left_drive_side.position();
@@ -150,7 +150,7 @@ impl<T: DriveSide> Subsystem<Pose> for Drive<T> {
             }
 
             latest_pose = self.generate_pose(&latest_pose);
-            send_bus!(self.pose_broadcaster, latest_pose.clone());
+            send_bus!(self.pose_broadcaster, latest_pose);
         }
     }
 
