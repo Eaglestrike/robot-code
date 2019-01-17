@@ -1,6 +1,3 @@
-#![feature(test)]
-#![feature(const_fn)]
-
 pub mod integration;
 
 // re-exports
