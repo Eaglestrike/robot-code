@@ -1,5 +1,6 @@
 [workspace]
 members = [
     "first-party/controls",
-    "c2018"
+    "rio-benches",
+    "c2018",
 ]
