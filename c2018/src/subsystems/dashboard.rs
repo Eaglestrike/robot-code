@@ -49,7 +49,8 @@ struct DashboardHandle {
 
 impl Handler for DashboardHandle {
     fn on_open(&mut self, _: Handshake) -> Result<()> {
-        self.web_socket.timeout(config::PACKET_RATE, UPDATE)?;
+        self.web_socket
+            .timeout(config::UPDATE_INTERVAL_MS, UPDATE)?;
         self.web_socket.timeout(config::PACKET_TIMEOUT, TIMEOUT)
     }
 
@@ -72,7 +73,7 @@ impl Handler for DashboardHandle {
 
                 //TODO: Figure out what information will be on the dashboard and how it gets here
 
-                self.web_socket.timeout(config::PACKET_RATE, UPDATE)
+                self.web_socket.timeout(config::UPDATE_INTERVAL_MS, UPDATE)
             }
             TIMEOUT => self.web_socket.close(CloseCode::Away),
             _ => Err(ws::Error::new(
