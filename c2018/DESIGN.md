@@ -1,33 +1,34 @@
 # 2018 Code Design
-*Note: This document is a work in progress. If you have questions, please ask!* <br>
+*Note: This document is a work in progress. Nothing is set in stone. If you have
+questions, please ask!* <br>
 **With the exception of Aris and Josh, any changes to this document must be submit in the form of a pull
 request!**
 
 ## Subsystems
-The code shall be divided into subsystems, which are our primary unit of encapsulation for conceptual, 
+The code shall be divided into subsystems, which are our primary unit of encapsulation for conceptual,
 structural, and execution purposes. Each subsystem shall be given its own module within the `subsystem` module
 in the form of either a file or folder containing the system and it's relevant components. Each subsystem will
 be given it's own thread shortly after creation.
 
 This year if a task requires it's own thread, it should be considered a subsystem to better facilitate code
 layout and interfacing with the parent subsystem. Use this as a general rule of thumb, but there will may be
-exceptions which come up that make more sense from a concurrency prespective to separate.
+exceptions which come up that make more sense from a concurrency perspective to separate.
 
 ### Subsystem Interface
+Subsystems must implement the [`Subsystem`] trait.
+
 Each subsystem should have a `new` associated function, which should take in all needed `Sender`s
-and return a tuple of `Self` and the `Sender` for the associated command queue.
+and `Receiver`s and return `Self`.
 
 Each subsystem should have a `run` method, which takes `self` and runs the subsystem, looping
 and sleeping (or, more probably, waiting for a new command or update) as necessary. This method
-will be run in its own thread, and should be written to take advantage of concurrent execution. 
+will be run in its own thread, and should be written to take advantage of concurrent execution.
+The existence of such a method is a requirement of the [`Subsystem`] trait.
 
 Each subsystem should have an enum containing all commands it knows how to process. Variants of this enum
 will be what is sent over the subsystem's command queue.
 
-Each subsystem will contain a bus broadcast channel to convery messages to other subsystems.
-Each subsystem should have a `create_receiver` method which returns a `BusReader` connected to the
-respective subsystem's broadcast channel. The bus should be created when `new` is called as to ensure
-`create_receiver` can be used directly after creation.
+Each subsystem will contain a bus broadcast channel to convey messages to other subsystems.
 
 ### State Struct Pattern
 All state (anything that may be updated at runtime) for a subsystem shall be contained in a single struct.
@@ -42,7 +43,7 @@ mod drive {
 
 ```
 
-This way, all state updates can be handled cleanly using struct update syntax. 
+This way, all state updates can be handled cleanly using struct update syntax.
 ```rust
 new_state = State {
   gear: LOW,
@@ -60,7 +61,7 @@ is clarified in this section, there will be no component struct or trait as they
 their subsystems or some form of utility file and the current design has no need for extraneous abstraction.
 
 ### Layout
-*Note: This section is even more indeterminate than everything else.* 
+*Note: This section is even more indeterminate than everything else.*
 
 - Controller
   - Gets inputs from driver station and delegates instructions to the other subsystems
@@ -83,11 +84,11 @@ their subsystems or some form of utility file and the current design has no need
 Subsystems shall communicate using channels. Each subsystem will have have its own mpsc channel
 (we will be using the [crossbeam-channel] crate, which are actually mpmc, but we will be using them
 with only one consumer). For the most part, only **commands** from the Controller to the subsystem
-should be sent via this queue. 
+should be sent via this queue.
 
 #### Broadcast Channels
-For cases where events need to be broadcast to all intrested subsystems, we will use the [bus] crate.
-This should be done for all **data** sent from one peer subsystem to one or more other peer subsystems. 
+For cases where events need to be broadcast to all interested subsystems, we will use the [bus] crate.
+This should be done for all **data** sent from one peer subsystem to one or more other peer subsystems.
 
 ## Initialization
 
@@ -104,9 +105,9 @@ all dependencies shall be injected.
 
 
 ## Configuration
-All configuration (e.g. hardware channel numbers, physical constants of design) shall be handled 
-in a `config` module by declaring constants. Subsystems may depend on these constants. 
+All configuration (e.g. hardware channel numbers, physical constants of design) shall be handled
+in a `config` module by declaring constants. Subsystems may depend on these constants.
 
-
+[`Subsystem`]: https://github.com/Eaglestrike/robot-code/blob/master/c2018/src/subsystems/mod.rs
 [crossbeam-channel]: https://github.com/crossbeam-rs/crossbeam/tree/master/crossbeam-channel
 [bus]: https://github.com/jonhoo/bus
