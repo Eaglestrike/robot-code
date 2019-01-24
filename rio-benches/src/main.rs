@@ -1,3 +1,4 @@
+#![allow(unused_imports, dead_code)]
 #![feature(test)]
 
 use std::thread;
@@ -56,9 +57,9 @@ fn bench_iters_send_recv(b: &mut Bencher) {
     let (s3, r3) = bounded(1000);
     let (s4, r4) = bounded(1000);
 
-    let mut a1 = MethodCommunicator::new(1.01, r1, s2.clone(), s3.clone());
-    let mut a2 = MethodCommunicator::new(0.99, r2, s3.clone(), s4.clone());
-    let mut a3 = MethodCommunicator::new(-0.89, r3, s4.clone(), s1.clone());
+    let a1 = MethodCommunicator::new(1.01, r1, s2.clone(), s3.clone());
+    let a2 = MethodCommunicator::new(0.99, r2, s3.clone(), s4.clone());
+    let a3 = MethodCommunicator::new(-0.89, r3, s4.clone(), s1.clone());
     let mut a4 = MethodCommunicator::new(-1.23, r4, s1.clone(), s2.clone());
 
     const ITER2: usize = 100 * ITERS;
