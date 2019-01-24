@@ -2,14 +2,13 @@
 
 use std::thread;
 
-use crossbeam_channel::{Sender, Receiver, bounded};
+use crossbeam_channel::{bounded, Receiver, Sender};
 extern crate test;
 use test::Bencher;
 
 fn main() {
     println!("Hello, world!");
 }
-
 
 #[derive(Copy, Clone)]
 struct Data(pub [f64; 5]);
@@ -41,22 +40,21 @@ impl MethodCommunicator {
 
     pub fn send(&self) {
         if self.int > 0. {
-            self.ext1.try_send( Data([self.int; 5])).ok();
+            self.ext1.try_send(Data([self.int; 5])).ok();
         } else {
-            self.ext2.try_send( Data([self.int; 5])).ok();
+            self.ext2.try_send(Data([self.int; 5])).ok();
         }
     }
 }
-
 
 const ITERS: usize = 100;
 
 #[bench]
 fn bench_iters_send_recv(b: &mut Bencher) {
-    let (s1, r1)  = bounded(1000);
-    let (s2, r2)  = bounded(1000);
-    let (s3, r3)  = bounded(1000);
-    let (s4, r4)  = bounded(1000);
+    let (s1, r1) = bounded(1000);
+    let (s2, r2) = bounded(1000);
+    let (s3, r3) = bounded(1000);
+    let (s4, r4) = bounded(1000);
 
     let mut a1 = MethodCommunicator::new(1.01, r1, s2.clone(), s3.clone());
     let mut a2 = MethodCommunicator::new(0.99, r2, s3.clone(), s4.clone());
