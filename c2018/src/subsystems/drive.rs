@@ -30,7 +30,7 @@ pub struct Pose {
 #[allow(dead_code)]
 pub enum Instruction {
     GearShift(Action),
-    Velocity(f64, f64),
+    Velocity(MeterPerSecond<f64>, MeterPerSecond<f64>),
     Percentage(f64, f64),
     FramePeriod(u8),
 }
@@ -119,14 +119,14 @@ impl Subsystem for Drive {
                         .set(a)
                         .expect("Unable to set gear shifter!"),
                     Instruction::Percentage(left, right) => {
-                        self.left_drive_side.set_percent(left.min(1.0).max(-1.0));
-                        self.right_drive_side.set_percent(right.min(1.0).max(-1.0));
+                        self.left_drive_side.set_percent(left);
+                        self.right_drive_side.set_percent(right);
                     }
                     Instruction::Velocity(left, right) => {
                         self.left_drive_side
-                            .set_velocity(left.min(MAX_VELOCITY).max(-MAX_VELOCITY));
+                            .set_velocity(left);
                         self.right_drive_side
-                            .set_velocity(right.min(MAX_VELOCITY).max(-MAX_VELOCITY));
+                            .set_velocity(right);
                     }
                     Instruction::FramePeriod(n) => {
                         self.left_drive_side.config_frame_period(n);
@@ -191,7 +191,7 @@ impl DriveSide {
         self.master
             .set(
                 ControlMode::Velocity,
-                velocity * 0.1,
+                0.005 * *(velocity/MPS),
                 DemandType::Neutral,
                 0.0,
             )

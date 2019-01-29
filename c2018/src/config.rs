@@ -29,12 +29,6 @@ pub mod drive {
     /// The number of meters per tick of the drive encoders
     pub const ENCODER_METERS_PER_TICK: MeterPerSecond<f64> = const_unit!(-1.0); //TODO
 
-    /// Maximum allowed velocity when being controlled by the operator
-    pub const MAX_VELOCITY: MeterPerSecond<f64> = const_unit!(6.0);
-
-    /// Maximum allowed acceleration when being controlled by the operator
-    pub const MAX_ACCELERATION: MeterPerSecond2<f64> = const_unit!(4.0);
-
     /// Distance between the wheels on each drive side. This value will be tweaked later when we do
     /// tests for calibration which will account for wheel skid.
     pub const DRIVE_BASE_WHEEL_WIDTH: Meter<f64> = const_unit!(-1.0); //TODO
