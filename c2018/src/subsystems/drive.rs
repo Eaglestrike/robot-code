@@ -14,14 +14,16 @@ use crate::talon_util::TalonExt;
 
 use super::Subsystem;
 
-#[derive(Debug, PartialEq, Default, Copy, Clone)]
+use controls::units::*;
+
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Pose {
-    pub x: f64,
-    pub y: f64,
+    pub x: Meter<f64>,
+    pub y: Meter<f64>,
     pub heading: f64,
-    pub velocity: f64,
-    pub angular_velocity: f64,
-    distance_accumulated: f64,
+    pub velocity: MeterPerSecond<f64>,
+    pub angular_velocity: Hertz<f64>,
+    distance_accumulated: Meter<f64>,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -54,16 +56,15 @@ impl Drive {
         let left_velocity = self.left_drive_side.velocity();
         let right_velocity = self.right_drive_side.velocity();
 
-        let distance: f64 =
-            0.5 * (left_distance + right_distance) as f64 - previous.distance_accumulated;
+        let distance = (left_distance + right_distance) / 2.0 - previous.distance_accumulated;
 
         Pose {
             x: previous.x + distance * angle.cos(),
             y: previous.y + distance * angle.sin(),
             heading: new_heading,
             velocity: (left_velocity + right_velocity) / 2.0,
-            angular_velocity: right_velocity - left_velocity / DRIVE_BASE_WHEEL_WIDTH * 2.0,
-            distance_accumulated: 0.5 * (left_distance + right_distance) as f64,
+            angular_velocity: (right_velocity - left_velocity) / DRIVE_BASE_WHEEL_WIDTH * 2.0,
+            distance_accumulated: (left_distance + right_distance) / 2.0,
         }
     }
 
@@ -99,7 +100,14 @@ impl Drive {
 
 impl Subsystem for Drive {
     fn run(mut self) {
-        let mut latest_pose = Pose::default();
+        let mut latest_pose = Pose {
+             x: 0.0 * M,
+         y: 0.0 * M,
+         heading: 0.0,
+         velocity: 0.0 * M / S,
+         angular_velocity: 0.0 / S,
+        distance_accumulated: 0.0 * M,
+    };
 
         loop {
             thread::sleep(crate::config::SUBSYSTEM_SLEEP_TIME);
@@ -179,22 +187,22 @@ impl DriveSide {
             .expect("Unable to communicate with the talons!");
     }
 
-    fn set_velocity(&mut self, feet_per_second: f64) {
+    fn set_velocity(&mut self, velocity: MeterPerSecond<f64>) {
         self.master
             .set(
                 ControlMode::Velocity,
-                feet_per_second * 0.1,
+                velocity * 0.1,
                 DemandType::Neutral,
                 0.0,
             )
             .expect("Unable to communicate with the talons!");
     }
 
-    fn position(&self) -> i32 {
-        self.master.get_selected_sensor_position(0).unwrap()
+    fn position(&self) -> Meter<f64> {
+        f64::from(self.master.get_selected_sensor_position(0).unwrap()) * M
     }
 
-    fn velocity(&self) -> f64 {
+    fn velocity(&self) -> MeterPerSecond<f64> {
         f64::from(self.master.get_selected_sensor_velocity(0).unwrap()) * ENCODER_METERS_PER_TICK
     }
 }

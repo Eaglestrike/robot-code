@@ -1,5 +1,6 @@
 use ctre::motor_control::*;
 use ctre::ErrorCode;
+use ctre::motor_control::config::*;
 
 use crate::config::drive;
 
@@ -15,6 +16,7 @@ impl TalonExt for TalonSRX {
     fn new_cim(id: i32) -> Result<TalonSRX, ErrorCode> {
         let mut talon: TalonSRX = TalonSRX::new(id);
         talon.reset()?;
+
 
         talon.set_inverted(false);
         talon.set_sensor_phase(false);
