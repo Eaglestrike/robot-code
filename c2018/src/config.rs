@@ -8,9 +8,6 @@ use std::time::Duration;
 /// How long to sleep before checking for messages and other periodic tasks.
 pub const SUBSYSTEM_SLEEP_TIME: Duration = Duration::from_millis(5);
 
-/// The number of messages a broadcast bus can hold before stalling. Each subsystem contains one.
-pub const BUS_SIZE: usize = 1024;
-
 pub mod drive {
     use super::*;
 
@@ -41,7 +38,7 @@ pub mod drive {
     pub const CURRENT_LIMIT_THRESHOLD: i32 = 60;
 
     /// Limit for sustained current in the motor. Units are in amps.
-    pub const CURRENT_LIMIT: i32 = 50;
+    pub const CURRENT_LIMIT: i32 = 45;
 
     /// Limit for duration of sustained current
     pub const CURRENT_LIMIT_DURATION_MS: i32 = 200;
@@ -56,8 +53,5 @@ pub mod drive {
 
         /// Gear shifter solenoid channel ID for low gear
         pub const LOW_GEAR_CHANNEL: i32 = 1;
-
-        /// Ratio of the high gear speed to the low gear speed
-        pub const HIGH_LOW_GEAR_RATIO: f64 = 0.0;
     }
 }
