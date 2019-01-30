@@ -1,9 +1,9 @@
 //! Module contains configuration variables.
 //! These should use `dimensioned` units wherever applicable, and contain units in the name otherwise.
 
-use std::time::Duration;
 use controls::const_unit;
 use controls::units::*;
+use std::time::Duration;
 
 /// How long to sleep before checking for messages and other periodic tasks.
 pub const SUBSYSTEM_SLEEP_TIME: Duration = Duration::from_millis(5);

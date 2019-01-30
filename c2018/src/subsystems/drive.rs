@@ -2,19 +2,17 @@ use std::thread;
 
 use bus::Bus;
 use crossbeam_channel::{unbounded, Receiver, Sender};
-
+use ctre::motor_control::config::*;
 use ctre::motor_control::*;
 use ctre::ErrorCode;
-use ctre::motor_control::config::*;
-
 use navx::AHRS;
 use wpilib::pneumatics::{Action, DoubleSolenoid};
+
+use controls::units::*;
 
 use crate::config::drive::*;
 
 use super::Subsystem;
-
-use controls::units::*;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Pose {
@@ -46,74 +44,28 @@ pub struct Drive {
 
 fn create_cim(id: i32) -> Result<TalonSRX, ErrorCode> {
     let mut talon: TalonSRX = TalonSRX::new(id);
-    talon.config_all(&TalonSRXConfig  {
-            base: BaseMotorConfig {
-                custom: Default::default(),
-                openloopRamp: 0.0,
-                closedloopRamp: 0.0,
-                peakOutputForward: 1.0,
-                peakOutputReverse: -1.0,
-                nominalOutputForward: 0.0,
-                nominalOutputReverse: 0.0,
-                neutralDeadband: 0.04,
-                voltageCompSaturation: 0.0,
-                voltageMeasurementFilter: 5,
-                velocityMeasurementPeriod: VelocityMeasPeriod::Period_5Ms,
-                velocityMeasurementWindow: 64,
-                forwardLimitSwitchDeviceID: 0,
-                reverseLimitSwitchDeviceID: 0,
-                forwardLimitSwitchNormal: LimitSwitchNormal::NormallyOpen,
-                reverseLimitSwitchNormal: LimitSwitchNormal::NormallyOpen,
-                forwardSoftLimitThreshold: 0,
-                reverseSoftLimitThreshold: 0,
-                forwardSoftLimitEnable: false,
-                reverseSoftLimitEnable: false,
-                slot_0: Default::default(),
-                slot_1: Default::default(),
-                slot_2: Default::default(),
-                slot_3: Default::default(),
-                auxPIDPolarity: false,
-                filter_0: Default::default(),
-                filter_1: Default::default(),
-                motionCruiseVelocity: 0,
-                motionAcceleration: 0,
-                motionProfileTrajectoryPeriod: 0,
-                feedbackNotContinuous: false,
-                remoteSensorClosedLoopDisableNeutralOnLOS: false,
-                clearPositionOnLimitF: false,
-                clearPositionOnLimitR: false,
-                clearPositionOnQuadIdx: false,
-                limitSwitchDisableNeutralOnLOS: false,
-                softLimitDisableNeutralOnLOS: false,
-                pulseWidthPeriod_EdgesPerRot: 1,
-                pulseWidthPeriod_FilterWindowSz: 1,
-            },
-            primaryPID: Default::default(),
-            auxilaryPID: Default::default(),
-            forwardLimitSwitchSource: LimitSwitchSource::Deactivated,
-            reverseLimitSwitchSource: LimitSwitchSource::Deactivated,
-            sum_0: FeedbackDevice::QuadEncoder,
-            sum_1: FeedbackDevice::QuadEncoder,
-            diff_0: FeedbackDevice::QuadEncoder,
-            diff_1: FeedbackDevice::QuadEncoder,
-            peakCurrentLimit: CURRENT_LIMIT_THRESHOLD,
-            peakCurrentDuration: CURRENT_LIMIT_DURATION_MS,
-            continuousCurrentLimit: CURRENT_LIMIT,
-        }, TALON_CONFIG_TIMEOUT_MS)?;
+    let mut config = TalonSRXConfig::default();
+    config.base.voltageMeasurementFilter = 5;
+    config.base.velocityMeasurementPeriod = VelocityMeasPeriod::Period_5Ms;
+    config.forwardLimitSwitchSource = LimitSwitchSource::Deactivated;
+    config.reverseLimitSwitchSource = LimitSwitchSource::Deactivated;
+    config.peakCurrentLimit = CURRENT_LIMIT_THRESHOLD;
+    config.peakCurrentDuration = CURRENT_LIMIT_DURATION_MS;
+    config.continuousCurrentLimit = CURRENT_LIMIT;
 
-        talon.set_inverted(false);
-        talon.set_sensor_phase(false);
-        talon.set_neutral_mode(NeutralMode::Brake);
+    talon.config_all(&config, TALON_CONFIG_TIMEOUT_MS)?;
 
-        talon.config_selected_feedback_sensor(
-            FeedbackDevice::CTRE_MagEncoder_Relative,
-            0,
-            TALON_CONFIG_TIMEOUT_MS,
-        )?;
-        talon.set_selected_sensor_position(0, 0, TALON_CONFIG_TIMEOUT_MS)?;
-        talon.set_quadrature_position(0, TALON_CONFIG_TIMEOUT_MS)?;
+    talon.set_sensor_phase(false);
+    talon.set_neutral_mode(NeutralMode::Brake);
 
-        talon.enable_current_limit(true);
+    talon.config_selected_feedback_sensor(
+        FeedbackDevice::CTRE_MagEncoder_Relative,
+        0,
+        TALON_CONFIG_TIMEOUT_MS,
+    )?;
+    talon.set_selected_sensor_position(0, 0, TALON_CONFIG_TIMEOUT_MS)?;
+    talon.set_quadrature_position(0, TALON_CONFIG_TIMEOUT_MS)?;
+    talon.enable_current_limit(true);
 
     Ok(talon)
 }
@@ -175,13 +127,13 @@ impl Drive {
 impl Subsystem for Drive {
     fn run(mut self) {
         let mut latest_pose = Pose {
-             x: 0.0 * M,
-         y: 0.0 * M,
-         heading: 0.0,
-         velocity: 0.0 * M / S,
-         angular_velocity: 0.0 / S,
-        distance_accumulated: 0.0 * M,
-    };
+            x: 0.0 * M,
+            y: 0.0 * M,
+            heading: 0.0,
+            velocity: 0.0 * M / S,
+            angular_velocity: 0.0 / S,
+            distance_accumulated: 0.0 * M,
+        };
 
         loop {
             thread::sleep(crate::config::SUBSYSTEM_SLEEP_TIME);
@@ -197,10 +149,8 @@ impl Subsystem for Drive {
                         self.right_drive_side.set_percent(right);
                     }
                     Instruction::Velocity(left, right) => {
-                        self.left_drive_side
-                            .set_velocity(left);
-                        self.right_drive_side
-                            .set_velocity(right);
+                        self.left_drive_side.set_velocity(left);
+                        self.right_drive_side.set_velocity(right);
                     }
                     Instruction::FramePeriod(n) => {
                         self.left_drive_side.config_frame_period(n);
@@ -265,7 +215,7 @@ impl DriveSide {
         self.master
             .set(
                 ControlMode::Velocity,
-                0.005 * *(velocity/MPS),
+                0.005 * *(velocity / MPS),
                 DemandType::Neutral,
                 0.0,
             )
