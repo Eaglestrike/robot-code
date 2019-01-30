@@ -1,7 +1,7 @@
 use std::thread;
 
 use bus::Bus;
-use crossbeam_channel::{unbounded, Receiver, Sender};
+use crossbeam_channel::Receiver;
 use ctre::motor_control::config::*;
 use ctre::motor_control::*;
 use ctre::ErrorCode;
@@ -94,10 +94,8 @@ impl Drive {
         }
     }
 
-    pub fn new(broadcaster: Bus<Pose>) -> (Self, Sender<Instruction>) {
-        let (sender, receiver) = unbounded();
-
-        let drive = Drive {
+    pub fn new(broadcaster: Bus<Pose>, receiver: Receiver<Instruction>) -> Self {
+        Drive {
             left_drive_side: DriveSide::new(
                 create_cim(LEFT_MASTER).expect("Unable to create left master talon!"),
                 create_cim(LEFT_SLAVE).expect("Unable to create left slave talon!"),
@@ -118,9 +116,7 @@ impl Drive {
             .expect("Unable to create gear shifter!"),
             receiver,
             broadcaster,
-        };
-
-        (drive, sender)
+        }
     }
 }
 
