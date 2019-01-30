@@ -4,15 +4,31 @@ use bus::Bus;
 use crossbeam_channel::Receiver;
 use ctre::motor_control::config::*;
 use ctre::motor_control::*;
-use ctre::ErrorCode;
+use lazy_static::lazy_static;
 use navx::AHRS;
-use wpilib::pneumatics::{Action, DoubleSolenoid};
+use wpilib::pneumatics::Solenoid;
 
+use controls::const_unit;
 use controls::units::*;
 
 use crate::config::drive::*;
 
 use super::Subsystem;
+
+#[derive(Debug, Copy, Clone)]
+pub enum Gear {
+    High,
+    Low,
+}
+
+impl Into<bool> for Gear {
+    fn into(self) -> bool {
+        match self {
+            Gear::High => shifter::HIGH_GEAR,
+            Gear::Low => !shifter::HIGH_GEAR,
+        }
+    }
+}
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Pose {
@@ -27,60 +43,70 @@ pub struct Pose {
 #[derive(Debug, Copy, Clone)]
 #[allow(dead_code)]
 pub enum Instruction {
-    GearShift(Action),
+    GearShift(Gear),
     Velocity(MeterPerSecond<f64>, MeterPerSecond<f64>),
     Percentage(f64, f64),
-    FramePeriod(u8),
 }
 
 pub struct Drive {
-    left_drive_side: DriveSide,
-    right_drive_side: DriveSide,
+    l_mstr: TalonSRX,
+    r_mstr: TalonSRX,
+    _l_slave: TalonSRX,
+    _r_slave: TalonSRX,
     ahrs: AHRS,
-    gear_shifter: DoubleSolenoid,
+    gear_shifter: Solenoid,
     receiver: Receiver<Instruction>,
     broadcaster: Bus<Pose>,
 }
 
-fn create_cim(id: i32) -> Result<TalonSRX, ErrorCode> {
-    let mut talon: TalonSRX = TalonSRX::new(id);
-    let mut config = TalonSRXConfig::default();
-    config.base.voltageMeasurementFilter = 5;
-    config.base.velocityMeasurementPeriod = VelocityMeasPeriod::Period_5Ms;
-    config.forwardLimitSwitchSource = LimitSwitchSource::Deactivated;
-    config.reverseLimitSwitchSource = LimitSwitchSource::Deactivated;
-    config.peakCurrentLimit = CURRENT_LIMIT_THRESHOLD;
-    config.peakCurrentDuration = CURRENT_LIMIT_DURATION_MS;
-    config.continuousCurrentLimit = CURRENT_LIMIT;
+lazy_static! {
+    static ref DEFAULT_CONFIG: TalonSRXConfig = TalonSRXConfig {
+        base: BaseMotorConfig {
+            voltageMeasurementFilter: 5,
+            velocityMeasurementPeriod: VelocityMeasPeriod::Period_5Ms,
+            ..Default::default()
+        },
+        forwardLimitSwitchSource: LimitSwitchSource::Deactivated,
+        reverseLimitSwitchSource: LimitSwitchSource::Deactivated,
+        peakCurrentLimit: CURRENT_LIMIT_THRESHOLD,
+        peakCurrentDuration: CURRENT_LIMIT_DURATION_MS,
+        continuousCurrentLimit: CURRENT_LIMIT,
+        ..Default::default()
+    };
+}
+trait TypedQuadrature {
+    fn pos(&self) -> ctre::Result<Meter<f64>>;
+    fn vel(&self) -> ctre::Result<MeterPerSecond<f64>>;
+}
 
-    talon.config_all(&config, TALON_CONFIG_TIMEOUT_MS)?;
+impl TypedQuadrature for TalonSRX {
+    fn pos(&self) -> ctre::Result<Meter<f64>> {
+        self.get_quadrature_position()
+            .and_then(|ticks| Ok(ticks as f64 * crate::config::drive::ENCODER_METERS_PER_TICK))
+    }
 
-    talon.set_sensor_phase(false);
-    talon.set_neutral_mode(NeutralMode::Brake);
-
-    talon.config_selected_feedback_sensor(
-        FeedbackDevice::CTRE_MagEncoder_Relative,
-        0,
-        TALON_CONFIG_TIMEOUT_MS,
-    )?;
-    talon.set_selected_sensor_position(0, 0, TALON_CONFIG_TIMEOUT_MS)?;
-    talon.set_quadrature_position(0, TALON_CONFIG_TIMEOUT_MS)?;
-    talon.enable_current_limit(true);
-
-    Ok(talon)
+    fn vel(&self) -> ctre::Result<MeterPerSecond<f64>> {
+        self.get_quadrature_velocity()
+            .and_then(|ticks| Ok(ticks as f64 * crate::config::drive::ENCODER_METERS_PER_TICK / S))
+    }
 }
 
 impl Drive {
+    fn config_talons<T>(&mut self, f: impl Fn(&mut TalonSRX) -> T) -> (T, T) {
+        (f(&mut self.l_mstr), f(&mut self.r_mstr))
+    }
+
     /// Generates the next pose from the previous pose and current gyro data
     fn generate_pose(&self, previous: &Pose) -> Pose {
         let new_heading: f64 = self.ahrs.yaw().into();
         let angle = (new_heading + previous.heading) / 2.0;
 
-        let left_distance = self.left_drive_side.position();
-        let right_distance = self.right_drive_side.position();
+        //TODO log errors handling here
+        let left_distance = self.l_mstr.pos().unwrap_or(const_unit!(0.));
+        let right_distance = self.r_mstr.pos().unwrap_or(const_unit!(0.));
 
-        let left_velocity = self.left_drive_side.velocity();
-        let right_velocity = self.right_drive_side.velocity();
+        let left_velocity = self.l_mstr.vel().unwrap_or(const_unit!(0.));
+        let right_velocity = self.l_mstr.vel().unwrap_or(const_unit!(0.));
 
         let distance = (left_distance + right_distance) / 2.0 - previous.distance_accumulated;
 
@@ -89,31 +115,44 @@ impl Drive {
             y: previous.y + distance * angle.sin(),
             heading: new_heading,
             velocity: (left_velocity + right_velocity) / 2.0,
-            angular_velocity: (right_velocity - left_velocity) / DRIVE_BASE_WHEEL_WIDTH * 2.0,
+            angular_velocity: (right_velocity - left_velocity) / DRIVE_BASE_WHEEL_WIDTH,
             distance_accumulated: (left_distance + right_distance) / 2.0,
         }
     }
 
     pub fn new(broadcaster: Bus<Pose>, receiver: Receiver<Instruction>) -> Self {
+        let mut l_mstr = TalonSRX::new(LEFT_MASTER);
+        let mut l_slave = TalonSRX::new(LEFT_SLAVE);
+        l_mstr
+            .config_all(&DEFAULT_CONFIG, TALON_CFG_TO_MS)
+            .expect("Unable to configure right_master side!");
+        l_slave
+            .config_all(&DEFAULT_CONFIG, TALON_CFG_TO_MS)
+            .expect("Unable to configure right_master side!");
+        l_slave
+            .follow(&mut l_mstr, FollowerType::PercentOutput)
+            .unwrap();
+
+        let mut r_mstr = TalonSRX::new(RIGHT_MASTER);
+        let mut r_slave = TalonSRX::new(RIGHT_SLAVE);
+        r_mstr
+            .config_all(&DEFAULT_CONFIG, TALON_CFG_TO_MS)
+            .expect("Unable to configure right_master side!");
+        r_slave
+            .config_all(&DEFAULT_CONFIG, TALON_CFG_TO_MS)
+            .expect("Unable to configure right_master side!");
+        r_slave
+            .follow(&mut r_mstr, FollowerType::PercentOutput)
+            .unwrap();
+
         Drive {
-            left_drive_side: DriveSide::new(
-                create_cim(LEFT_MASTER).expect("Unable to create left master talon!"),
-                create_cim(LEFT_SLAVE).expect("Unable to create left slave talon!"),
-                true,
-            )
-            .expect("Unable to construct drive side!"),
-            right_drive_side: DriveSide::new(
-                create_cim(RIGHT_MASTER).expect("Unable to create right master talon!"),
-                create_cim(RIGHT_SLAVE).expect("Unable to create right slave talon!"),
-                false,
-            )
-            .expect("Unable to construct drive side!"),
+            l_mstr,
+            r_mstr,
+            _l_slave: l_slave,
+            _r_slave: r_slave,
             ahrs: AHRS::from_spi_minutiae(wpilib::spi::Port::MXP, 500_000, 60),
-            gear_shifter: DoubleSolenoid::new(
-                shifter::LOW_GEAR_CHANNEL,
-                shifter::HIGH_GEAR_CHANNEL,
-            )
-            .expect("Unable to create gear shifter!"),
+            gear_shifter: Solenoid::new(shifter::SOLENOID_CHANNEL)
+                .expect("Unable to create gear shifter!"),
             receiver,
             broadcaster,
         }
@@ -136,93 +175,24 @@ impl Subsystem for Drive {
 
             for item in self.receiver.try_iter() {
                 match item {
-                    Instruction::GearShift(a) => self
+                    Instruction::GearShift(g) => self
                         .gear_shifter
-                        .set(a)
+                        .set(g.into())
                         .expect("Unable to set gear shifter!"),
-                    Instruction::Percentage(left, right) => {
-                        self.left_drive_side.set_percent(left);
-                        self.right_drive_side.set_percent(right);
+                    Instruction::Percentage(lpct, rpct) => {
+                        self.l_mstr
+                            .set(ControlMode::PercentOutput, lpct, DemandType::Neutral, 0.0)
+                            .unwrap();
+                        self.r_mstr
+                            .set(ControlMode::PercentOutput, rpct, DemandType::Neutral, 0.0)
+                            .unwrap();
                     }
-                    Instruction::Velocity(left, right) => {
-                        self.left_drive_side.set_velocity(left);
-                        self.right_drive_side.set_velocity(right);
-                    }
-                    Instruction::FramePeriod(n) => {
-                        self.left_drive_side.config_frame_period(n);
-                        self.right_drive_side.config_frame_period(n);
-                    }
+                    Instruction::Velocity(_left, _right) => unimplemented!(),
                 }
             }
 
             latest_pose = self.generate_pose(&latest_pose);
             self.broadcaster.broadcast(latest_pose);
         }
-    }
-}
-
-struct DriveSide {
-    master: TalonSRX,
-    #[allow(dead_code)]
-    slave: TalonSRX,
-}
-
-impl DriveSide {
-    fn new(master: TalonSRX, slave: TalonSRX, inverted: bool) -> Result<Self, ErrorCode> {
-        let mut drive_side: DriveSide = DriveSide { master, slave };
-        drive_side.slave.set(
-            ControlMode::Follower,
-            drive_side.master.get_device_id().into(),
-            DemandType::Neutral,
-            0.0,
-        )?;
-        drive_side
-            .master
-            .config_kf(LOW_GEAR_VEL_PID_IDX, 0.279_714_286, 10)?;
-        drive_side.master.config_kp(0, 0.5, 10)?;
-        drive_side.master.config_ki(0, 0.0, 10)?;
-        drive_side.master.config_kd(0, 2.5, 10)?;
-
-        drive_side.master.set_inverted(inverted);
-        drive_side.slave.set_inverted(inverted);
-
-        Ok(drive_side)
-    }
-
-    /// Set how fast to sample data from the encoders
-    fn config_frame_period(&mut self, period: u8) {
-        self.master
-            .set_status_frame_period(StatusFrameEnhanced::Status_3_Quadrature, period, 0)
-            .expect("Unable to configure the talons!");
-    }
-
-    fn set_percent(&mut self, percentage: f64) {
-        self.master
-            .set(
-                ControlMode::PercentOutput,
-                percentage,
-                DemandType::Neutral,
-                0.0,
-            )
-            .expect("Unable to communicate with the talons!");
-    }
-
-    fn set_velocity(&mut self, velocity: MeterPerSecond<f64>) {
-        self.master
-            .set(
-                ControlMode::Velocity,
-                0.005 * *(velocity / MPS),
-                DemandType::Neutral,
-                0.0,
-            )
-            .expect("Unable to communicate with the talons!");
-    }
-
-    fn position(&self) -> Meter<f64> {
-        f64::from(self.master.get_selected_sensor_position(0).unwrap()) * M
-    }
-
-    fn velocity(&self) -> MeterPerSecond<f64> {
-        f64::from(self.master.get_selected_sensor_velocity(0).unwrap()) * ENCODER_METERS_PER_TICK
     }
 }
