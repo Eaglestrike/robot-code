@@ -7,6 +7,8 @@ edition = "2018"
 [dependencies]
 ctre = { git = "https://github.com/Lytigas/ctre-rs.git", branch = "2019-cargo" }
 navx = { git = "https://github.com/Eaglestrike/navx-rs.git" }
+debug_stub_derive = "0.3"
+lazy_static = "1"
 wpilib = "0.4.0"
 crossbeam-channel = "0.3.6"
 parking_lot = "0.7.1"
