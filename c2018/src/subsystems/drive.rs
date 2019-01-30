@@ -124,6 +124,7 @@ impl Drive {
     }
 
     pub fn new(broadcaster: Bus<Pose>, receiver: Receiver<Instruction>) -> Self {
+        // TODO log errors
         let mut l_mstr = TalonSRX::new(LEFT_MASTER);
         let mut l_slave = TalonSRX::new(LEFT_SLAVE);
         l_mstr
@@ -154,6 +155,7 @@ impl Drive {
             _l_slave: l_slave,
             _r_slave: r_slave,
             ahrs: AHRS::from_spi_minutiae(wpilib::spi::Port::MXP, 500_000, 60),
+            // TODO log errors
             gear_shifter: Solenoid::new(shifter::SOLENOID_CHANNEL)
                 .expect("Unable to create gear shifter!"),
             receiver,
@@ -181,6 +183,7 @@ impl Subsystem for Drive {
                     Instruction::GearShift(g) => self
                         .gear_shifter
                         .set(g.into())
+                        // TODO log
                         .expect("Unable to set gear shifter!"),
                     Instruction::Percentage(lpct, rpct) => {
                         self.l_mstr
