@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate debug_stub_derive;
+
 mod config;
 mod subsystems;
 
@@ -12,6 +15,7 @@ fn main() {
     let (drive_send, recv) = unbounded();
     thread::spawn(move || {
         let drive = Drive::new(bus, recv);
+        println!("drive: {:?}", drive);
         drive.run();
     });
     drive_send.send(Instruction::GearShift(Gear::High)).unwrap();

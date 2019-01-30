@@ -48,14 +48,17 @@ pub enum Instruction {
     Percentage(f64, f64),
 }
 
+#[derive(DebugStub)]
 pub struct Drive {
     l_mstr: TalonSRX,
     r_mstr: TalonSRX,
     _l_slave: TalonSRX,
     _r_slave: TalonSRX,
+    #[debug_stub = "Opaque(AHRS)"]
     ahrs: AHRS,
     gear_shifter: Solenoid,
     receiver: Receiver<Instruction>,
+    #[debug_stub = "Opaque(Bus<Pose>)"]
     broadcaster: Bus<Pose>,
 }
 
