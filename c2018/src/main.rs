@@ -12,8 +12,8 @@ use wpilib::RobotBase;
 use bus::Bus;
 use crossbeam_channel::unbounded;
 use std::thread;
-use subsystems::drive::*;
-use subsystems::Subsystem;
+use self::subsystems::drive::*;
+use self::subsystems::Subsystem;
 
 fn main() {
     let base = RobotBase::new().unwrap();
