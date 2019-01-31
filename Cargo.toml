@@ -5,3 +5,13 @@ members = [
     "rio-benches",
     "c2018",
 ]
+
+[profile.dev]
+# We counterintuitively don't need this, since we can't view debug info ATM
+debug = false
+
+[profile.release]
+lto = true
+
+[profile.bench]
+lto = true
