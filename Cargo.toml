@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "first-party/controls",
+    "first-party/interp-map",
     "rio-benches",
     "c2018",
 ]
