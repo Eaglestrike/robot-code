@@ -9,6 +9,8 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 
+#include <iostream>
+
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -262,8 +264,13 @@ CalibProcessor::CalibProcessor(cv::Ptr<calibrationData> data, captureParameters 
     mCapuredFrames = 0;
     mNeededFramesNum = capParams.calibrationStep;
     mDelayBetweenCaptures = static_cast<int>(capParams.captureDelay * capParams.fps);
+    std::cout << "Using " << mCalibData->imageSize.width << "x" << mCalibData->imageSize.height << " for mMaxTemplateOffset" << std::endl;
     mMaxTemplateOffset = std::sqrt(static_cast<float>(mCalibData->imageSize.height * mCalibData->imageSize.height) +
                                    static_cast<float>(mCalibData->imageSize.width * mCalibData->imageSize.width)) / 20.0;
+    std::cout << "calculated " << mMaxTemplateOffset << " for mMaxTemplateOffset" << std::endl;
+    mMaxTemplateOffset = 160;
+    std::cout << "overwriting to value" << mMaxTemplateOffset << " for mMaxTemplateOffset" << std::endl;
+
     mSquareSize = capParams.squareSize;
     mTemplDist = capParams.templDst;
 
