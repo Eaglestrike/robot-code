@@ -89,8 +89,9 @@ impl TypedQuadrature for TalonSRX {
     }
 
     fn vel(&self) -> ctre::Result<MeterPerSecond<f64>> {
-        self.get_quadrature_velocity()
-            .and_then(|ticks| Ok(f64::from(ticks) * crate::config::drive::ENCODER_METERS_PER_TICK / S))
+        self.get_quadrature_velocity().and_then(|ticks| {
+            Ok(f64::from(ticks) * crate::config::drive::ENCODER_METERS_PER_TICK / S)
+        })
     }
 }
 

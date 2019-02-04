@@ -2,7 +2,7 @@
 pub enum Edge {
     FALLING,
     RISING,
-    FLAT
+    FLAT,
 }
 
 impl Edge {
@@ -20,14 +20,14 @@ impl Edge {
 #[derive(Clone)]
 pub struct EdgeDetector<T: FnMut() -> bool> {
     closure: T,
-    last_value: bool
+    last_value: bool,
 }
 
 impl<T: FnMut() -> bool> EdgeDetector<T> {
     pub fn new(closure: T) -> Self {
         Self {
             closure,
-            last_value: false
+            last_value: false,
         }
     }
 

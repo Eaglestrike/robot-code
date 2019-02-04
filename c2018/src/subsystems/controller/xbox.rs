@@ -7,25 +7,25 @@ pub struct Xbox<'a> {
     left_y: JoystickAxis,
     right_x: JoystickAxis,
     right_y: JoystickAxis,
-    arrow_pad: JoystickPOV
+    arrow_pad: JoystickPOV,
 }
 
 macro_rules! get_button {
-    ($ds:expr, $port:expr, $axis:expr) => (
+    ($ds:expr, $port:expr, $axis:expr) => {
         $ds.stick_button($port, $axis).unwrap_or(false)
-    );
+    };
 }
 
 macro_rules! get_axis {
-    ($ds:expr, $port:expr, $axis:expr) => (
+    ($ds:expr, $port:expr, $axis:expr) => {
         $ds.stick_axis($port, $axis).unwrap_or(0.0)
-    );
+    };
 }
 
 macro_rules! get_pov {
-    ($ds:expr, $port:expr, $pov:expr) => (
+    ($ds:expr, $port:expr, $pov:expr) => {
         $ds.stick_pov($port, $pov).unwrap_or(0)
-    );
+    };
 }
 
 impl<'a> Xbox<'a> {
@@ -33,7 +33,10 @@ impl<'a> Xbox<'a> {
         Self::new_from_port(JoystickPort::new(channel)?, ds)
     }
 
-    pub fn new_from_port(port: JoystickPort, ds: &'a DriverStation<'a>) -> Result<Self, JoystickError> {
+    pub fn new_from_port(
+        port: JoystickPort,
+        ds: &'a DriverStation<'a>,
+    ) -> Result<Self, JoystickError> {
         Ok(Self {
             ds,
             port,
@@ -41,7 +44,7 @@ impl<'a> Xbox<'a> {
             left_y: JoystickAxis::new(1)?,
             right_x: JoystickAxis::new(4)?,
             right_y: JoystickAxis::new(5)?,
-            arrow_pad: JoystickPOV::new(0)?
+            arrow_pad: JoystickPOV::new(0)?,
         })
     }
 
