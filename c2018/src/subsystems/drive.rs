@@ -96,6 +96,10 @@ impl TypedQuadrature for TalonSRX {
 }
 
 impl Drive {
+    fn config_talons<T>(&mut self, f: impl Fn(&mut TalonSRX) -> T) -> (T, T) {
+        (f(&mut self.l_mstr), f(&mut self.r_mstr))
+    }
+
     /// Generates the next pose from the previous pose and current gyro data
     fn generate_pose(&self, previous: &Pose) -> Pose {
         let new_heading: f64 = self.ahrs.yaw().into();
