@@ -21,9 +21,9 @@ pub enum Gear {
     Low,
 }
 
-impl Into<bool> for Gear {
-    fn into(self) -> bool {
-        match self {
+impl From<Gear> for bool {
+    fn from(gear: Gear) -> Self {
+        match gear {
             Gear::High => shifter::HIGH_GEAR,
             Gear::Low => !shifter::HIGH_GEAR,
         }
