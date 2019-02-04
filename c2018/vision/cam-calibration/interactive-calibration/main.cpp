@@ -90,6 +90,7 @@ static void undistortButton(int state, void* data)
 
 int main(int argc, char** argv)
 {
+    std::cout << "Using OpenCV version " << CV_VERSION << std::endl;
     cv::CommandLineParser parser(argc, argv, keys);
     if(parser.has("help")) {
         parser.printMessage();
