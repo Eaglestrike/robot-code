@@ -1,0 +1,6 @@
+-t=circles
+-sz=30
+-w=6
+-h=4
+-ft=true
+-d=0.2

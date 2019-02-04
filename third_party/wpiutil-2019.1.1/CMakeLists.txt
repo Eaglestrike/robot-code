@@ -1,30 +1,9 @@
 project(wpiutil)
 
-include(SubDirList)
-include(GenResources)
-
-# Java bindings
-if (NOT WITHOUT_JAVA)
-  find_package(Java)
-  include(UseJava)
-  set(CMAKE_JAVA_COMPILE_FLAGS "-Xlint:unchecked")
-
-  set(CMAKE_JAVA_INCLUDE_PATH wpiutil.jar)
-
-  file(GLOB_RECURSE JAVA_SOURCES src/main/java/*.java)
-  add_jar(wpiutil_jar ${JAVA_SOURCES} OUTPUT_NAME wpiutil)
-
-  get_property(WPIUTIL_JAR_FILE TARGET wpiutil_jar PROPERTY JAR_FILE)
-  install(FILES ${WPIUTIL_JAR_FILE} DESTINATION "${java_lib_dest}")
-
-  set_property(TARGET wpiutil_jar PROPERTY FOLDER "java")
-
-endif()
-
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-GENERATE_RESOURCES(src/main/native/resources generated/main/cpp WPI wpi wpiutil_resources_src)
+# GENERATE_RESOURCES(src/main/native/resources generated/main/cpp WPI wpi wpiutil_resources_src)
 
 file(GLOB_RECURSE wpiutil_native_src src/main/native/cpp/*.cpp)
 
@@ -104,40 +83,21 @@ target_include_directories(wpiutil PRIVATE
     src/main/native/include/uv-private
 )
 
-install(TARGETS wpiutil EXPORT wpiutil DESTINATION "${main_lib_dest}")
-install(DIRECTORY src/main/native/include/ DESTINATION "${include_dest}/wpiutil")
-
-if (NOT WITHOUT_JAVA AND MSVC)
-    install(TARGETS wpiutil RUNTIME DESTINATION "${jni_lib_dest}" COMPONENT Runtime)
-endif()
-
 if (MSVC)
     set (wpiutil_config_dir ${wpilib_dest})
 else()
     set (wpiutil_config_dir share/wpiutil)
 endif()
 
-install(FILES wpiutil-config.cmake DESTINATION ${wpiutil_config_dir})
-install(EXPORT wpiutil DESTINATION ${wpiutil_config_dir})
-
-SUBDIR_LIST(wpiutil_examples "${CMAKE_CURRENT_SOURCE_DIR}/examples")
-foreach(example ${wpiutil_examples})
-    file(GLOB wpiutil_example_src examples/${example}/*.cpp)
-    if(wpiutil_example_src)
-        add_executable(wpiutil_${example} ${wpiutil_example_src})
-        target_link_libraries(wpiutil_${example} wpiutil)
-    endif()
-endforeach()
-
 if (UNIX AND NOT APPLE)
     set (LIBUTIL -lutil)
 else()
     set (LIBUTIL)
 endif()
-file(GLOB netconsoleServer_src src/netconsoleServer/native/cpp/*.cpp)
-add_executable(netconsoleServer ${netconsoleServer_src})
-target_link_libraries(netconsoleServer wpiutil ${LIBUTIL})
+# file(GLOB netconsoleServer_src src/netconsoleServer/native/cpp/*.cpp)
+# add_executable(netconsoleServer ${netconsoleServer_src})
+# target_link_libraries(netconsoleServer wpiutil ${LIBUTIL})
 
-file(GLOB netconsoleTee_src src/netconsoleTee/native/cpp/*.cpp)
-add_executable(netconsoleTee ${netconsoleTee_src})
-target_link_libraries(netconsoleTee wpiutil)
+# file(GLOB netconsoleTee_src src/netconsoleTee/native/cpp/*.cpp)
+# add_executable(netconsoleTee ${netconsoleTee_src})
+# target_link_libraries(netconsoleTee wpiutil)
