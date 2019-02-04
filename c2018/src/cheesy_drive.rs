@@ -108,7 +108,7 @@ impl CheesyDrive {
         let neg_inertia_power = neg_inertia * neg_inertia_scalar;
         self.neg_inertia_accumlator += neg_inertia_power;
 
-        wheel = wheel + self.neg_inertia_accumlator;
+        wheel += self.neg_inertia_accumlator;
         if self.neg_inertia_accumlator > 1.0 {
             self.neg_inertia_accumlator -= 1.0;
         } else if self.neg_inertia_accumlator < -1.0 {

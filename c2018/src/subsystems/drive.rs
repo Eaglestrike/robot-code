@@ -85,20 +85,16 @@ trait TypedQuadrature {
 impl TypedQuadrature for TalonSRX {
     fn pos(&self) -> ctre::Result<Meter<f64>> {
         self.get_quadrature_position()
-            .and_then(|ticks| Ok(ticks as f64 * crate::config::drive::ENCODER_METERS_PER_TICK))
+            .and_then(|ticks| Ok(f64::from(ticks) * crate::config::drive::ENCODER_METERS_PER_TICK))
     }
 
     fn vel(&self) -> ctre::Result<MeterPerSecond<f64>> {
         self.get_quadrature_velocity()
-            .and_then(|ticks| Ok(ticks as f64 * crate::config::drive::ENCODER_METERS_PER_TICK / S))
+            .and_then(|ticks| Ok(f64::from(ticks) * crate::config::drive::ENCODER_METERS_PER_TICK / S))
     }
 }
 
 impl Drive {
-    fn config_talons<T>(&mut self, f: impl Fn(&mut TalonSRX) -> T) -> (T, T) {
-        (f(&mut self.l_mstr), f(&mut self.r_mstr))
-    }
-
     /// Generates the next pose from the previous pose and current gyro data
     fn generate_pose(&self, previous: &Pose) -> Pose {
         let new_heading: f64 = self.ahrs.yaw().into();
@@ -134,7 +130,7 @@ impl Drive {
             .config_all(&DEFAULT_CONFIG, TALON_CFG_TO_MS)
             .expect("Unable to configure right_master side!");
         l_slave
-            .follow(&mut l_mstr, FollowerType::PercentOutput)
+            .follow(&l_mstr, FollowerType::PercentOutput)
             .unwrap();
 
         let mut r_mstr = TalonSRX::new(RIGHT_MASTER);
@@ -146,7 +142,7 @@ impl Drive {
             .config_all(&DEFAULT_CONFIG, TALON_CFG_TO_MS)
             .expect("Unable to configure right_master side!");
         r_slave
-            .follow(&mut r_mstr, FollowerType::PercentOutput)
+            .follow(&r_mstr, FollowerType::PercentOutput)
             .unwrap();
 
         Drive {
