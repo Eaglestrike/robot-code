@@ -7,7 +7,9 @@ use super::{
     Subsystem,
 };
 use crate::cheesy_drive::CheesyDrive;
+use crate::config::SUBSYSTEM_SLEEP_TIME;
 use crossbeam_channel::Sender;
+use std::thread;
 
 type Drive = Sender<drive::Instruction>;
 
@@ -31,25 +33,28 @@ impl<T: Controls> Controller<T> {
 impl<T: Controls> Subsystem for Controller<T> {
     fn run(mut self) {
         let controls = self.controls;
+        loop {
+            thread::sleep(SUBSYSTEM_SLEEP_TIME);
 
-        // DRIVE
-        let wheel = controls.wheel();
-        let throttle = controls.throttle();
-        let quick_turn = controls.quick_turn();
-        let high_gear = !controls.low_gear();
-        if high_gear {
-            self.drive.send(drive::Instruction::GearShift(Gear::High))
-        } else {
-            self.drive.send(drive::Instruction::GearShift(Gear::Low))
-        }
-        .expect("Channel disconnected: ");
-
-        let signal = self
-            .cheesy
-            .cheesy_drive(wheel, throttle, quick_turn, high_gear);
-        self.drive
-            .send(drive::Instruction::Percentage(signal.l, signal.r))
+            // DRIVE
+            let wheel = controls.wheel();
+            let throttle = controls.throttle();
+            let quick_turn = controls.quick_turn();
+            let high_gear = !controls.low_gear();
+            if high_gear {
+                self.drive.send(drive::Instruction::GearShift(Gear::High))
+            } else {
+                self.drive.send(drive::Instruction::GearShift(Gear::Low))
+            }
             .expect("Channel disconnected: ");
+
+            let signal = self
+                .cheesy
+                .cheesy_drive(wheel, throttle, quick_turn, high_gear);
+            self.drive
+                .send(drive::Instruction::Percentage(signal.l, signal.r))
+                .expect("Channel disconnected: ");
+        }
     }
 }
 
