@@ -61,7 +61,7 @@ int main(int argc, char **argv)
 #ifdef USE_CAMERA
         cam >> raw;
 #else
-        raw = cv::imread(fn[min(k, fn.size() - 1)]);
+        raw = cv::imread(fn[((k % fn.size()) + fn.size()) % fn.size()]);
 #endif
         SHOW("raw", raw);
 
@@ -194,21 +194,36 @@ int main(int argc, char **argv)
         }
         SHOW("targeted", resized);
         // push all the targets out in a message
-        //         for (auto &pair : matched)
-        //         {
-        //             // find the bottom inside point of each rotated rect
-        //             auto &lr = pair.first;
-        //             Point left = Point(lr.center.x + lr.size.width * cos(lr.angle * CV_PI / 180), lr.center.y + lr.size.height * sin(lr.angle * CV_PI / 180));
+        for (auto &pair : matched)
+        {
+            // find the bottom inside point of each rotated rect
+            auto &lr = pair.first;
+            double _angle = lr.angle * CV_PI / 180.;
+            float b = (float)sin(_angle) * -0.5f;
+            float a = (float)cos(_angle) * 0.5f;
+            Point left;
+            left.x = lr.center.x - a * lr.size.height + b * lr.size.width;
+            left.y = lr.center.y + b * lr.size.height + a * lr.size.width;
 
-        // #ifdef DEBUG
-        //             circle(resized, left, 20, Scalar(255, 255, 255), -1);
-        // #endif
+            auto &rr = pair.second;
+            _angle = rr.angle * CV_PI / 180.;
+            b = (float)sin(_angle) * -0.5f;
+            a = (float)cos(_angle) * 0.5f;
+            Point right;
+            right.x = rr.center.x - a * rr.size.height - b * rr.size.width;
+            right.y = rr.center.y + b * rr.size.height - a * rr.size.width;
 
-        //             // take the mean of the points
+            // take the mean of the points
+            Point mean;
+            mean.x = (left.x + right.x) / 2;
+            mean.y = (left.y + right.y) / 2;
+#ifdef DEBUG
+            circle(resized, mean, 2, Scalar(255, 255, 0), -1);
+#endif
 
-        //             // TODO send it out
-        //         }
-        //         SHOW("spoints", resized);
+            // TODO send it out
+        }
+        SHOW("spoints", resized);
 
         switch (waitKey(WAITKEY_DELAY))
         {
@@ -220,6 +235,11 @@ int main(int argc, char **argv)
             break;
         case 'b':
             k--;
+            break;
+        case 's':
+            stringstream fname;
+            fname << "../c2018/vision/test-img/out/" << k << ".jpg";
+            imwrite(fname.str(), resized);
             break;
 #endif
         }
