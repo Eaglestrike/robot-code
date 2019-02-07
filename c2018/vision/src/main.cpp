@@ -1,8 +1,8 @@
+#include <cmath>
 #include <iostream>
 #include <opencv2/opencv.hpp>
-#include <vector>
-#include <cmath>
 #include <utility>
+#include <vector>
 
 #include "config.hpp"
 #include "macros.hpp"
@@ -33,13 +33,12 @@ int main(int argc, char **argv)
 #ifdef USE_CAMERA
     VideoCapture cam(0);
 #else
-    cv::String path("../c2018/vision/test-img/*.jpg"); //select only jpg
+    cv::String path("../c2018/vision/test-img/*.jpg"); // select only jpg
     vector<cv::String> fn;
     vector<cv::Mat> data;
     cv::glob(path, fn, true);
     size_t k = 0;
-    if (fn.empty())
-    {
+    if (fn.empty()) {
         return 0;
     }
 #endif
@@ -56,8 +55,7 @@ int main(int argc, char **argv)
     vector<pair<RotatedRect, RotatedRect>> matched;
     pair<RotatedRect, RotatedRect> selected;
 
-    for (;;)
-    {
+    for (;;) {
 #ifdef USE_CAMERA
         cam >> raw;
 #else
@@ -89,8 +87,7 @@ int main(int argc, char **argv)
         SHOW("contours", resized);
 
         targets.clear();
-        for (auto &cnt : contours)
-        {
+        for (auto &cnt : contours) {
             // determine if contour is a valid target
             convex_cnt.clear();
             convexHull(cnt, convex_cnt);
@@ -103,14 +100,12 @@ int main(int argc, char **argv)
                 line(resized, rect_points[j], rect_points[(j + 1) % 4], Scalar(255, 0, 255), 1, 8);
 #endif
 
-            if (rect.size.area() < minTargetRectArea)
-            {
+            if (rect.size.area() < minTargetRectArea) {
                 cout << "area too small" << endl;
                 continue;
             }
             float area = static_cast<float>(contourArea(convex_cnt));
-            if (area / rect.size.area() < static_cast<float>(minTargetFullness) / 1000)
-            {
+            if (area / rect.size.area() < static_cast<float>(minTargetFullness) / 1000) {
                 cout << "fullness too low" << endl;
                 continue;
             }
@@ -120,8 +115,7 @@ int main(int argc, char **argv)
         }
 
         // preprocess rectangles for system solving
-        for (RotatedRect &rect : targets)
-        {
+        for (RotatedRect &rect : targets) {
 #ifdef DEBUG
             Point2f rect_points[4];
             rect.points(rect_points);
@@ -130,12 +124,9 @@ int main(int argc, char **argv)
 #endif
             // remember, opencv coordinate system has a flipped y, angles are still from +x towards +y
             // ensures the angle is to the positive side of the rect
-            if (rect.size.width < rect.size.height)
-            {
+            if (rect.size.width < rect.size.height) {
                 rect.angle -= 90;
-            }
-            else
-            {
+            } else {
                 // means height < width
                 // ensure height > width
                 auto temp = rect.size.height;
@@ -152,11 +143,9 @@ int main(int argc, char **argv)
 
         // iterate over all pairs
         matched.clear();
-        for (auto a = targets.begin(); a != targets.end(); ++a)
-        {
+        for (auto a = targets.begin(); a != targets.end(); ++a) {
             auto b = a;
-            for (++b; b != targets.end(); ++b)
-            {
+            for (++b; b != targets.end(); ++b) {
                 // solve the system of two vertical-ish lines through the rectangle center
                 // A + a*t = B + b*s
                 float ax = cos(a->angle * CV_PI / 180.0);
@@ -176,17 +165,13 @@ int main(int argc, char **argv)
                 cout << "cx " << centerX << endl;
                 float maxX = max(a->center.x, b->center.x);
                 float minX = min(a->center.x, b->center.x);
-                if (minX < centerX && centerX < maxX && !isnan(centerX))
-                {
+                if (minX < centerX && centerX < maxX && !isnan(centerX)) {
 #ifdef DEBUG
                     line(resized, Point(centerX, 0), Point(centerX, 200), Scalar(0, 255, 0));
 #endif
-                    if (a->center.x < centerX)
-                    { // a is on the left
+                    if (a->center.x < centerX) { // a is on the left
                         matched.push_back(make_pair(*a, *b));
-                    }
-                    else
-                    { // a is on the right
+                    } else { // a is on the right
                         matched.push_back(make_pair(*b, *a));
                     }
                 }
@@ -194,8 +179,7 @@ int main(int argc, char **argv)
         }
         SHOW("targeted", resized);
         // push all the targets out in a message
-        for (auto &pair : matched)
-        {
+        for (auto &pair : matched) {
             // find the bottom inside point of each rotated rect
             auto &lr = pair.first;
             double _angle = lr.angle * CV_PI / 180.;
@@ -225,8 +209,7 @@ int main(int argc, char **argv)
         }
         SHOW("spoints", resized);
 
-        switch (waitKey(WAITKEY_DELAY))
-        {
+        switch (waitKey(WAITKEY_DELAY)) {
         case 27:
             return 0;
 #ifndef USE_CAMERA
