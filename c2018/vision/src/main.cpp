@@ -29,6 +29,7 @@ int main(int argc, char **argv)
     ALGORITHM_PARAM(vhigh, 89, 255);
     ALGORITHM_PARAM(minTargetRectArea, 100, 500);
     ALGORITHM_PARAM(minTargetFullness, 500, 1000);
+    ALGORITHM_PARAM(maxHorizontalDistanceFactor, 550, 800);
 
 #ifdef USE_CAMERA
     VideoCapture cam(0);
@@ -146,6 +147,10 @@ int main(int argc, char **argv)
         for (auto a = targets.begin(); a != targets.end(); ++a) {
             auto b = a;
             for (++b; b != targets.end(); ++b) {
+                float avgwidth = (b->size.width + a->size.width) / 2.0;
+                if (abs(a->center.x - b->center.x) > avgwidth * (static_cast<float>(maxHorizontalDistanceFactor) / 100.0)) {
+                    continue;
+                }
                 // solve the system of two vertical-ish lines through the rectangle center
                 // A + a*t = B + b*s
                 float ax = cos(a->angle * CV_PI / 180.0);
