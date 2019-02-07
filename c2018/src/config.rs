@@ -49,3 +49,17 @@ pub mod drive {
         pub const HIGH_GEAR: bool = true; // TODO
     }
 }
+
+pub mod superstructure {
+    use super::*;
+    pub mod elevator {
+        use super::*;
+        pub const MIN: Meter<f64> = const_unit!(0.0);
+        // TODO: Make the below actual values
+        pub const MAX: Meter<f64> = const_unit!(0.0);
+        pub const LOW: Meter<f64> = const_unit!(0.0);
+        pub const MID_LOW: Meter<f64> = const_unit!(0.0);
+        pub const MID_HIGH: Meter<f64> = const_unit!(0.0);
+        pub const HIGH: Meter<f64> = const_unit!(0.0);
+    }
+}
