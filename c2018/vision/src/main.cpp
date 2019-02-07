@@ -60,7 +60,10 @@ int main(int argc, char **argv)
 #ifdef USE_CAMERA
         cam >> raw;
 #else
-        raw = cv::imread(fn[((k % fn.size()) + fn.size()) % fn.size()]);
+        int idx = ((k % fn.size()) + fn.size()) % fn.size();
+        raw = cv::imread(fn[idx]);
+        cout << "proc image " << fn[idx] << endl;
+
 #endif
         SHOW("raw", raw);
 
@@ -80,7 +83,6 @@ int main(int argc, char **argv)
         inRange(hsv, Scalar(hlow, slow, vlow), Scalar(hhigh, shigh, vhigh), mask);
         SHOW("mask", mask);
 
-        cout << "test" << endl;
         contours.clear();
         findContours(mask, contours, RETR_EXTERNAL, CHAIN_APPROX_TC89_KCOS);
 
@@ -94,20 +96,20 @@ int main(int argc, char **argv)
             convexHull(cnt, convex_cnt);
             RotatedRect rect = minAreaRect(convex_cnt);
 
-#ifdef DEBUG
-            Point2f rect_points[4];
-            rect.points(rect_points);
-            for (int j = 0; j < 4; j++)
-                line(resized, rect_points[j], rect_points[(j + 1) % 4], Scalar(255, 0, 255), 1, 8);
-#endif
+            // #ifdef DEBUG
+            //             Point2f rect_points[4];
+            //             rect.points(rect_points);
+            //             for (int j = 0; j < 4; j++)
+            //                 line(resized, rect_points[j], rect_points[(j + 1) % 4], Scalar(255, 0, 255), 1, 8);
+            // #endif
 
             if (rect.size.area() < minTargetRectArea) {
-                cout << "area too small" << endl;
+                DBP("area too small");
                 continue;
             }
             float area = static_cast<float>(contourArea(convex_cnt));
             if (area / rect.size.area() < static_cast<float>(minTargetFullness) / 1000) {
-                cout << "fullness too low" << endl;
+                DBP("fullness too low");
                 continue;
             }
 
@@ -140,7 +142,7 @@ int main(int argc, char **argv)
 #endif
         }
         SHOW("boxes", resized);
-        cout << "tlen" << targets.size() << endl;
+        DBP("tlen" << targets.size());
 
         // iterate over all pairs
         matched.clear();
@@ -164,10 +166,10 @@ int main(int argc, char **argv)
 #endif
 
                 float t = -(a->center.x * by - a->center.y * bx - b->center.x * by + b->center.y * bx) / (ax * by - ay * bx);
-                cout << "t " << t << endl;
+                DBP("t " << t);
                 float centerX = a->center.x + ax * t;
                 // if the solution lies between the two centers, they form a match
-                cout << "cx " << centerX << endl;
+                DBP("cx " << centerX);
                 float maxX = max(a->center.x, b->center.x);
                 float minX = min(a->center.x, b->center.x);
                 if (minX < centerX && centerX < maxX) {
@@ -226,7 +228,7 @@ int main(int argc, char **argv)
             break;
         case 's':
             stringstream fname;
-            fname << "../c2018/vision/test-img/out/" << k << ".jpg";
+            fname << "../c2018/vision/out/" << k << ".jpg";
             imwrite(fname.str(), resized);
             break;
 #endif
