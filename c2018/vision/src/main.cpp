@@ -165,7 +165,7 @@ int main(int argc, char **argv)
                 cout << "cx " << centerX << endl;
                 float maxX = max(a->center.x, b->center.x);
                 float minX = min(a->center.x, b->center.x);
-                if (minX < centerX && centerX < maxX && !isnan(centerX)) {
+                if (minX < centerX && centerX < maxX) {
 #ifdef DEBUG
                     line(resized, Point(centerX, 0), Point(centerX, 200), Scalar(0, 255, 0));
 #endif
