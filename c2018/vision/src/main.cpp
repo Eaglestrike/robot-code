@@ -1,6 +1,8 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <vector>
+#include <cmath>
+#include <utility>
 
 #include "config.hpp"
 #include "macros.hpp"
@@ -51,6 +53,8 @@ int main(int argc, char **argv)
     vector<Point> convex_cnt;
     vector<Point> poly;
     vector<RotatedRect> targets;
+    vector<pair<RotatedRect, RotatedRect>> matched;
+    pair<RotatedRect, RotatedRect> selected;
 
     for (;;)
     {
@@ -92,6 +96,13 @@ int main(int argc, char **argv)
             convexHull(cnt, convex_cnt);
             RotatedRect rect = minAreaRect(convex_cnt);
 
+#ifdef DEBUG
+            Point2f rect_points[4];
+            rect.points(rect_points);
+            for (int j = 0; j < 4; j++)
+                line(resized, rect_points[j], rect_points[(j + 1) % 4], Scalar(255, 0, 255), 1, 8);
+#endif
+
             if (rect.size.area() < minTargetRectArea)
             {
                 cout << "area too small" << endl;
@@ -108,25 +119,96 @@ int main(int argc, char **argv)
             // store target info
         }
 
+        // preprocess rectangles for system solving
         for (RotatedRect &rect : targets)
         {
-
-            // perform target matching
-            // output found vertical angle and horizontal angle
-            cv::Mat pts;
-            // vector<vector<Point>> vec2;
-            // vec2.push_back(v);
-            boxPoints(rect, pts);
-            // polylines(resized, pts, true, Scalar(0, 0, 255));
-
+#ifdef DEBUG
             Point2f rect_points[4];
             rect.points(rect_points);
             for (int j = 0; j < 4; j++)
                 line(resized, rect_points[j], rect_points[(j + 1) % 4], Scalar(0, 0, 255), 1, 8);
-
-            cout << "test" << endl;
+#endif
+            // remember, opencv coordinate system has a flipped y, angles are still from +x towards +y
+            // ensures the angle is to the positive side of the rect
+            if (rect.size.width < rect.size.height)
+            {
+                rect.angle -= 90;
+            }
+            else
+            {
+                // means height < width
+                // ensure height > width
+                auto temp = rect.size.height;
+                rect.size.height = rect.size.width;
+                rect.size.width = temp;
+            }
+#ifdef DEBUG
+            putText(resized, to_string(rect.size.width > rect.size.height), rect.center, CV_FONT_HERSHEY_PLAIN, 1.0, Scalar(0, 255, 255));
+            putText(resized, to_string(static_cast<int>(rect.center.x)), rect.center, CV_FONT_HERSHEY_PLAIN, 1.0, Scalar(0, 0, 255));
+#endif
         }
         SHOW("boxes", resized);
+        cout << "tlen" << targets.size() << endl;
+
+        // iterate over all pairs
+        matched.clear();
+        for (auto a = targets.begin(); a != targets.end(); ++a)
+        {
+            auto b = a;
+            for (++b; b != targets.end(); ++b)
+            {
+                // solve the system of two vertical-ish lines through the rectangle center
+                // A + a*t = B + b*s
+                float ax = cos(a->angle * CV_PI / 180.0);
+                float ay = sin(a->angle * CV_PI / 180.0);
+                float bx = cos(b->angle * CV_PI / 180.0);
+                float by = sin(b->angle * CV_PI / 180.0);
+
+#ifdef DEBUG
+                line(resized, a->center, Point(a->center.x + 300 * ax, a->center.y + 300 * ay), Scalar(0, 255, 0));
+                line(resized, b->center, Point(b->center.x + 300 * bx, b->center.y + 300 * by), Scalar(0, 255, 0));
+#endif
+
+                float t = -(a->center.x * by - a->center.y * bx - b->center.x * by + b->center.y * bx) / (ax * by - ay * bx);
+                cout << "t " << t << endl;
+                float centerX = a->center.x + ax * t;
+                // if the solution lies between the two centers, they form a match
+                cout << "cx " << centerX << endl;
+                float maxX = max(a->center.x, b->center.x);
+                float minX = min(a->center.x, b->center.x);
+                if (minX < centerX && centerX < maxX && !isnan(centerX))
+                {
+#ifdef DEBUG
+                    line(resized, Point(centerX, 0), Point(centerX, 200), Scalar(0, 255, 0));
+#endif
+                    if (a->center.x < centerX)
+                    { // a is on the left
+                        matched.push_back(make_pair(*a, *b));
+                    }
+                    else
+                    { // a is on the right
+                        matched.push_back(make_pair(*b, *a));
+                    }
+                }
+            }
+        }
+        SHOW("targeted", resized);
+        // push all the targets out in a message
+        //         for (auto &pair : matched)
+        //         {
+        //             // find the bottom inside point of each rotated rect
+        //             auto &lr = pair.first;
+        //             Point left = Point(lr.center.x + lr.size.width * cos(lr.angle * CV_PI / 180), lr.center.y + lr.size.height * sin(lr.angle * CV_PI / 180));
+
+        // #ifdef DEBUG
+        //             circle(resized, left, 20, Scalar(255, 255, 255), -1);
+        // #endif
+
+        //             // take the mean of the points
+
+        //             // TODO send it out
+        //         }
+        //         SHOW("spoints", resized);
 
         switch (waitKey(WAITKEY_DELAY))
         {
