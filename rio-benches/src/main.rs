@@ -83,8 +83,7 @@ fn bench_iters_send_recv(b: &mut Bencher) {
         }
     });
 
-    // assert!(s1.)
-    t1.join();
-    t2.join();
-    t3.join();
+    t1.join().unwrap();
+    t2.join().unwrap();
+    t3.join().unwrap();
 }
