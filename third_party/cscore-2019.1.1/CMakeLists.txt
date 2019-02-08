@@ -1,6 +1,6 @@
 project(cscore)
 
-find_package( OpenCV 3.4 REQUIRED )
+find_package( OpenCV 3.3 REQUIRED )
 
 file(GLOB
     cscore_native_src src/main/native/cpp/*.cpp)
