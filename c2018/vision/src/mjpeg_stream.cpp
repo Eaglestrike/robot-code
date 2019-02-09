@@ -1,10 +1,10 @@
 #include "mjpeg_stream.hpp"
 #include "config.hpp"
 
-#include <iostream>
 #include <cscore_oo.h>
-#include <wpi/raw_ostream.h>
 #include <iomanip>
+#include <iostream>
+#include <wpi/raw_ostream.h>
 
 using namespace cs;
 using namespace team114::c2019::vision;
@@ -26,9 +26,7 @@ void create_server(std::string name, int cam_id)
     std::cout << std::fixed << std::showpoint << std::setprecision(4);
     cs::AddListener(
         [&](const cs::RawEvent &event) {
-            std::cout << "FPS=" << camera.GetActualFPS()
-                      << " MBPS=" << (camera.GetActualDataRate() / 1000000.0)
-                      << std::endl;
+            std::cout << "FPS=" << camera.GetActualFPS() << " MBPS=" << (camera.GetActualDataRate() / 1000000.0) << std::endl;
         },
         cs::RawEvent::kTelemetryUpdated, false, &status);
     cs::SetTelemetryPeriod(1.0);
