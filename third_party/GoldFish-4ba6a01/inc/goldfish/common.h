@@ -3,14 +3,15 @@
 #include <cstdint>
 #include <iterator>
 #include <stdlib.h>
+#include "endianness.h"
 
 namespace goldfish
 {
 	using byte = uint8_t;
 
-	inline uint16_t from_big_endian(uint16_t x) { return _byteswap_ushort(x); }
-	inline uint32_t from_big_endian(uint32_t x) { return _byteswap_ulong(x); }
-	inline uint64_t from_big_endian(uint64_t x) { return _byteswap_uint64(x); }
+	inline uint16_t from_big_endian(uint16_t x) { return bswap16(x); }
+	inline uint32_t from_big_endian(uint32_t x) { return bswap32(x); }
+	inline uint64_t from_big_endian(uint64_t x) { return bswap64(x); }
 
 	inline uint16_t to_big_endian(uint16_t x) { return from_big_endian(x); }
 	inline uint32_t to_big_endian(uint32_t x) { return from_big_endian(x); }
@@ -49,7 +50,12 @@ namespace goldfish
 
 	// VC++ has a make_unchecked_array_iterator API to allow using raw iterators in APIs like std::copy or std::equal
 	// We implement our own that forwards to VC++ implementation or is identity depending on the compiler
-	template <class T> auto make_unchecked_array_iterator(T&& t) { return stdext::make_unchecked_array_iterator(std::forward<T>(t)); }
+	template <class T> auto make_unchecked_array_iterator(T&& t) {
+#if _MSC_VER >= 1800
+		return stdext::make_unchecked_array_iterator(std::forward<T>(t));
+#  endif
+		return t;
+	}
 	template <class T> auto get_array_iterator_from_unchecked(T&& t) { return t.base(); }
 
 	template <size_t...> struct largest {};

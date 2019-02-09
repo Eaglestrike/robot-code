@@ -58,7 +58,7 @@ namespace goldfish
 		constexpr T& back() const { assert(!empty()); return *(m_end - 1); }
 		T& pop_front() { assert(!empty()); return *(m_begin++); }
 		constexpr T& operator[](size_t i) const { assert(i < size()); return m_begin[i]; }
-		
+
 		void clear()
 		{
 			m_begin = m_end;
@@ -77,7 +77,7 @@ namespace goldfish
 		}
 		constexpr array_ref<T> without_front(size_t c) const
 		{
-			assert(s <= size());
+			assert(c <= size());
 			return{ m_begin + c, m_end };
 		}
 		constexpr array_ref<T> without_end(size_t c) const
