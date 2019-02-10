@@ -134,14 +134,23 @@ mod tests {
             msg: Some(-128309),
             t: [6, 54, 243, 6, 54, 243, 13, 6, 7, 32],
         };
-        let packet2 = packet.clone();
+        let packet2 = Packet {
+            idx: 12303840932948,
+            msg: None,
+            t: [6, 54, 243, 234, 0, 243, 121, 6, 7, 32],
+        };
+        let ppacket = packet.clone();
+        let ppacket2 = packet2.clone();
 
         let listener = TcpListener::bind("0.0.0.0:5808").unwrap();
         thread::spawn(move || {
             let stream = TcpStream::connect("0.0.0.0:5808").unwrap();
             let mut con = Connection::from_tcp(stream, None, None).unwrap();
-            con.negotiate().unwrap();
-            con.write_item(&packet2)
+            con.write_item(&ppacket).unwrap();
+            con.write_item(&ppacket2).unwrap();
+            let mut read_iter: ReadIter<'_, Packet> = con.make_iter().unwrap();
+            assert_eq!(read_iter.next().unwrap().unwrap(), ppacket2);
+            assert_eq!(read_iter.next().unwrap().unwrap(), ppacket);
         });
         let (stream, _addr) = listener.accept().unwrap();
         let mut con = Connection::from_tcp(stream, None, None).unwrap();
@@ -149,5 +158,8 @@ mod tests {
         con.write_item(&packet).unwrap();
         let mut read_iter: ReadIter<'_, Packet> = con.make_iter().unwrap();
         assert_eq!(read_iter.next().unwrap().unwrap(), packet);
+        con.write_item(&packet2).unwrap();
+        con.write_item(&packet).unwrap();
+        assert_eq!(read_iter.next().unwrap().unwrap(), packet2);
     }
 }
