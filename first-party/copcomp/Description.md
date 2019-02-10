@@ -10,6 +10,4 @@ Once a client has sent the above header and verified the received protocol versi
 
 ## Version 1
 
-Each datagram consists of the control character `r`, or `0x72`, followed by 2 bytes specifying the length of the following CBOR data.
-After such many bytes of CBOR data, either a new control character is sent, or the TCP connection is closed.
-Version 1 contains only one control character.
+After protocol negotation, the data stream is a sequence of CBOR items, as described in [Section 3.1 of the RFC](https://tools.ietf.org/html/rfc7049#section-3.1).
