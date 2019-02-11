@@ -7,11 +7,12 @@ let settings = MotionProfileSettings{
     max_velocity: max_velocity,
     max_acceleration: max_acceleration
 };
-let mut profile: MotionProfileStructure = MotionProfile::new(settings);
+let profile: MotionProfileStructure = MotionProfile::new(settings);
 profile.velocity_after_time(t);
 
 */
 
+#[derive(Clone)]
 struct MotionProfileSettings {
     initial_velocity: f64,
     final_velocity: f64,
@@ -27,14 +28,8 @@ struct MotionProfileInternalStructure {
 #[derive(Debug)]
 struct MotionProfileStructure{
     default: f64,
-    values: [MotionProfileInternalStructure;4]//Remove the fixed size?
+    values: [MotionProfileInternalStructure;4]
 }
-/*
-#[derive(Debug)]
-struct MotionProfileData{
-    structure: MotionProfileStructure,
-
-}*/
 
 trait MotionProfile{
     fn new(settings: MotionProfileSettings)-> Self;
@@ -54,32 +49,39 @@ impl MotionProfile for MotionProfileStructure{
         let max_acceleration = settings.max_acceleration;
 
         let time_to_max_velocity = (max_velocity - initial_velocity) / max_acceleration;
-        let distance_to_max_velocity = time_to_max_velocity * max_velocity / 2.0;
+        let distance_to_max_velocity = time_to_max_velocity * (max_velocity - initial_velocity) / 2.0 + time_to_max_velocity*initial_velocity;
         let time_to_ending_velocity = (max_velocity - final_velocity) / max_acceleration;
-        let distance_to_ending_velocity = time_to_max_velocity * max_velocity / 2.0;
+        let distance_to_ending_velocity = time_to_ending_velocity * (max_velocity-final_velocity) / 2.0 + time_to_ending_velocity*final_velocity;
         let total_time = (initial_error - distance_to_max_velocity - distance_to_ending_velocity) / max_velocity + time_to_max_velocity + time_to_ending_velocity;
         let use_modified_profile = initial_error < (distance_to_max_velocity + distance_to_ending_velocity);
         let output_structure: MotionProfileStructure;
         if use_modified_profile{
-            let swap_time = (max_acceleration * total_time  + final_velocity - initial_velocity)/(2.0 * max_acceleration); // The time you have to swap to un-accelerating from accelerating
+            // Solve for the modified total time with the quadratic formula
+            let quad_a = max_acceleration/4.0;
+            let quad_b = (initial_velocity+final_velocity)/2.0;
+            let quad_c = (-(final_velocity-initial_velocity).powi(2))/(4.0*max_acceleration) - initial_error;
+            let new_total_time = (-quad_b+(quad_b.powi(2)-4.0*quad_a*quad_c).sqrt())/(2.0*quad_a);
+            println!("new total time: {}", new_total_time);
+            let swap_time = (max_acceleration * new_total_time  + final_velocity - initial_velocity)/(2.0 * max_acceleration); // The time you have to swap to un-accelerating from accelerating
+            println!("Swap Time: {}", swap_time);
             output_structure = MotionProfileStructure{
                 default: final_velocity,
                 values: [
                     MotionProfileInternalStructure{
                         max: 0.0,
-                        data: [0.0, initial_velocity]
+                        data: [0.0,initial_velocity]
                     },
-                    MotionProfileInternalStructure{
+                    MotionProfileInternalStructure{ //Temp line to make it have a size of 4.
                         max: -1.0,
-                        data: [0.0, initial_velocity] //Temp line to make it have a size of 4.
+                        data: [0.0, initial_velocity]
                     },
                     MotionProfileInternalStructure{
                         max: swap_time,
                         data: [max_acceleration, initial_velocity]
                     },
                     MotionProfileInternalStructure{
-                        max: total_time,
-                        data: [-max_acceleration, max_acceleration*total_time + final_velocity]
+                        max: new_total_time,
+                        data: [-max_acceleration, max_acceleration*new_total_time + final_velocity]
                     }
                 ]
             };
@@ -93,7 +95,7 @@ impl MotionProfile for MotionProfileStructure{
                     },
                     MotionProfileInternalStructure{
                         max: time_to_max_velocity,
-                        data: [max_acceleration, initial_velocity] //Temp line to make it have a size of 4.
+                        data: [max_acceleration, initial_velocity]
                     },
                     MotionProfileInternalStructure{
                         max: total_time - time_to_ending_velocity,
@@ -123,4 +125,3 @@ impl MotionProfile for MotionProfileStructure{
     }
 
 }
-
