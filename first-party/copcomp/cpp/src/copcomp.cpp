@@ -46,7 +46,7 @@ void Connection::Negotiate()
         status = Negotiation::SUCCESS;
         return Negotiate();
     case Negotiation::UNINIT:
-        tcp.snd(NEG_BUF, sizeof(NEG_BUF), 0);
+        tcp.snd(NEG_BUF, sizeof(NEG_BUF));
         status = Negotiation::SENT;
         return Negotiate();
     }

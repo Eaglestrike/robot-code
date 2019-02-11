@@ -46,3 +46,10 @@ TARGET_LINK_LIBRARIES(socket++_int socket_int)
 
 INSTALL(TARGETS socket++_int DESTINATION ${LIB_DIR})
 ENDIF()
+
+# add include paths to the target so downstream linkers will get them
+get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+foreach(dir ${dirs})
+  message(STATUS "dir='${dir}'")
+  target_include_directories(socket++_int PUBLIC ${dir})
+endforeach()
