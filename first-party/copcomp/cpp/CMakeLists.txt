@@ -11,7 +11,7 @@ target_include_directories(copcomp PUBLIC include/)
 set_target_properties(copcomp PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries(copcomp socket_int)
 target_link_libraries(copcomp socket++_int)
-target_link_libraries(copcomp GoldFish)
+target_link_libraries(copcomp tinycbor)
 
 
 
