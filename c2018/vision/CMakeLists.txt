@@ -11,7 +11,7 @@ add_executable(c2019-vision ${c2019_vision_src})
 target_link_libraries(c2019-vision ${OpenCV_LIBS})
 target_link_libraries(c2019-vision cscore)
 include_directories(${OpenCV_INCLUDE_DIRS})
-target_link_libraries(c2019-vision socket++)
+target_link_libraries(c2019-vision copcomp)
 
 set_target_properties(c2019-vision
     PROPERTIES

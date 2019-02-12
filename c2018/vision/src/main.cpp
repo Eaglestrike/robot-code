@@ -1,4 +1,6 @@
 #include <cmath>
+#include <copcomp/2019packet.hpp>
+#include <copcomp/copcomp.hpp>
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <utility>
@@ -9,6 +11,7 @@
 
 using namespace cv;
 using namespace std;
+using namespace team114;
 
 // #define USE_CAMERA
 
@@ -55,6 +58,7 @@ int main(int argc, char **argv)
     vector<RotatedRect> targets;
     vector<pair<RotatedRect, RotatedRect>> matched;
     pair<RotatedRect, RotatedRect> selected;
+    copcomp::Connection rio_sender(c2019::vision::RIO_VISION_ADDR, c2019::vision::RIO_VISION_PORT);
 
     for (;;) {
 #ifdef USE_CAMERA
@@ -211,8 +215,11 @@ int main(int argc, char **argv)
 #ifdef DEBUG
             circle(resized, mean, 2, Scalar(255, 255, 0), -1);
 #endif
-
-            // TODO send it out
+            c2019::vision::Packet packet;
+            packet.micros = 1000; // TODO get time
+            packet.x = mean.x;
+            packet.y = mean.y;
+            rio_sender.write_item<c2019::vision::Packet>(packet);
         }
         SHOW("spoints", resized);
 
