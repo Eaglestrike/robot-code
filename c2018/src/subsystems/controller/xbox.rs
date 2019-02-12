@@ -1,3 +1,4 @@
+use super::{get_axis, get_button, get_pov};
 use wpilib::ds::*;
 
 pub struct Xbox<'a> {
@@ -8,24 +9,6 @@ pub struct Xbox<'a> {
     right_x: JoystickAxis,
     right_y: JoystickAxis,
     arrow_pad: JoystickPOV,
-}
-
-macro_rules! get_button {
-    ($ds:expr, $port:expr, $axis:expr) => {
-        $ds.stick_button($port, $axis).unwrap_or(false)
-    };
-}
-
-macro_rules! get_axis {
-    ($ds:expr, $port:expr, $axis:expr) => {
-        $ds.stick_axis($port, $axis).unwrap_or(0.0)
-    };
-}
-
-macro_rules! get_pov {
-    ($ds:expr, $port:expr, $pov:expr) => {
-        $ds.stick_pov($port, $pov).unwrap_or(0)
-    };
 }
 
 impl<'a> Xbox<'a> {
@@ -49,52 +32,52 @@ impl<'a> Xbox<'a> {
     }
 
     pub fn a(&self) -> bool {
-        get_button!(self.ds, self.port, 1)
+        get_button(self.ds, self.port, 1)
     }
 
     pub fn b(&self) -> bool {
-        get_button!(self.ds, self.port, 2)
+        get_button(self.ds, self.port, 2)
     }
     pub fn x(&self) -> bool {
-        get_button!(self.ds, self.port, 3)
+        get_button(self.ds, self.port, 3)
     }
 
     pub fn y(&self) -> bool {
-        get_button!(self.ds, self.port, 4)
+        get_button(self.ds, self.port, 4)
     }
 
     pub fn back(&self) -> bool {
-        get_button!(self.ds, self.port, 7)
+        get_button(self.ds, self.port, 7)
     }
 
     pub fn start(&self) -> bool {
-        get_button!(self.ds, self.port, 8)
+        get_button(self.ds, self.port, 8)
     }
     pub fn left_bumper(&self) -> bool {
-        get_button!(self.ds, self.port, 5)
+        get_button(self.ds, self.port, 5)
     }
     pub fn right_button(&self) -> bool {
-        get_button!(self.ds, self.port, 6)
+        get_button(self.ds, self.port, 6)
     }
     pub fn left_stick_pressed(&self) -> bool {
-        get_button!(self.ds, self.port, 9)
+        get_button(self.ds, self.port, 9)
     }
     pub fn right_stick_pressed(&self) -> bool {
-        get_button!(self.ds, self.port, 10)
+        get_button(self.ds, self.port, 10)
     }
     pub fn left_x(&self) -> f32 {
-        get_axis!(self.ds, self.port, self.left_x)
+        get_axis(self.ds, self.port, self.left_x)
     }
     pub fn left_y(&self) -> f32 {
-        get_axis!(self.ds, self.port, self.left_y)
+        get_axis(self.ds, self.port, self.left_y)
     }
     pub fn right_x(&self) -> f32 {
-        get_axis!(self.ds, self.port, self.right_x)
+        get_axis(self.ds, self.port, self.right_x)
     }
     pub fn right_y(&self) -> f32 {
-        get_axis!(self.ds, self.port, self.right_y)
+        get_axis(self.ds, self.port, self.right_y)
     }
     pub fn arrow_pad(&self) -> i16 {
-        get_pov!(self.ds, self.port, self.arrow_pad)
+        get_pov(self.ds, self.port, self.arrow_pad)
     }
 }

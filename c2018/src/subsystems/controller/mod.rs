@@ -7,9 +7,10 @@ use super::{
     superstructure, Subsystem,
 };
 use crate::cheesy_drive::CheesyDrive;
-use crate::config::{superstructure::elevator, SUBSYSTEM_SLEEP_TIME};
+use crate::config::{self, superstructure::elevator, SUBSYSTEM_SLEEP_TIME};
 use crossbeam_channel::Sender;
-use std::thread;
+use std::{f64, thread};
+use wpilib::ds::*;
 
 type Drive = Sender<drive::Instruction>;
 type Superstructure = Sender<superstructure::Instruction>;
@@ -134,4 +135,114 @@ pub trait Controls {
     fn elevator_manual_override(&mut self) -> bool;
     // Must be between 0 and 1
     fn elevator_override_level(&mut self) -> f64;
+}
+
+pub struct StandardControls<'a> {
+    ds: &'a DriverStation<'a>,
+    left: JoystickPort,
+    right: JoystickPort,
+    oi: JoystickPort,
+    x: JoystickAxis,
+    y: JoystickAxis,
+}
+
+impl<'a> StandardControls<'a> {
+    fn new(
+        ds: &'a DriverStation<'a>,
+        left: JoystickPort,
+        right: JoystickPort,
+        oi: JoystickPort,
+    ) -> Result<Self, JoystickError> {
+        Ok(Self {
+            ds,
+            left,
+            right,
+            oi,
+            x: JoystickAxis::new(0)?,
+            y: JoystickAxis::new(1)?,
+        })
+    }
+}
+impl<'a> Controls for StandardControls<'a> {
+    fn throttle(&mut self) -> f64 {
+        adjust_throttle(band(get_axis(self.ds, self.left, self.y).into()))
+    }
+    fn wheel(&mut self) -> f64 {
+        adjust_wheel(band(get_axis(self.ds, self.right, self.x).into()))
+    }
+    fn low_gear(&mut self) -> bool {
+        get_button(self.ds, self.left, 1)
+    }
+    fn quick_turn(&mut self) -> bool {
+        get_button(self.ds, self.right, 1)
+    }
+    //TODO: Bind these
+    fn begin_ball_intake(&mut self) -> bool {
+        false
+    }
+    fn abort_ball_intake(&mut self) -> bool {
+        false
+    }
+    fn outtake_ball(&mut self) -> bool {
+        false
+    }
+    fn intake_hatch(&mut self) -> bool {
+        false
+    }
+    fn outtake_hatch(&mut self) -> bool {
+        false
+    }
+    fn elevator_low(&mut self) -> bool {
+        false
+    }
+    fn elevator_mid_low(&mut self) -> bool {
+        false
+    }
+    fn elevator_mid_high(&mut self) -> bool {
+        false
+    }
+    fn elevator_high(&mut self) -> bool {
+        false
+    }
+    fn elevator_manual_override(&mut self) -> bool {
+        false
+    }
+    // Must be between 0 and 1
+    fn elevator_override_level(&mut self) -> f64 {
+        0.0
+    }
+}
+#[allow(clippy::let_and_return)]
+fn adjust_throttle(throttle: f64) -> f64 {
+    use config::controls::THROTTLE_GROWTH;
+    let denominator = (f64::consts::FRAC_PI_2 * THROTTLE_GROWTH).sin();
+    let throttle = (f64::consts::FRAC_PI_2 * THROTTLE_GROWTH * throttle) / denominator;
+    let throttle = (f64::consts::FRAC_PI_2 * THROTTLE_GROWTH * throttle) / denominator;
+    throttle
+}
+#[allow(clippy::let_and_return)]
+fn adjust_wheel(wheel: f64) -> f64 {
+    use config::controls::WHEEL_GROWTH;
+    let denominator = (f64::consts::FRAC_PI_2 * WHEEL_GROWTH).sin();
+    let wheel = (f64::consts::FRAC_PI_2 * WHEEL_GROWTH * wheel) / denominator;
+    let wheel = (f64::consts::FRAC_PI_2 * WHEEL_GROWTH * wheel) / denominator;
+    let wheel = (f64::consts::FRAC_PI_2 * WHEEL_GROWTH * wheel) / denominator;
+    wheel
+}
+fn band(val: f64) -> f64 {
+    use config::controls::STANDARD_DEADBAND;
+    if val.abs() > STANDARD_DEADBAND {
+        val
+    } else {
+        0.0
+    }
+}
+fn get_button(ds: &DriverStation<'_>, port: JoystickPort, num: u8) -> bool {
+    ds.stick_button(port, num).unwrap_or(false)
+}
+fn get_axis(ds: &DriverStation<'_>, port: JoystickPort, axis: JoystickAxis) -> f32 {
+    ds.stick_axis(port, axis).unwrap_or(0.0)
+}
+fn get_pov(ds: &DriverStation<'_>, port: JoystickPort, pov: JoystickPOV) -> i16 {
+    ds.stick_pov(port, pov).unwrap_or(0)
 }
