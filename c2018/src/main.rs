@@ -29,7 +29,8 @@ fn main() {
 
     let lj = JoystickPort::new(0).unwrap();
     let rj = JoystickPort::new(1).unwrap();
-    let axis = JoystickAxis::new(1).unwrap();
+    let throttle_axis = JoystickAxis::new(1).unwrap();
+    let wheel_axis = JoystickAxis::new(0).unwrap();
 
     drive_send.send(Instruction::GearShift(Gear::High)).unwrap();
     RobotBase::start_competition();
@@ -38,8 +39,8 @@ fn main() {
     loop {
         ds.wait_for_data();
         let signal = cdrive.cheesy_drive(
-            ds.stick_axis(lj, axis).unwrap_or(0.0).into(),
-            ds.stick_axis(rj, axis).unwrap_or(0.0).into(),
+            ds.stick_axis(lj, throttle_axis).unwrap_or(0.0).into(),
+            ds.stick_axis(rj, wheel_axis).unwrap_or(0.0).into(),
             false,
             false,
         );

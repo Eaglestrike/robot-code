@@ -57,7 +57,7 @@ impl CheesyDrive {
         is_high_gear: bool,
     ) -> DriveSignal {
         let mut wheel = wheel;
-        let mut throttle = throttle;
+        let mut throttle = -throttle;
         wheel = handle_deadband(wheel, WHEEL_DEADBAND);
         throttle = handle_deadband(throttle, THROTTLE_DEADBAND);
 
