@@ -1,14 +1,13 @@
 use serde::{Deserialize, Serialize};
 use serde_cbor;
-use serde_cbor::de::{Deserializer, IoRead, StreamDeserializer};
 use std::borrow::{Borrow, BorrowMut};
 use std::io;
-use std::io::{Cursor, Read, Write};
-use std::mem;
-use std::net::*;
-#[cfg(test)]
+use std::io::Cursor;
+use std::net::UdpSocket;
 #[macro_use]
 extern crate serde_derive;
+
+pub mod c2019;
 
 #[derive(Debug)]
 pub enum Error {
@@ -75,7 +74,6 @@ impl Connection {
         Ok(result)
     }
 }
-pub type ReadIter<'de, T> = StreamDeserializer<'de, IoRead<TcpStream>, T>;
 
 #[cfg(test)]
 mod tests {
@@ -103,24 +101,19 @@ mod tests {
         let ppacket = packet.clone();
         let ppacket2 = packet2.clone();
 
-        let listener = TcpListener::bind("0.0.0.0:5808").unwrap();
+        let listener = UdpSocket::bind("0.0.0.0:5808").unwrap();
         thread::spawn(move || {
-            let stream = TcpStream::connect("0.0.0.0:5808").unwrap();
-            let mut con = Connection::from_tcp(stream, None, None).unwrap();
+            let sender = UdpSocket::bind("0.0.0.0:5809").unwrap();
+            sender.connect("0.0.0.0:5808").unwrap();
+            let mut con = Connection::from_udp(sender, None, None).unwrap();
             con.write_item(&ppacket).unwrap();
             con.write_item(&ppacket2).unwrap();
-            let mut read_iter: ReadIter<'_, Packet> = con.make_iter().unwrap();
-            assert_eq!(read_iter.next().unwrap().unwrap(), ppacket2);
-            assert_eq!(read_iter.next().unwrap().unwrap(), ppacket);
         });
-        let (stream, _addr) = listener.accept().unwrap();
-        let mut con = Connection::from_tcp(stream, None, None).unwrap();
-        con.negotiate().unwrap();
-        con.write_item(&packet).unwrap();
-        let mut read_iter: ReadIter<'_, Packet> = con.make_iter().unwrap();
-        assert_eq!(read_iter.next().unwrap().unwrap(), packet);
-        con.write_item(&packet2).unwrap();
-        con.write_item(&packet).unwrap();
-        assert_eq!(read_iter.next().unwrap().unwrap(), packet2);
+        let mut con =
+            Connection::from_udp(listener, Some(std::time::Duration::from_millis(5)), None)
+                .unwrap();
+
+        assert_eq!(con.read_item::<Packet>().unwrap(), packet);
+        assert_eq!(con.read_item::<Packet>().unwrap(), packet2);
     }
 }
