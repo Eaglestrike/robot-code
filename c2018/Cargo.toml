@@ -18,3 +18,7 @@ controls = { path = "../first-party/controls" }
 serde = "1.0.84"
 serde_derive = "1.0.84"
 serde_cbor = "0.9.0"
+
+[package.metadata.frc]
+rio-address = "10.1.14.2"
+target-dir = "../target"
