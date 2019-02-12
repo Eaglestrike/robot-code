@@ -13,9 +13,11 @@ target_link_libraries(copcomp socket_int)
 target_link_libraries(copcomp socket++_int)
 target_link_libraries(copcomp tinycbor)
 
+# test binary
 
-
-# set_target_properties(c2019-vision
+add_executable(copcomp-2019-test test/main.cpp)
+target_link_libraries(copcomp-2019-test copcomp)
+# set_target_properties(copcomp-2019-test
 #     PROPERTIES
 #     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin"
 # )

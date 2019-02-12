@@ -1,35 +1,47 @@
+#include <array>
 #include <cstdint>
-#include <inetclientstream.hpp>
+#include <inetclientdgram.hpp>
 
 namespace team114
 {
 namespace copcomp
 {
 
-const uint8_t NEG_BUF[5] = {0x21, 0x31, 0x31, 0x34, 0x01};
-
 class Connection
 {
   public:
     Connection(const std::string &dsthost, const std::string &dstport);
-    void Negotiate();
+    virtual ~Connection();
     template <typename T> void write_item(const T &item)
     {
-        Negotiate();
-        auto fd = tcp.getfd();
+        size_t bytes = item.cbor_serialize(data, BUFFER_LEN);
+        udp.snd(data, bytes);
     }
-    template <typename T> T recv_item();
+
+    // template <typename T> void write_item_to(const T &item, std::string &dsthost, std::string &dstport)
+    // {
+    //     size_t bytes = item.cbor_serialize(data, BUFFER_LEN);
+    //     udp.sndto(data, bytes, dsthost, dstport);
+    // }
+
+    template <typename T> T recv_item()
+    {
+        size_t bytes = udp.rcv(data, BUFFER_LEN);
+        T t = T::cbor_deserialize(data, bytes);
+        return t;
+    }
+
+    // template <typename T> T recv_item_from(std::string &srchost, std::string &srcport)
+    // {
+    //     size_t bytes = udp.rcvfrom(data, BUFFER_LEN, srchost, srcport);
+    //     T t = T::cbor_deserialize(data, bytes);
+    //     return t;
+    // }
 
   private:
-    enum class Negotiation {
-        SUCCESS,
-        FAILED,
-        SENT,
-        UNINIT,
-    };
-    libsocket::inet_stream tcp;
-    Negotiation status;
-    uint8_t neg_buf[5];
+    static constexpr size_t BUFFER_LEN = 65 * 1024 * 1024;
+    libsocket::inet_dgram_client udp;
+    uint8_t *data; // enough to store the max UDP packet size
 };
 
 } // namespace copcomp
