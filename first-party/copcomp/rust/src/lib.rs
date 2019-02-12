@@ -44,7 +44,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 use std::time::Duration;
 impl Connection {
-    const BUF_LEN: usize = 64 * 1024 * 1024;
+    const BUF_LEN: usize = 64 * 1024;
     pub fn from_udp(udp: UdpSocket, rt: Option<Duration>, wt: Option<Duration>) -> Result<Self> {
         udp.set_read_timeout(rt)?;
         udp.set_write_timeout(wt)?;

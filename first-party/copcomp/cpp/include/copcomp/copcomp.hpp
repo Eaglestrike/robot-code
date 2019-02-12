@@ -39,9 +39,9 @@ class Connection
     // }
 
   private:
-    static constexpr size_t BUFFER_LEN = 65 * 1024 * 1024;
+    static constexpr size_t BUFFER_LEN = 65 * 1024; // enough to store the max UDP packet size
     libsocket::inet_dgram_client udp;
-    uint8_t *data; // enough to store the max UDP packet size
+    uint8_t *data;
 };
 
 } // namespace copcomp
