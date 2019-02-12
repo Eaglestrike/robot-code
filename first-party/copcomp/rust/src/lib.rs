@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
 use serde_cbor;
 use serde_cbor::de::{Deserializer, IoRead, StreamDeserializer};
+use std::borrow::{Borrow, BorrowMut};
 use std::io;
-use std::io::{Read, Write};
+use std::io::{Cursor, Read, Write};
 use std::mem;
 use std::net::*;
 #[cfg(test)]
@@ -34,84 +35,44 @@ impl From<serde_cbor::error::Error> for Error {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
-enum Negotiation {
-    Success,
-    Failed,
-    Sent,
-    Uninit,
-}
-
 pub struct Connection {
-    status: Negotiation,
-    read: Option<TcpStream>,
-    write: TcpStream,
-    neg_buf: [u8; 5],
+    udp: UdpSocket,
+    data: Box<[u8]>,
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
 
 use std::time::Duration;
 impl Connection {
-    const NEG_BUF: [u8; 5] = [0x21, 0x31, 0x31, 0x34, 0x01];
-    pub fn from_tcp(tcp: TcpStream, rt: Option<Duration>, wt: Option<Duration>) -> Result<Self> {
-        tcp.set_nodelay(true)?;
-        tcp.set_read_timeout(rt)?;
-        tcp.set_write_timeout(wt)?;
+    const BUF_LEN: usize = 64 * 1024 * 1024;
+    pub fn from_udp(udp: UdpSocket, rt: Option<Duration>, wt: Option<Duration>) -> Result<Self> {
+        udp.set_read_timeout(rt)?;
+        udp.set_write_timeout(wt)?;
 
         Ok(Connection {
-            status: Negotiation::Uninit,
-            neg_buf: [0; 5],
-            read: Some(tcp.try_clone()?),
-            write: tcp,
+            udp: udp,
+            data: vec![0u8; Self::BUF_LEN].into_boxed_slice(),
         })
     }
 
-    pub fn negotiate(&mut self) -> Result<()> {
-        dbg!(self.status);
-        match self.status {
-            Negotiation::Success => {
-                return Ok(());
-            }
-            Negotiation::Failed => {
-                return Err(Error::CopComp(ErrorKind::NegotationFailed));
-            }
-            Negotiation::Sent => {
-                if let Some(ref mut r) = self.read {
-                    r.read_exact(&mut self.neg_buf[..])?;
-                    if self.neg_buf != Self::NEG_BUF {
-                        self.status = Negotiation::Failed;
-                    } else {
-                        self.status = Negotiation::Success;
-                    }
-                    return self.negotiate();
-                } else {
-                    return Err(Error::CopComp(ErrorKind::ReaderConsumed));
-                }
-            }
-            Negotiation::Uninit => {
-                if self.write.write_all(&Self::NEG_BUF).is_err() {
-                    self.status = Negotiation::Failed;
-                    return self.negotiate();
-                }
-                self.status = Negotiation::Sent;
-                return self.negotiate();
-            }
-        }
-    }
-
     pub fn write_item<W: Serialize>(&mut self, item: &W) -> Result<()> {
-        self.negotiate()?;
-        serde_cbor::to_writer(&mut self.write, item)?;
+        let slice: &mut [u8] = self.data.borrow_mut();
+        let mut cursor = Cursor::new(slice);
+        serde_cbor::to_writer(&mut cursor, item)?;
+        let idx = cursor.position() as usize;
+        let slice: &[u8] = self.data.borrow();
+        self.udp.send(&slice[..idx])?;
         Ok(())
     }
 
-    pub fn make_iter<'de, R: Deserialize<'de>>(&mut self) -> Result<ReadIter<'de, R>> {
-        self.negotiate()?;
-        match mem::replace(&mut self.read, None) {
-            Some(tcp) => Ok(Deserializer::from_reader(tcp).into_iter()),
-            None => Err(Error::CopComp(ErrorKind::ReaderConsumed)),
-        }
+    pub fn read_item<R>(&mut self) -> Result<R>
+    where
+        R: for<'de> Deserialize<'de>,
+    {
+        let bytes = self.udp.recv(self.data.borrow_mut())?;
+        let slice: &[u8] = self.data.borrow();
+        let result: R = serde_cbor::from_reader(&slice[..bytes])?;
+        Ok(result)
     }
 }
 pub type ReadIter<'de, T> = StreamDeserializer<'de, IoRead<TcpStream>, T>;
