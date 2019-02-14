@@ -41,8 +41,8 @@ fn main() {
         let signal = cdrive.cheesy_drive(
             ds.stick_axis(lj, throttle_axis).unwrap_or(0.0).into(),
             ds.stick_axis(rj, wheel_axis).unwrap_or(0.0).into(),
-            false,
-            false,
+            ds.stick_button(rj, 0).unwrap_or(false),
+            true,
         );
         drive_send
             .send(Instruction::Percentage(signal.l, signal.r))
