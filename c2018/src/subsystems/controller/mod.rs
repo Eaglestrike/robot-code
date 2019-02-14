@@ -7,38 +7,45 @@ use super::{
     superstructure, Subsystem,
 };
 use crate::cheesy_drive::CheesyDrive;
-use crate::config::{self, superstructure::elevator, SUBSYSTEM_SLEEP_TIME};
+use crate::config::superstructure::elevator;
 use crossbeam_channel::Sender;
-use std::{f64, thread};
 use wpilib::ds::*;
 
 type Drive = Sender<drive::Instruction>;
 type Superstructure = Sender<superstructure::Instruction>;
 
 #[allow(dead_code)]
-struct Controller<T: Controls> {
+#[derive(Debug)]
+pub struct Controller<'a, T: Controls> {
     controls: T,
     cheesy: CheesyDrive,
     drive: Drive,
     superstructure: Superstructure,
+    ds: DriverStation<'a>,
 }
 
-impl<T: Controls> Controller<T> {
-    fn new(controls: T, drive: Drive, superstructure: Superstructure) -> Self {
+impl<'a, T: Controls> Controller<'a, T> {
+    pub fn new(
+        controls: T,
+        drive: Drive,
+        superstructure: Superstructure,
+        ds: DriverStation<'a>,
+    ) -> Self {
         Self {
             controls,
             cheesy: CheesyDrive::new(),
             drive,
             superstructure,
+            ds,
         }
     }
 }
 
-impl<T: Controls> Subsystem for Controller<T> {
+impl<'a, T: Controls> Subsystem for Controller<'a, T> {
     fn run(mut self) {
         let mut controls = self.controls;
         loop {
-            thread::sleep(SUBSYSTEM_SLEEP_TIME);
+            self.ds.wait_for_data();
 
             // DRIVE
             let wheel = controls.wheel();
@@ -137,8 +144,9 @@ pub trait Controls {
     fn elevator_override_level(&mut self) -> f64;
 }
 
+#[derive(Debug)]
 pub struct StandardControls<'a> {
-    ds: &'a DriverStation<'a>,
+    ds: DriverStation<'a>,
     left: JoystickPort,
     right: JoystickPort,
     oi: JoystickPort,
@@ -147,8 +155,8 @@ pub struct StandardControls<'a> {
 }
 
 impl<'a> StandardControls<'a> {
-    fn new(
-        ds: &'a DriverStation<'a>,
+    pub fn new(
+        ds: DriverStation<'a>,
         left: JoystickPort,
         right: JoystickPort,
         oi: JoystickPort,
@@ -165,16 +173,16 @@ impl<'a> StandardControls<'a> {
 }
 impl<'a> Controls for StandardControls<'a> {
     fn throttle(&mut self) -> f64 {
-        adjust_throttle(band(get_axis(self.ds, self.left, self.y).into()))
+        get_axis(&self.ds, self.left, self.y).into()
     }
     fn wheel(&mut self) -> f64 {
-        adjust_wheel(band(get_axis(self.ds, self.right, self.x).into()))
+        get_axis(&self.ds, self.right, self.x).into()
     }
     fn low_gear(&mut self) -> bool {
-        get_button(self.ds, self.left, 1)
+        false
     }
     fn quick_turn(&mut self) -> bool {
-        get_button(self.ds, self.right, 1)
+        get_button(&self.ds, self.right, 0)
     }
     //TODO: Bind these
     fn begin_ball_intake(&mut self) -> bool {
@@ -209,31 +217,6 @@ impl<'a> Controls for StandardControls<'a> {
     }
     // Must be between 0 and 1
     fn elevator_override_level(&mut self) -> f64 {
-        0.0
-    }
-}
-#[allow(clippy::let_and_return)]
-fn adjust_throttle(throttle: f64) -> f64 {
-    use config::controls::THROTTLE_GROWTH;
-    let denominator = (f64::consts::FRAC_PI_2 * THROTTLE_GROWTH).sin();
-    let throttle = (f64::consts::FRAC_PI_2 * THROTTLE_GROWTH * throttle) / denominator;
-    let throttle = (f64::consts::FRAC_PI_2 * THROTTLE_GROWTH * throttle) / denominator;
-    throttle
-}
-#[allow(clippy::let_and_return)]
-fn adjust_wheel(wheel: f64) -> f64 {
-    use config::controls::WHEEL_GROWTH;
-    let denominator = (f64::consts::FRAC_PI_2 * WHEEL_GROWTH).sin();
-    let wheel = (f64::consts::FRAC_PI_2 * WHEEL_GROWTH * wheel) / denominator;
-    let wheel = (f64::consts::FRAC_PI_2 * WHEEL_GROWTH * wheel) / denominator;
-    let wheel = (f64::consts::FRAC_PI_2 * WHEEL_GROWTH * wheel) / denominator;
-    wheel
-}
-fn band(val: f64) -> f64 {
-    use config::controls::STANDARD_DEADBAND;
-    if val.abs() > STANDARD_DEADBAND {
-        val
-    } else {
         0.0
     }
 }

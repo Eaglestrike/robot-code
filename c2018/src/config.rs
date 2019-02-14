@@ -50,16 +50,11 @@ pub mod drive {
     }
 }
 
-pub mod controls {
-    //pub const TURN_SENSITIVITY: f64 = 1.0;
-    pub const THROTTLE_GROWTH: f64 = 0.65;
-    pub const WHEEL_GROWTH: f64 = 0.5;
-    pub const STANDARD_DEADBAND: f64 = 0.2;
-}
 pub mod superstructure {
     use super::*;
     pub mod elevator {
         use super::*;
+        #[allow(dead_code)]
         pub const MIN: Meter<f64> = const_unit!(0.0);
         // TODO: Make the below actual values
         pub const MAX: Meter<f64> = const_unit!(0.0);

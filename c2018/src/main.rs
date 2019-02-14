@@ -5,50 +5,37 @@ mod cheesy_drive;
 mod config;
 mod subsystems;
 
-use std::time;
+use crate::subsystems::Subsystem;
 use wpilib::ds::*;
 use wpilib::RobotBase;
 
 use bus::Bus;
 use crossbeam_channel::unbounded;
 use std::thread;
+use subsystems::controller::*;
 use subsystems::drive::*;
-use subsystems::Subsystem;
 
 fn main() {
-    let base = RobotBase::new().unwrap();
-    let ds = base.make_ds();
-
     let bus = Bus::new(0);
-    let (drive_send, recv) = unbounded();
+    let (drive_send, drive_recv) = unbounded();
+    let (super_send, _super_recv) = unbounded();
+    let base = RobotBase::new().unwrap();
+
     thread::spawn(move || {
-        let drive = Drive::new(bus, recv);
+        let drive = Drive::new(bus, drive_recv);
         println!("drive: {:?}", drive);
         drive.run();
     });
 
     let lj = JoystickPort::new(0).unwrap();
     let rj = JoystickPort::new(1).unwrap();
-    let throttle_axis = JoystickAxis::new(1).unwrap();
-    let wheel_axis = JoystickAxis::new(0).unwrap();
+    let oi = JoystickPort::new(2).unwrap();
+    let controls = StandardControls::new(base.make_ds(), lj, rj, oi).unwrap();
 
-    drive_send.send(Instruction::GearShift(Gear::High)).unwrap();
     RobotBase::start_competition();
-    let mut old = time::Instant::now();
-    let mut cdrive = cheesy_drive::CheesyDrive::new();
-    loop {
-        ds.wait_for_data();
-        let signal = cdrive.cheesy_drive(
-            ds.stick_axis(lj, throttle_axis).unwrap_or(0.0).into(),
-            ds.stick_axis(rj, wheel_axis).unwrap_or(0.0).into(),
-            ds.stick_button(rj, 0).unwrap_or(false),
-            true,
-        );
-        drive_send
-            .send(Instruction::Percentage(signal.l, signal.r))
-            .unwrap();
-        let new = time::Instant::now();
-        println!("{}", (new - old).subsec_micros());
-        old = new;
-    }
+
+    //NOTE: All new control bindings or functions should be added in subsystems/controller/mod.rs
+    let controller = Controller::new(controls, drive_send, super_send, base.make_ds());
+    println!("controller: {:?}", controller);
+    controller.run();
 }

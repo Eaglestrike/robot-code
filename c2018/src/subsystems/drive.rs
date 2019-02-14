@@ -96,6 +96,7 @@ impl TypedQuadrature for TalonSRX {
 }
 
 impl Drive {
+    #[allow(dead_code)]
     fn config_talons<T>(&mut self, f: impl Fn(&mut TalonSRX) -> T) -> (T, T) {
         (f(&mut self.l_mstr), f(&mut self.r_mstr))
     }
