@@ -60,6 +60,7 @@ pub mod superstructure {
     use super::*;
     pub mod elevator {
         use super::*;
+        #[allow(dead_code)]
         pub const MIN: Meter<f64> = const_unit!(0.0);
         // TODO: Make the below actual values
         pub const MAX: Meter<f64> = const_unit!(0.0);
