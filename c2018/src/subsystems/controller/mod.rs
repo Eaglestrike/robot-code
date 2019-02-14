@@ -16,7 +16,8 @@ type Drive = Sender<drive::Instruction>;
 type Superstructure = Sender<superstructure::Instruction>;
 
 #[allow(dead_code)]
-struct Controller<T: Controls> {
+#[derive(Debug)]
+pub struct Controller<T: Controls> {
     controls: T,
     cheesy: CheesyDrive,
     drive: Drive,
@@ -24,7 +25,7 @@ struct Controller<T: Controls> {
 }
 
 impl<T: Controls> Controller<T> {
-    fn new(controls: T, drive: Drive, superstructure: Superstructure) -> Self {
+    pub fn new(controls: T, drive: Drive, superstructure: Superstructure) -> Self {
         Self {
             controls,
             cheesy: CheesyDrive::new(),
@@ -137,6 +138,7 @@ pub trait Controls {
     fn elevator_override_level(&mut self) -> f64;
 }
 
+#[derive(Debug)]
 pub struct StandardControls<'a> {
     ds: &'a DriverStation<'a>,
     left: JoystickPort,
@@ -147,7 +149,7 @@ pub struct StandardControls<'a> {
 }
 
 impl<'a> StandardControls<'a> {
-    fn new(
+    pub fn new(
         ds: &'a DriverStation<'a>,
         left: JoystickPort,
         right: JoystickPort,
