@@ -137,6 +137,8 @@ impl Drive {
         l_slave
             .follow(&l_mstr, FollowerType::PercentOutput)
             .unwrap();
+        l_mstr.set_inverted(true);
+        l_slave.set_inverted(true);
 
         let mut r_mstr = TalonSRX::new(RIGHT_MASTER);
         let mut r_slave = TalonSRX::new(RIGHT_SLAVE);
