@@ -50,12 +50,6 @@ pub mod drive {
     }
 }
 
-pub mod controls {
-    //pub const TURN_SENSITIVITY: f64 = 1.0;
-    pub const THROTTLE_GROWTH: f64 = 0.65;
-    pub const WHEEL_GROWTH: f64 = 0.5;
-    pub const STANDARD_DEADBAND: f64 = 0.2;
-}
 pub mod superstructure {
     use super::*;
     pub mod elevator {
