@@ -33,6 +33,7 @@ fn main() {
     let controls = StandardControls::new(base.make_ds(), lj, rj, oi).unwrap();
 
     RobotBase::start_competition();
+
     //NOTE: All new control bindings or functions should be added in subsystems/controller/mod.rs
     let controller = Controller::new(controls, drive_send, super_send, base.make_ds());
     println!("controller: {:?}", controller);

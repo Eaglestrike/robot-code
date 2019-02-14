@@ -179,10 +179,10 @@ impl<'a> Controls for StandardControls<'a> {
         get_axis(&self.ds, self.right, self.x).into()
     }
     fn low_gear(&mut self) -> bool {
-        get_button(&self.ds, self.left, 1)
+        false
     }
     fn quick_turn(&mut self) -> bool {
-        get_button(&self.ds, self.right, 1)
+        get_button(&self.ds, self.right, 0)
     }
     //TODO: Bind these
     fn begin_ball_intake(&mut self) -> bool {
