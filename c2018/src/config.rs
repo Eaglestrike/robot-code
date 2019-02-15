@@ -51,6 +51,11 @@ pub mod drive {
 }
 
 pub mod superstructure {
+    // TODO find
+    pub const GATE1: i32 = -1;
+    pub const GATE2: i32 = -1;
+    pub const GATE3: i32 = -1;
+
     use super::*;
     pub mod elevator {
         use super::*;
@@ -62,5 +67,17 @@ pub mod superstructure {
         pub const MID_LOW: Meter<f64> = const_unit!(0.0);
         pub const MID_HIGH: Meter<f64> = const_unit!(0.0);
         pub const HIGH: Meter<f64> = const_unit!(0.0);
+
+        // todo IDS
+        pub const MASTER_TALON: i32 = -1;
+        pub const SLAVE_TALON1: i32 = -1;
+        pub const SLAVE_TALON2: i32 = -1;
+        pub const LIMIT_SWITCH: i32 = -1;
+    }
+
+    pub mod hatch {
+        // TODO set ids
+        pub const EXTEND_PNEUMATICS_ID: i32 = -1;
+        pub const OUTTAKE_PNEUMATICS_ID: i32 = -1;
     }
 }

@@ -11,6 +11,8 @@ pub mod units {
     use dimensioned::typenum::{tarr, N1, N2, P1, Z0};
     /// Used for Kd in PID loops
     pub type VoltSecondPerMeter<V> = SI<V, tarr![P1, P1, N2, N1, Z0, Z0, Z0]>; // also Newtons per Amp
+    pub type PerMeter<V> = SI<V, tarr![N1, Z0, Z0, Z0, Z0, Z0, Z0]>;
+
 
     #[macro_export]
     macro_rules! const_unit {

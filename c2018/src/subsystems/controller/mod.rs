@@ -8,6 +8,7 @@ use super::{
 };
 use crate::cheesy_drive::CheesyDrive;
 use crate::config::superstructure::elevator;
+use crate::config::{self, SUBSYSTEM_SLEEP_TIME};
 use crossbeam_channel::Sender;
 use wpilib::ds::*;
 
@@ -58,69 +59,69 @@ impl<'a, T: Controls> Subsystem for Controller<'a, T> {
                 self.drive.send(drive::Instruction::GearShift(Gear::Low))
             }
             .expect("Channel disconnected: ");
+            // TODO user input
+            // let signal = self
+            //     .cheesy
+            //     .cheesy_drive(wheel, throttle, quick_turn, high_gear);
+            // self.drive
+            //     .send(drive::Instruction::Percentage(signal.l, signal.r))
+            //     .expect("Channel disconnected: ");
 
-            let signal = self
-                .cheesy
-                .cheesy_drive(wheel, throttle, quick_turn, high_gear);
-            self.drive
-                .send(drive::Instruction::Percentage(signal.l, signal.r))
-                .expect("Channel disconnected: ");
+            // // SUPERSTRUCTURE
+            // if controls.abort_ball_intake() {
+            //     self.superstructure
+            //         .send(superstructure::Instruction::AbortBallIntake)
+            //         .expect("Channel disconnected: ");
+            // } else if controls.begin_ball_intake() {
+            //     self.superstructure
+            //         .send(superstructure::Instruction::BeginBallIntake)
+            //         .expect("Channel disconnected: ");
+            // } else if controls.outtake_ball() {
+            //     self.superstructure
+            //         .send(superstructure::Instruction::BallOuttake)
+            //         .expect("Channel disconnected: ");
+            // }
 
-            // SUPERSTRUCTURE
-            if controls.abort_ball_intake() {
-                self.superstructure
-                    .send(superstructure::Instruction::AbortBallIntake)
-                    .expect("Channel disconnected: ");
-            } else if controls.begin_ball_intake() {
-                self.superstructure
-                    .send(superstructure::Instruction::BeginBallIntake)
-                    .expect("Channel disconnected: ");
-            } else if controls.outtake_ball() {
-                self.superstructure
-                    .send(superstructure::Instruction::BallOuttake)
-                    .expect("Channel disconnected: ");
-            }
+            // if controls.intake_hatch() {
+            //     self.superstructure
+            //         .send(superstructure::Instruction::HatchIntake)
+            //         .expect("Channel disconnected: ");
+            // } else if controls.outtake_hatch() {
+            //     self.superstructure
+            //         .send(superstructure::Instruction::HatchIntake)
+            //         .expect("Channel disconnected: ");
+            // }
 
-            if controls.intake_hatch() {
-                self.superstructure
-                    .send(superstructure::Instruction::HatchIntake)
-                    .expect("Channel disconnected: ");
-            } else if controls.outtake_hatch() {
-                self.superstructure
-                    .send(superstructure::Instruction::HatchOuttake)
-                    .expect("Channel disconnected: ");
-            }
-
-            if controls.elevator_manual_override() {
-                let level = controls.elevator_override_level() * elevator::MAX;
-                self.superstructure
-                    .send(superstructure::Instruction::SetElevatorHeight(level))
-                    .expect("Channel disconnected: ");
-            } else if controls.elevator_low() {
-                self.superstructure
-                    .send(superstructure::Instruction::SetElevatorHeight(
-                        elevator::LOW,
-                    ))
-                    .expect("Channel disconnected: ");
-            } else if controls.elevator_mid_low() {
-                self.superstructure
-                    .send(superstructure::Instruction::SetElevatorHeight(
-                        elevator::MID_LOW,
-                    ))
-                    .expect("Channel disconnected: ");
-            } else if controls.elevator_mid_high() {
-                self.superstructure
-                    .send(superstructure::Instruction::SetElevatorHeight(
-                        elevator::MID_HIGH,
-                    ))
-                    .expect("Channel disconnected: ");
-            } else if controls.elevator_high() {
-                self.superstructure
-                    .send(superstructure::Instruction::SetElevatorHeight(
-                        elevator::HIGH,
-                    ))
-                    .expect("Channel disconnected: ");
-            }
+            // if controls.elevator_manual_override() {
+            //     let level = controls.elevator_override_level() * elevator::MAX;
+            //     self.superstructure
+            //         .send(superstructure::Instruction::SetElevatorHeight(level))
+            //         .expect("Channel disconnected: ");
+            // } else if controls.elevator_low() {
+            //     self.superstructure
+            //         .send(superstructure::Instruction::SetElevatorHeight(
+            //             elevator::LOW,
+            //         ))
+            //         .expect("Channel disconnected: ");
+            // } else if controls.elevator_mid_low() {
+            //     self.superstructure
+            //         .send(superstructure::Instruction::SetElevatorHeight(
+            //             elevator::MID_LOW,
+            //         ))
+            //         .expect("Channel disconnected: ");
+            // } else if controls.elevator_mid_high() {
+            //     self.superstructure
+            //         .send(superstructure::Instruction::SetElevatorHeight(
+            //             elevator::MID_HIGH,
+            //         ))
+            //         .expect("Channel disconnected: ");
+            // } else if controls.elevator_high() {
+            //     self.superstructure
+            //         .send(superstructure::Instruction::SetElevatorHeight(
+            //             elevator::HIGH,
+            //         ))
+            //         .expect("Channel disconnected: ");
+            // }
         }
     }
 }
