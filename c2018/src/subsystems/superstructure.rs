@@ -190,6 +190,22 @@ pub struct Superstructure {
     om: CachingTalon,
     receiver: Receiver<Instruction>,
 }
+use crate::config::superstructure as config;
+impl Superstructure {
+    pub fn new(recv: Receiver<Instruction>) -> HalResult<Self> {
+        Ok(Self {
+            goal: goal::GoalState::Hatch(goal::HatchGoalHeight::Low, hatch_hardware::CLOSED_HATCH_STATE),
+            unjam: unjam::UnjamState::Disabled,
+            hatch_hardware: hatch_hardware::HatchHardware::new()?,
+            channel: channel::Channel::new()?,
+            elevator: elevator::Elevator::new()?,
+            im: CachingTalon::new(TalonSRX::new(config::CHANNEL_TALON)),
+            is: CachingSolenoid::new(Solenoid::new(config::INTAKE_SOLENOID)?)?,
+            om: CachingTalon::new(TalonSRX::new(config::OUTTAKE_TALON)),
+            receiver: recv,
+        })
+    }
+}
 
 impl Superstructure {
     fn flush_outs(&mut self, out: &PeriodicOuts) -> Result<(), HalCtreError>{
@@ -270,7 +286,8 @@ impl Subsystem for Superstructure {
             // Unjam gets to override everyone else
             self.unjam.process();
             self.unjam.write_outs(&mut outs);
-            self.flush_outs(&outs);
+            // TODO log
+            self.flush_outs(&outs).unwrap();
         }
     }
 }

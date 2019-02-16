@@ -1,7 +1,7 @@
 use super::PeriodicOuts;
 use super::HalCtreError;
 use super::IntakeExt;
-use wpilib::dio::DigitalInput;
+use wpilib::{HalResult, dio::DigitalInput};
 
 // TODO tune
 const CHAN_INTAKE_COMMAND: f64 = 1.0;
@@ -29,7 +29,15 @@ pub struct Channel {
 
 const OUTK_TIME_TICKS: u16 = 200;
 
+use crate::config::superstructure::{GATE1, GATE2, GATE3};
 impl Channel {
+    pub fn new() -> HalResult<Self> {
+        Ok(Self {
+            state: BallProgress::None,
+            gates: (DigitalInput::new(GATE1)?,DigitalInput::new(GATE2)?,DigitalInput::new(GATE3)?),
+        })
+    }
+
     pub fn try_init_outk(&mut self) {
         use BallProgress::*;
         self.state = match self.state {

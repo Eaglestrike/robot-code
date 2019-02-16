@@ -75,6 +75,11 @@ pub mod superstructure {
         pub const LIMIT_SWITCH: i32 = -1;
     }
 
+    // TODO ids
+    pub const INTAKE_SOLENOID: i32 = -1;
+    pub const CHANNEL_TALON: i32 = -1;
+    pub const OUTTAKE_TALON: i32 = -1;
+
     pub mod hatch {
         // TODO set ids
         pub const EXTEND_PNEUMATICS_ID: i32 = -1;
