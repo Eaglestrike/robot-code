@@ -1,8 +1,8 @@
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub enum Edge {
-    FALLING,
-    RISING,
-    FLAT,
+    Falling,
+    Rising,
+    Flat,
 }
 
 impl Edge {
@@ -10,10 +10,10 @@ impl Edge {
         self == Edge::FALLING
     }
     pub fn rising(self) -> bool {
-        self == Edge::RISING
+        self == Edge::Rising
     }
     pub fn flat(self) -> bool {
-        self == Edge::FLAT
+        self == Edge::Flat
     }
 }
 
@@ -37,23 +37,23 @@ impl<T: FnMut() -> bool> EdgeDetector<T> {
         self.last_value = new_value;
 
         if last_value && !new_value {
-            Edge::FALLING
+            Edge::Falling
         } else if !last_value && new_value {
-            Edge::RISING
+            Edge::Rising
         } else {
-            Edge::FLAT
+            Edge::Flat
         }
     }
 
     pub fn falling(&mut self) -> bool {
-        self.get() == Edge::FALLING
+        self.get() == Edge::Falling
     }
 
     pub fn rising(&mut self) -> bool {
-        self.get() == Edge::RISING
+        self.get() == Edge::Rising
     }
 
     pub fn flat(&mut self) -> bool {
-        self.get() == Edge::FLAT
+        self.get() == Edge::Flat
     }
 }
