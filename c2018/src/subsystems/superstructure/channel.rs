@@ -38,11 +38,19 @@ impl Channel {
         })
     }
 
-    pub fn try_init_outk(&mut self) {
+    pub fn try_abort_intk(&mut self) -> bool {
         use BallProgress::*;
-        self.state = match self.state {
-            CarriageSecure => Outtaking(OUTK_TIME_TICKS),
-            x => x,
+        return match self.state {
+            Intaking => {self.state = None; true}
+            x => {false},
+        }
+    }
+
+    pub fn try_init_outk(&mut self) -> bool {
+        use BallProgress::*;
+        return match self.state {
+            CarriageSecure => {self.state = Outtaking(OUTK_TIME_TICKS); true}
+            x => {false},
         }
     }
 

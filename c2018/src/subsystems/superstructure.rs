@@ -110,6 +110,7 @@ mod interface {
         Unjam(bool),
         BallOuttake,
         BallIntake,
+        AbortIntake,
         HatchExtend(HatchPneumaticExt),
         HatchOuttake(HatchPneumaticExt),
     }
@@ -253,7 +254,10 @@ impl Subsystem for Superstructure {
                             }
                         }
                     },
-                    BallOuttake => {self.channel.try_init_outk()}
+                    BallOuttake => {self.channel.try_init_outk();}
+                    AbortIntake => {if self.channel.try_abort_intk() {
+                        self.goal = goal::GoalState::Hatch(goal::HatchGoalHeight::Low, hatch_hardware::CLOSED_HATCH_STATE);
+                    }}
                 }
             }
             // process desired state
