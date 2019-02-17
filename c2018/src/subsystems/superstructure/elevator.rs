@@ -62,6 +62,7 @@ impl Elevator {
         match self.state {
             LoopState::Unitialized => {
                 // TODO handle
+                self.state = LoopState::Zeroing;
                 return self.iterate();
             }
             LoopState::Zeroing => {
