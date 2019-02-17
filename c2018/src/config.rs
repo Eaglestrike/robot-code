@@ -56,18 +56,7 @@ pub mod superstructure {
     pub const GATE2: i32 = -1;
     pub const GATE3: i32 = -1;
 
-    use super::*;
     pub mod elevator {
-        use super::*;
-        #[allow(dead_code)]
-        pub const MIN: Meter<f64> = const_unit!(0.0);
-        // TODO: Make the below actual values
-        pub const MAX: Meter<f64> = const_unit!(0.0);
-        pub const LOW: Meter<f64> = const_unit!(0.0);
-        pub const MID_LOW: Meter<f64> = const_unit!(0.0);
-        pub const MID_HIGH: Meter<f64> = const_unit!(0.0);
-        pub const HIGH: Meter<f64> = const_unit!(0.0);
-
         // todo IDS
         pub const MASTER_TALON: i32 = -1;
         pub const SLAVE_TALON1: i32 = -1;
