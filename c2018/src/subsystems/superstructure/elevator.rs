@@ -6,7 +6,7 @@ use ctre::motor_control::{ControlMode, DemandType, MotorController, TalonSRX};
 use wpilib::{dio::DigitalInput, HalResult};
 
 #[derive(Copy, Clone, Debug)]
-enum LoopState {
+pub enum LoopState {
     Unitialized,
     Zeroing,
     Running,
