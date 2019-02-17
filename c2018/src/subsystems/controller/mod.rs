@@ -2,12 +2,10 @@ pub mod edge_detect;
 pub mod xbox;
 
 use super::{
-    drive::{self, Gear, Instruction as DriveCmd},
+    drive::{Gear, Instruction as DriveCmd},
     superstructure, Subsystem,
 };
 use crate::cheesy_drive::CheesyDrive;
-use crate::config::superstructure::elevator;
-use crate::config::{self, SUBSYSTEM_SLEEP_TIME};
 use crossbeam_channel::Sender;
 use superstructure::{HatchPneumaticExt, Instruction as SsCmd, UserElevatorHeights};
 use wpilib::ds::*;
@@ -109,16 +107,12 @@ impl<'a, T: Controls> Subsystem for Controller<'a, T> {
             );
             if self.controls.elevator_low().rising() {
                 self.superstructure
-                    .send(SsCmd::SetElevatorHeight(
-                        superstructure::UserElevatorHeights::Low,
-                    ))
+                    .send(SsCmd::SetElevatorHeight(UserElevatorHeights::Low))
                     .expect("SS disconnected");
             }
             if self.controls.elevator_med().rising() {
                 self.superstructure
-                    .send(SsCmd::SetElevatorHeight(
-                        superstructure::UserElevatorHeights::Med,
-                    ))
+                    .send(SsCmd::SetElevatorHeight(UserElevatorHeights::Med))
                     .expect("SS disconnected");
             }
             if self.controls.elevator_high().rising() {
