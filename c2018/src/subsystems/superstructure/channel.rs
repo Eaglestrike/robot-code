@@ -22,6 +22,7 @@ pub enum BallProgress {
     Done,
 }
 
+#[derive(Debug)]
 pub struct Channel {
     state: BallProgress,
     gates: (DigitalInput, DigitalInput, DigitalInput),

@@ -180,6 +180,7 @@ mod unjam;
 
 use ctre::motor_control::{ControlMode, DemandType, MotorController, TalonSRX};
 use wpilib::{pneumatics::Solenoid, HalResult};
+#[derive(Debug)]
 pub struct Superstructure {
     goal: goal::GoalState,
     unjam: unjam::UnjamState,
@@ -345,6 +346,7 @@ impl CachingTalon {
     }
 }
 
+#[derive(Debug)]
 struct CachingSolenoid(Solenoid, bool);
 
 impl CachingSolenoid {

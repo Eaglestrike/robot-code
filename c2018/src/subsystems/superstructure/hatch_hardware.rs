@@ -4,6 +4,7 @@ use crate::config::superstructure::hatch as config;
 use wpilib::pneumatics::Solenoid;
 use wpilib::HalResult;
 
+#[derive(Debug)]
 pub struct HatchHardware {
     extend: Solenoid,
     outtake: Solenoid,
