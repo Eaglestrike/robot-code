@@ -1,7 +1,7 @@
-use super::PeriodicOuts;
 use super::HalCtreError;
 use super::IntakeExt;
-use wpilib::{HalResult, dio::DigitalInput};
+use super::PeriodicOuts;
+use wpilib::{dio::DigitalInput, HalResult};
 
 // TODO tune
 const CHAN_INTAKE_COMMAND: f64 = 1.0;
@@ -35,24 +35,34 @@ impl Channel {
     pub fn new() -> HalResult<Self> {
         Ok(Self {
             state: BallProgress::None,
-            gates: (DigitalInput::new(GATE1)?,DigitalInput::new(GATE2)?,DigitalInput::new(GATE3)?),
+            gates: (
+                DigitalInput::new(GATE1)?,
+                DigitalInput::new(GATE2)?,
+                DigitalInput::new(GATE3)?,
+            ),
         })
     }
 
     pub fn try_abort_intk(&mut self) -> bool {
         use BallProgress::*;
         return match self.state {
-            Intaking => {self.state = None; true}
-            _ => {false},
-        }
+            Intaking => {
+                self.state = None;
+                true
+            }
+            _ => false,
+        };
     }
 
     pub fn try_init_outk(&mut self) -> bool {
         use BallProgress::*;
         return match self.state {
-            CarriageSecure => {self.state = Outtaking(OUTK_TIME_TICKS); true}
-            _ => {false},
-        }
+            CarriageSecure => {
+                self.state = Outtaking(OUTK_TIME_TICKS);
+                true
+            }
+            _ => false,
+        };
     }
 
     pub fn reset(&mut self) {
@@ -89,13 +99,43 @@ impl Channel {
         // TODO add backwards transitions for unjam
         self.state = match self.state {
             None => None,
-            Intaking => if self.gates.0.get()? {Inside} else {Intaking},
+            Intaking => {
+                if self.gates.0.get()? {
+                    Inside
+                } else {
+                    Intaking
+                }
+            }
             // TODO should be handled here to be on the safer side?
-            Inside =>if self.gates.1.get()? {Queued} else {Inside},
-            Queued => if elev_ready {CarriageVolatile} else {Queued},
-            CarriageVolatile => if self.gates.2.get()? {CarriageSecure} else {CarriageVolatile},
+            Inside => {
+                if self.gates.1.get()? {
+                    Queued
+                } else {
+                    Inside
+                }
+            }
+            Queued => {
+                if elev_ready {
+                    CarriageVolatile
+                } else {
+                    Queued
+                }
+            }
+            CarriageVolatile => {
+                if self.gates.2.get()? {
+                    CarriageSecure
+                } else {
+                    CarriageVolatile
+                }
+            }
             CarriageSecure => CarriageSecure,
-            Outtaking(ticks) => if ticks > 0 {Outtaking(ticks-1)} else {Done},
+            Outtaking(ticks) => {
+                if ticks > 0 {
+                    Outtaking(ticks - 1)
+                } else {
+                    Done
+                }
+            }
             Done => Done,
         };
         Ok(())

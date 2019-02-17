@@ -40,14 +40,11 @@ pub struct EdgeDetector {
 
 impl EdgeDetector {
     pub fn new() -> Self {
-        Self {
-            last_value: false,
-        }
+        Self { last_value: false }
     }
 
     pub fn get(&mut self, new_value: bool) -> Edge {
-        let edge =
-        if self.last_value && !new_value {
+        let edge = if self.last_value && !new_value {
             Edge::Falling
         } else if !self.last_value && new_value {
             Edge::Rising

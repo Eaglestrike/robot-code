@@ -2,17 +2,18 @@ pub mod edge_detect;
 pub mod xbox;
 
 use super::{
-    drive::{self, Gear},
+    drive::{self, Gear, Instruction as DriveCmd},
     superstructure, Subsystem,
 };
 use crate::cheesy_drive::CheesyDrive;
 use crate::config::superstructure::elevator;
 use crate::config::{self, SUBSYSTEM_SLEEP_TIME};
 use crossbeam_channel::Sender;
+use superstructure::{HatchPneumaticExt, Instruction as SsCmd, UserElevatorHeights};
 use wpilib::ds::*;
 
-type Drive = Sender<drive::Instruction>;
-type Superstructure = Sender<superstructure::Instruction>;
+type Drive = Sender<DriveCmd>;
+type Superstructure = Sender<SsCmd>;
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -58,51 +59,81 @@ impl<'a, T: Controls> Subsystem for Controller<'a, T> {
                 .cheesy
                 .cheesy_drive(wheel, throttle, quick_turn, high_gear);
             self.drive
-                .send(drive::Instruction::Percentage(signal.l, signal.r))
+                .send(DriveCmd::Percentage(signal.l, signal.r))
                 .expect("Channel disconnected: ");
             // TODO log
             self.controls.low_gear().sig_send_val(
-                drive::Instruction::GearShift(Gear::Low),
-                drive::Instruction::GearShift(Gear::High),
-                |cmd| {self.drive.send(cmd).expect("DT disconnected");}
+                DriveCmd::GearShift(Gear::Low),
+                DriveCmd::GearShift(Gear::High),
+                |cmd| {
+                    self.drive.send(cmd).expect("DT disconnected");
+                },
             );
 
             // SUPERSTRUCTURE
 
             // TODO log
             if self.controls.ball_intake().rising() {
-                self.superstructure.send(superstructure::Instruction::BallIntake).expect("SS disconnected");
+                self.superstructure
+                    .send(SsCmd::BallIntake)
+                    .expect("SS disconnected");
             }
             if self.controls.abort_ball_intake().rising() {
-                self.superstructure.send(superstructure::Instruction::AbortIntake).expect("SS disconnected");
+                self.superstructure
+                    .send(SsCmd::AbortIntake)
+                    .expect("SS disconnected");
             }
             if self.controls.outtake_ball().rising() {
-                self.superstructure.send(superstructure::Instruction::BallOuttake).expect("SS disconnected");
+                self.superstructure
+                    .send(SsCmd::BallOuttake)
+                    .expect("SS disconnected");
             }
-            self.controls.ball_unjam().sig_send(
-                |is_unjam| {self.superstructure.send(superstructure::Instruction::Unjam(is_unjam)).expect("SS disconnected");}
-            );
+            self.controls.ball_unjam().sig_send(|is_unjam| {
+                self.superstructure
+                    .send(SsCmd::Unjam(is_unjam))
+                    .expect("SS disconnected");
+            });
             self.controls.hatch_extend().sig_send_val(
-                superstructure::Instruction::HatchExtend(superstructure::HatchPneumaticExt::Extended),
-                superstructure::Instruction::HatchExtend(superstructure::HatchPneumaticExt::Retracted),
-                |cmd| {self.superstructure.send(cmd).expect("SS disconnected");}
+                SsCmd::HatchExtend(HatchPneumaticExt::Extended),
+                SsCmd::HatchExtend(HatchPneumaticExt::Retracted),
+                |cmd| {
+                    self.superstructure.send(cmd).expect("SS disconnected");
+                },
             );
             self.controls.hatch_outtake().sig_send_val(
-                superstructure::Instruction::HatchOuttake(superstructure::HatchPneumaticExt::Extended),
-                superstructure::Instruction::HatchOuttake(superstructure::HatchPneumaticExt::Retracted),
-                |cmd| {self.superstructure.send(cmd).expect("SS disconnected");}
+                SsCmd::HatchOuttake(HatchPneumaticExt::Extended),
+                SsCmd::HatchOuttake(HatchPneumaticExt::Retracted),
+                |cmd| {
+                    self.superstructure.send(cmd).expect("SS disconnected");
+                },
             );
             if self.controls.elevator_low().rising() {
-                self.superstructure.send(superstructure::Instruction::SetElevatorHeight(superstructure::UserElevatorHeights::Low)).expect("SS disconnected");
+                self.superstructure
+                    .send(SsCmd::SetElevatorHeight(
+                        superstructure::UserElevatorHeights::Low,
+                    ))
+                    .expect("SS disconnected");
             }
             if self.controls.elevator_med().rising() {
-                self.superstructure.send(superstructure::Instruction::SetElevatorHeight(superstructure::UserElevatorHeights::Med)).expect("SS disconnected");
+                self.superstructure
+                    .send(SsCmd::SetElevatorHeight(
+                        superstructure::UserElevatorHeights::Med,
+                    ))
+                    .expect("SS disconnected");
             }
             if self.controls.elevator_high().rising() {
-                self.superstructure.send(superstructure::Instruction::SetElevatorHeight(superstructure::UserElevatorHeights::High)).expect("SS disconnected");
+                self.superstructure
+                    .send(SsCmd::SetElevatorHeight(
+                        superstructure::UserElevatorHeights::High,
+                    ))
+                    .expect("SS disconnected");
             }
             if self.controls.elevator_cargo().rising() {
-                self.superstructure.send(superstructure::Instruction::SetElevatorHeight(superstructure::UserElevatorHeights::Cargo)).expect("SS disconnected");
+                self.superstructure
+                    .send(SsCmd::SetElevatorHeight(
+                        superstructure::UserElevatorHeights::Cargo,
+                    ))
+                    .expect("SS disconnected");
             }
         }
     }
@@ -146,7 +177,7 @@ macro_rules! wrapper_fields {
     };
 }
 
-use edge_detect::{EdgeDetector, Edge};
+use edge_detect::{Edge, EdgeDetector};
 wrapper_fields! { EdgeWrapper,
     low_gear,
     quick_turn,

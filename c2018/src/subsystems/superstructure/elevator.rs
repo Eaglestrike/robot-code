@@ -19,7 +19,7 @@ pub struct Elevator {
     s2: TalonSRX,
     limit: DigitalInput,
     state: LoopState,
-    goal: i32, // encoder ticks
+    goal: i32,         // encoder ticks
     last_sent_sp: i32, // encoder ticks
 }
 
@@ -108,10 +108,9 @@ impl Elevator {
     }
 
     pub fn is_holding(&self) -> ctre::Result<bool> {
-        Ok(
-            self.last_sent_sp == self.goal && (self.mt.get_selected_sensor_position(RECT_PROF_PID_IDX)? - self.last_sent_sp).abs()
-                < COMPLETION_THRESHOLD_TICKS,
-        )
+        Ok(self.last_sent_sp == self.goal
+            && (self.mt.get_selected_sensor_position(RECT_PROF_PID_IDX)? - self.last_sent_sp).abs()
+                < COMPLETION_THRESHOLD_TICKS)
     }
 
     pub fn is_at_height(&self, pos: si::Meter<f64>) -> ctre::Result<bool> {

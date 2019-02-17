@@ -4,10 +4,9 @@ use crossbeam_channel::Receiver;
 mod hatch_hardware;
 use hatch_hardware::HatchHardware;
 
-mod elevator;
 mod channel;
+mod elevator;
 use elevator::Elevator;
-
 
 #[derive(Debug, Clone)]
 pub struct PeriodicOuts {
@@ -196,7 +195,10 @@ use crate::config::superstructure as config;
 impl Superstructure {
     pub fn new(recv: Receiver<Instruction>) -> HalResult<Self> {
         Ok(Self {
-            goal: goal::GoalState::Hatch(goal::HatchGoalHeight::Low, hatch_hardware::CLOSED_HATCH_STATE),
+            goal: goal::GoalState::Hatch(
+                goal::HatchGoalHeight::Low,
+                hatch_hardware::CLOSED_HATCH_STATE,
+            ),
             unjam: unjam::UnjamState::Disabled,
             hatch_hardware: hatch_hardware::HatchHardware::new()?,
             channel: channel::Channel::new()?,
@@ -210,7 +212,7 @@ impl Superstructure {
 }
 
 impl Superstructure {
-    fn flush_outs(&mut self, out: &PeriodicOuts) -> Result<(), HalCtreError>{
+    fn flush_outs(&mut self, out: &PeriodicOuts) -> Result<(), HalCtreError> {
         // TODO replace with individual handling
         // or consider using Result::and() to chain these as is
         self.im.pct(out.intk_pct)?;
@@ -241,10 +243,8 @@ impl Subsystem for Superstructure {
                         }
                         _ => (),
                     },
-                    Unjam(x) => {self.unjam.set_enabled(x)}
-                    BallIntake => {
-                        self.goal = GoalState::Ball(BallGoalHeight::None)
-                    }
+                    Unjam(x) => self.unjam.set_enabled(x),
+                    BallIntake => self.goal = GoalState::Ball(BallGoalHeight::None),
                     SetElevatorHeight(wanted) => match self.goal {
                         GoalState::Hatch(ref mut height, _) => {
                             *height = wanted.into_hatch();
@@ -255,10 +255,17 @@ impl Subsystem for Superstructure {
                             }
                         }
                     },
-                    BallOuttake => {self.channel.try_init_outk();}
-                    AbortIntake => {if self.channel.try_abort_intk() {
-                        self.goal = goal::GoalState::Hatch(goal::HatchGoalHeight::Low, hatch_hardware::CLOSED_HATCH_STATE);
-                    }}
+                    BallOuttake => {
+                        self.channel.try_init_outk();
+                    }
+                    AbortIntake => {
+                        if self.channel.try_abort_intk() {
+                            self.goal = goal::GoalState::Hatch(
+                                goal::HatchGoalHeight::Low,
+                                hatch_hardware::CLOSED_HATCH_STATE,
+                            );
+                        }
+                    }
                 }
             }
             // process desired state
@@ -269,18 +276,23 @@ impl Subsystem for Superstructure {
                     self.elevator.set_goal(height.into());
                     // TODO log
                     self.hatch_hardware.set(ext_state.clone()).unwrap();
-                },
+                }
                 GoalState::Ball(goal_height) => {
                     // TODO log error
                     self.hatch_hardware.set_closed().unwrap();
                     self.channel.idempotent_start();
                     if self.channel.is_done() {
-                        self.goal = GoalState::Hatch(HatchGoalHeight::Low, hatch_hardware::CLOSED_HATCH_STATE);
+                        self.goal = GoalState::Hatch(
+                            HatchGoalHeight::Low,
+                            hatch_hardware::CLOSED_HATCH_STATE,
+                        );
                         self.channel.reset();
                     } else {
                         self.elevator.set_goal(goal_height.into());
                         // TODO log the two possible failures here
-                        self.channel.process_sensors(self.elevator.is_holding().unwrap_or(false)).unwrap();
+                        self.channel
+                            .process_sensors(self.elevator.is_holding().unwrap_or(false))
+                            .unwrap();
                     }
                 }
             }
@@ -296,7 +308,6 @@ impl Subsystem for Superstructure {
         }
     }
 }
-
 
 #[derive(Debug)]
 struct CachingTalon(TalonSRX, (ControlMode, f64, DemandType, f64));
