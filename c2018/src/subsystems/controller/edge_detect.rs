@@ -6,12 +6,14 @@ pub enum Edge {
 }
 
 impl Edge {
+    #[allow(dead_code)]
     pub fn falling(self) -> bool {
         self == Edge::Falling
     }
     pub fn rising(self) -> bool {
         self == Edge::Rising
     }
+    #[allow(dead_code)]
     pub fn flat(self) -> bool {
         self == Edge::Flat
     }
@@ -55,14 +57,17 @@ impl EdgeDetector {
         edge
     }
 
+    #[allow(dead_code)]
     pub fn falling(&mut self, new_value: bool) -> bool {
         self.get(new_value) == Edge::Falling
     }
 
+    #[allow(dead_code)]
     pub fn rising(&mut self, new_value: bool) -> bool {
         self.get(new_value) == Edge::Rising
     }
 
+    #[allow(dead_code)]
     pub fn flat(&mut self, new_value: bool) -> bool {
         self.get(new_value) == Edge::Flat
     }

@@ -1,4 +1,5 @@
 pub mod edge_detect;
+#[allow(dead_code)]
 pub mod xbox;
 
 use super::{
@@ -171,31 +172,38 @@ macro_rules! wrapper_fields {
     };
 }
 
-use edge_detect::{Edge, EdgeDetector};
-wrapper_fields! { EdgeWrapper,
-    low_gear,
-    quick_turn,
-    ball_intake,
-    abort_ball_intake,
-    outtake_ball,
-    ball_unjam,
-    hatch_extend,
-    hatch_outtake,
-    elevator_low,
-    elevator_med,
-    elevator_high,
-    elevator_cargo
-}
-
-impl<T: Controls> EdgeWrapper<T> {
-    pub fn throttle(&mut self) -> f64 {
-        self.c.throttle()
+#[allow(dead_code)]
+mod _wrapper {
+    use super::{
+        edge_detect::{Edge, EdgeDetector},
+        Controls,
+    };
+    wrapper_fields! { EdgeWrapper,
+        low_gear,
+        quick_turn,
+        ball_intake,
+        abort_ball_intake,
+        outtake_ball,
+        ball_unjam,
+        hatch_extend,
+        hatch_outtake,
+        elevator_low,
+        elevator_med,
+        elevator_high,
+        elevator_cargo
     }
 
-    pub fn wheel(&mut self) -> f64 {
-        self.c.wheel()
+    impl<T: Controls> EdgeWrapper<T> {
+        pub fn throttle(&mut self) -> f64 {
+            self.c.throttle()
+        }
+
+        pub fn wheel(&mut self) -> f64 {
+            self.c.wheel()
+        }
     }
 }
+use _wrapper::EdgeWrapper;
 
 // Implement this for a raw controller struct
 pub trait Controls {
