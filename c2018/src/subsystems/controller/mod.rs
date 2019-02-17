@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 pub mod edge_detect;
 pub mod xbox;
 
@@ -18,7 +17,7 @@ type Superstructure = Sender<superstructure::Instruction>;
 #[allow(dead_code)]
 #[derive(Debug)]
 pub struct Controller<'a, T: Controls> {
-    controls: T,
+    controls: EdgeWrapper<T>,
     cheesy: CheesyDrive,
     drive: Drive,
     superstructure: Superstructure,
@@ -33,7 +32,7 @@ impl<'a, T: Controls> Controller<'a, T> {
         ds: DriverStation<'a>,
     ) -> Self {
         Self {
-            controls,
+            controls: EdgeWrapper::new(controls),
             cheesy: CheesyDrive::new(),
             drive,
             superstructure,
@@ -44,105 +43,151 @@ impl<'a, T: Controls> Controller<'a, T> {
 
 impl<'a, T: Controls> Subsystem for Controller<'a, T> {
     fn run(mut self) {
-        let mut controls = self.controls;
         loop {
             self.ds.wait_for_data();
 
+            // TODO add logging to all this
+
             // DRIVE
-            let wheel = controls.wheel();
-            let throttle = controls.throttle();
-            let quick_turn = controls.quick_turn();
-            let high_gear = !controls.low_gear();
-            if high_gear {
-                self.drive.send(drive::Instruction::GearShift(Gear::High))
-            } else {
-                self.drive.send(drive::Instruction::GearShift(Gear::Low))
-            }
-            .expect("Channel disconnected: ");
+            let wheel = self.controls.wheel();
+            let throttle = self.controls.throttle();
+            let quick_turn = self.controls.quick_turn_raw();
+            let high_gear = !self.controls.low_gear_raw();
             // TODO user input
-            // let signal = self
-            //     .cheesy
-            //     .cheesy_drive(wheel, throttle, quick_turn, high_gear);
-            // self.drive
-            //     .send(drive::Instruction::Percentage(signal.l, signal.r))
-            //     .expect("Channel disconnected: ");
+            let signal = self
+                .cheesy
+                .cheesy_drive(wheel, throttle, quick_turn, high_gear);
+            self.drive
+                .send(drive::Instruction::Percentage(signal.l, signal.r))
+                .expect("Channel disconnected: ");
+            // TODO log
+            self.controls.low_gear().sig_send_val(
+                drive::Instruction::GearShift(Gear::Low),
+                drive::Instruction::GearShift(Gear::High),
+                |cmd| {self.drive.send(cmd).expect("DT disconnected");}
+            );
 
-            // // SUPERSTRUCTURE
-            // if controls.abort_ball_intake() {
-            //     self.superstructure
-            //         .send(superstructure::Instruction::AbortBallIntake)
-            //         .expect("Channel disconnected: ");
-            // } else if controls.begin_ball_intake() {
-            //     self.superstructure
-            //         .send(superstructure::Instruction::BeginBallIntake)
-            //         .expect("Channel disconnected: ");
-            // } else if controls.outtake_ball() {
-            //     self.superstructure
-            //         .send(superstructure::Instruction::BallOuttake)
-            //         .expect("Channel disconnected: ");
-            // }
+            // SUPERSTRUCTURE
 
-            // if controls.intake_hatch() {
-            //     self.superstructure
-            //         .send(superstructure::Instruction::HatchIntake)
-            //         .expect("Channel disconnected: ");
-            // } else if controls.outtake_hatch() {
-            //     self.superstructure
-            //         .send(superstructure::Instruction::HatchIntake)
-            //         .expect("Channel disconnected: ");
-            // }
-
-            // if controls.elevator_manual_override() {
-            //     let level = controls.elevator_override_level() * elevator::MAX;
-            //     self.superstructure
-            //         .send(superstructure::Instruction::SetElevatorHeight(level))
-            //         .expect("Channel disconnected: ");
-            // } else if controls.elevator_low() {
-            //     self.superstructure
-            //         .send(superstructure::Instruction::SetElevatorHeight(
-            //             elevator::LOW,
-            //         ))
-            //         .expect("Channel disconnected: ");
-            // } else if controls.elevator_mid_low() {
-            //     self.superstructure
-            //         .send(superstructure::Instruction::SetElevatorHeight(
-            //             elevator::MID_LOW,
-            //         ))
-            //         .expect("Channel disconnected: ");
-            // } else if controls.elevator_mid_high() {
-            //     self.superstructure
-            //         .send(superstructure::Instruction::SetElevatorHeight(
-            //             elevator::MID_HIGH,
-            //         ))
-            //         .expect("Channel disconnected: ");
-            // } else if controls.elevator_high() {
-            //     self.superstructure
-            //         .send(superstructure::Instruction::SetElevatorHeight(
-            //             elevator::HIGH,
-            //         ))
-            //         .expect("Channel disconnected: ");
-            // }
+            // TODO log
+            if self.controls.ball_intake().rising() {
+                self.superstructure.send(superstructure::Instruction::BallIntake).expect("SS disconnected");
+            }
+            if self.controls.abort_ball_intake().rising() {
+                self.superstructure.send(superstructure::Instruction::AbortIntake).expect("SS disconnected");
+            }
+            if self.controls.outtake_ball().rising() {
+                self.superstructure.send(superstructure::Instruction::BallOuttake).expect("SS disconnected");
+            }
+            self.controls.ball_unjam().sig_send(
+                |is_unjam| {self.superstructure.send(superstructure::Instruction::Unjam(is_unjam)).expect("SS disconnected");}
+            );
+            self.controls.hatch_extend().sig_send_val(
+                superstructure::Instruction::HatchExtend(superstructure::HatchPneumaticExt::Extended),
+                superstructure::Instruction::HatchExtend(superstructure::HatchPneumaticExt::Retracted),
+                |cmd| {self.superstructure.send(cmd).expect("SS disconnected");}
+            );
+            self.controls.hatch_outtake().sig_send_val(
+                superstructure::Instruction::HatchOuttake(superstructure::HatchPneumaticExt::Extended),
+                superstructure::Instruction::HatchOuttake(superstructure::HatchPneumaticExt::Retracted),
+                |cmd| {self.superstructure.send(cmd).expect("SS disconnected");}
+            );
+            if self.controls.elevator_low().rising() {
+                self.superstructure.send(superstructure::Instruction::SetElevatorHeight(superstructure::UserElevatorHeights::Low)).expect("SS disconnected");
+            }
+            if self.controls.elevator_med().rising() {
+                self.superstructure.send(superstructure::Instruction::SetElevatorHeight(superstructure::UserElevatorHeights::Med)).expect("SS disconnected");
+            }
+            if self.controls.elevator_high().rising() {
+                self.superstructure.send(superstructure::Instruction::SetElevatorHeight(superstructure::UserElevatorHeights::High)).expect("SS disconnected");
+            }
+            if self.controls.elevator_cargo().rising() {
+                self.superstructure.send(superstructure::Instruction::SetElevatorHeight(superstructure::UserElevatorHeights::Cargo)).expect("SS disconnected");
+            }
         }
     }
 }
 
+extern crate paste;
+macro_rules! wrapper_fields {
+    ($name:ident, $( $x:ident ),*) => {
+        #[derive(Debug)]
+        pub struct $name<T: Controls> {
+            c: T,
+        $(
+            $x: EdgeDetector,
+        )*
+        }
+
+        impl<T: Controls> $name<T> {
+            pub fn new(c: T) -> Self {
+                Self {
+                    c,
+                    $(
+                        $x: EdgeDetector::new(),
+                    )*
+                }
+            }
+
+            $(
+                pub fn $x (&mut self) -> Edge {
+                    self.$x.get(self.c.$x())
+                }
+            )*
+
+            paste::item! {
+                $(
+                    pub fn [<$x _raw>] (&mut self) -> bool {
+                        self.c.$x()
+                    }
+                )*
+            }
+        }
+    };
+}
+
+use edge_detect::{EdgeDetector, Edge};
+wrapper_fields! { EdgeWrapper,
+    low_gear,
+    quick_turn,
+    ball_intake,
+    abort_ball_intake,
+    outtake_ball,
+    ball_unjam,
+    hatch_extend,
+    hatch_outtake,
+    elevator_low,
+    elevator_med,
+    elevator_high,
+    elevator_cargo
+}
+
+impl<T: Controls> EdgeWrapper<T> {
+    pub fn throttle(&mut self) -> f64 {
+        self.c.throttle()
+    }
+
+    pub fn wheel(&mut self) -> f64 {
+        self.c.wheel()
+    }
+}
+
+// Implement this for a raw controller struct
 pub trait Controls {
     fn throttle(&mut self) -> f64;
     fn wheel(&mut self) -> f64;
     fn low_gear(&mut self) -> bool;
     fn quick_turn(&mut self) -> bool;
-    fn begin_ball_intake(&mut self) -> bool;
+    fn ball_intake(&mut self) -> bool;
     fn abort_ball_intake(&mut self) -> bool;
     fn outtake_ball(&mut self) -> bool;
-    fn intake_hatch(&mut self) -> bool;
-    fn outtake_hatch(&mut self) -> bool;
+    fn ball_unjam(&mut self) -> bool;
+    fn hatch_extend(&mut self) -> bool;
+    fn hatch_outtake(&mut self) -> bool;
     fn elevator_low(&mut self) -> bool;
-    fn elevator_mid_low(&mut self) -> bool;
-    fn elevator_mid_high(&mut self) -> bool;
+    fn elevator_med(&mut self) -> bool;
     fn elevator_high(&mut self) -> bool;
-    fn elevator_manual_override(&mut self) -> bool;
-    // Must be between 0 and 1
-    fn elevator_override_level(&mut self) -> f64;
+    fn elevator_cargo(&mut self) -> bool;
 }
 
 #[derive(Debug)]
@@ -186,7 +231,7 @@ impl<'a> Controls for StandardControls<'a> {
         get_button(&self.ds, self.right, 0)
     }
     //TODO: Bind these
-    fn begin_ball_intake(&mut self) -> bool {
+    fn ball_intake(&mut self) -> bool {
         false
     }
     fn abort_ball_intake(&mut self) -> bool {
@@ -195,30 +240,26 @@ impl<'a> Controls for StandardControls<'a> {
     fn outtake_ball(&mut self) -> bool {
         false
     }
-    fn intake_hatch(&mut self) -> bool {
+    fn ball_unjam(&mut self) -> bool {
         false
     }
-    fn outtake_hatch(&mut self) -> bool {
+    fn hatch_extend(&mut self) -> bool {
+        false
+    }
+    fn hatch_outtake(&mut self) -> bool {
         false
     }
     fn elevator_low(&mut self) -> bool {
         false
     }
-    fn elevator_mid_low(&mut self) -> bool {
-        false
-    }
-    fn elevator_mid_high(&mut self) -> bool {
+    fn elevator_med(&mut self) -> bool {
         false
     }
     fn elevator_high(&mut self) -> bool {
         false
     }
-    fn elevator_manual_override(&mut self) -> bool {
+    fn elevator_cargo(&mut self) -> bool {
         false
-    }
-    // Must be between 0 and 1
-    fn elevator_override_level(&mut self) -> f64 {
-        0.0
     }
 }
 fn get_button(ds: &DriverStation<'_>, port: JoystickPort, num: u8) -> bool {
