@@ -7,7 +7,7 @@ pub enum Edge {
 
 impl Edge {
     pub fn falling(self) -> bool {
-        self == Edge::FALLING
+        self == Edge::Falling
     }
     pub fn rising(self) -> bool {
         self == Edge::Rising
