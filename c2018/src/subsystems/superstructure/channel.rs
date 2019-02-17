@@ -42,7 +42,7 @@ impl Channel {
         use BallProgress::*;
         return match self.state {
             Intaking => {self.state = None; true}
-            x => {false},
+            _ => {false},
         }
     }
 
@@ -50,7 +50,7 @@ impl Channel {
         use BallProgress::*;
         return match self.state {
             CarriageSecure => {self.state = Outtaking(OUTK_TIME_TICKS); true}
-            x => {false},
+            _ => {false},
         }
     }
 
