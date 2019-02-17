@@ -14,17 +14,25 @@ use crossbeam_channel::unbounded;
 use std::thread;
 use subsystems::controller::*;
 use subsystems::drive::*;
+use subsystems::superstructure::*;
 
 fn main() {
     let bus = Bus::new(0);
     let (drive_send, drive_recv) = unbounded();
-    let (super_send, _super_recv) = unbounded();
+    let (super_send, super_recv) = unbounded();
     let base = RobotBase::new().unwrap();
 
     thread::spawn(move || {
         let drive = Drive::new(bus, drive_recv);
         println!("drive: {:?}", drive);
         drive.run();
+    });
+
+    thread::spawn(move || {
+        // TODO log
+        let sstruct = Superstructure::new(super_recv).unwrap();
+        println!("sstruct: {:?}", sstruct);
+        sstruct.run();
     });
 
     let lj = JoystickPort::new(0).unwrap();
@@ -34,7 +42,7 @@ fn main() {
 
     RobotBase::start_competition();
 
-    //NOTE: All new control bindings or functions should be added in subsystems/controller/mod.rs
+    // NOTE: All new control bindings or functions should be added in subsystems/controller/mod.rs
     let controller = Controller::new(controls, drive_send, super_send, base.make_ds());
     println!("controller: {:?}", controller);
     controller.run();
