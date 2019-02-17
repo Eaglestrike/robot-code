@@ -127,12 +127,6 @@ mod goal {
         Hatch(HatchGoalHeight, HatchState),
     }
 
-    #[derive(Debug, Clone, PartialEq, Eq)]
-    pub enum BallGoalState {
-        Move(BallGoalHeight),
-        Unjam,
-    }
-
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub enum BallGoalHeight {
         None,
