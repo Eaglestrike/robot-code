@@ -96,7 +96,7 @@ mod interface {
 
         pub fn into_ball(self) -> BallGoalHeight {
             match self {
-                UserElevatorHeights::Cargo => BallGoalHeight::Low,
+                UserElevatorHeights::Cargo => BallGoalHeight::Cargo,
                 UserElevatorHeights::Low => BallGoalHeight::Low,
                 UserElevatorHeights::Med => BallGoalHeight::Med,
                 UserElevatorHeights::High => BallGoalHeight::High,
