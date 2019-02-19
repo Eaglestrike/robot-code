@@ -130,12 +130,10 @@ impl Drive {
         // TODO log errors
         let mut l_mstr = TalonSRX::new(LEFT_MASTER);
         let mut l_slave = TalonSRX::new(LEFT_SLAVE);
-        l_mstr
-            .config_all(&DEFAULT_CONFIG, TALON_CFG_TO_MS)
-            .expect("Unable to configure right_master side!");
-        l_slave
-            .config_all(&DEFAULT_CONFIG, TALON_CFG_TO_MS)
-            .expect("Unable to configure right_master side!");
+        l_mstr.config_all(&DEFAULT_CONFIG, TALON_CFG_TO_MS).ok();
+        // .expect("Unable to configure left_master side!")
+        l_slave.config_all(&DEFAULT_CONFIG, TALON_CFG_TO_MS).ok();
+        // .expect("Unable to configure left_slave side!");
         l_slave
             .follow(&l_mstr, FollowerType::PercentOutput)
             .unwrap();
@@ -144,12 +142,10 @@ impl Drive {
 
         let mut r_mstr = TalonSRX::new(RIGHT_MASTER);
         let mut r_slave = TalonSRX::new(RIGHT_SLAVE);
-        r_mstr
-            .config_all(&DEFAULT_CONFIG, TALON_CFG_TO_MS)
-            .expect("Unable to configure right_master side!");
-        r_slave
-            .config_all(&DEFAULT_CONFIG, TALON_CFG_TO_MS)
-            .expect("Unable to configure right_master side!");
+        r_mstr.config_all(&DEFAULT_CONFIG, TALON_CFG_TO_MS).ok();
+        // .expect("Unable to configure right_master side!");
+        r_slave.config_all(&DEFAULT_CONFIG, TALON_CFG_TO_MS).ok();
+        // .expect("Unable to configure right_slave side!");
         r_slave
             .follow(&r_mstr, FollowerType::PercentOutput)
             .unwrap();
