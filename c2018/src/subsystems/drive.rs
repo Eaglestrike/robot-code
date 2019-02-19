@@ -54,8 +54,8 @@ pub struct Drive {
     r_mstr: TalonSRX,
     _l_slave: TalonSRX,
     _r_slave: TalonSRX,
-    #[debug_stub = "Opaque(AHRS)"]
-    ahrs: AHRS,
+    // #[debug_stub = "Opaque(AHRS)"]
+    // ahrs: AHRS,
     gear_shifter: Solenoid,
     receiver: Receiver<Instruction>,
     #[debug_stub = "Opaque(Bus<Pose>)"]
@@ -103,7 +103,8 @@ impl Drive {
 
     /// Generates the next pose from the previous pose and current gyro data
     fn generate_pose(&self, previous: &Pose) -> Pose {
-        let new_heading: f64 = self.ahrs.yaw().into();
+        // let new_heading: f64 = self.ahrs.yaw().into();
+        let new_heading = 0.0;
         let angle = (new_heading + previous.heading) / 2.0;
 
         //TODO log errors handling here
@@ -158,7 +159,7 @@ impl Drive {
             r_mstr,
             _l_slave: l_slave,
             _r_slave: r_slave,
-            ahrs: AHRS::from_spi_minutiae(wpilib::spi::Port::MXP, 500_000, 60),
+            // ahrs: AHRS::from_spi_minutiae(wpilib::spi::Port::MXP, 500_000, 60),
             // TODO log errors
             gear_shifter: Solenoid::new(shifter::SOLENOID_CHANNEL)
                 .expect("Unable to create gear shifter!"),
