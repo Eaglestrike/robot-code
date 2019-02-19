@@ -45,8 +45,9 @@ impl Elevator {
     pub const ZEROING_SPEED: si::MeterPerSecond<f64> = const_unit!(0.04);
     pub const MAX_HEIGHT: si::Meter<f64> = const_unit!(2.0);
     pub const MIN_HEIGHT: si::Meter<f64> = const_unit!(-0.02);
-    pub const MAX_HEIGHT_TICKS: i32 = 38000;
+    pub const MAX_HEIGHT_TICKS: i32 = 38500;
     pub const MIN_HEIGHT_TICKS: i32 = 100;
+    pub const TARGET_KF: f64 = 0.00010126582;
     pub const DT: si::Second<f64> = const_unit!(1. / 200.);
     pub const KP: si::VoltPerMeter<f64> = const_unit!(300.0);
     pub const KD: si::VoltSecondPerMeter<f64> = const_unit!(30.);
@@ -68,18 +69,18 @@ impl Elevator {
                     reverseSoftLimitEnable: true,
                     voltageCompSaturation: 12.0,
                     slot_0: SlotConfiguration {
-                        kP: 0.15,
-                        kI: 0.0,
-                        kD: 4.0,
-                        kF: 0.06,
-                        integralZone: 0,
+                        kP: 0.18,
+                        kI: 0.001,
+                        kD: 7.0,
+                        kF: 0.1,
+                        integralZone: 700,
                         allowableClosedloopError: 0,
-                        maxIntegralAccumulator: 0.0,
+                        maxIntegralAccumulator: 99999999.0,
                         closedLoopPeakOutput: 1.0,
                         closedLoopPeriod: 1,
                     },
                     motionCruiseVelocity: 12500,
-                    motionAcceleration: 27000,
+                    motionAcceleration: 25000,
                     motionProfileTrajectoryPeriod: 0,
                     closedloopRamp: 0.1,
                     openloopRamp: 0.1,
@@ -164,10 +165,10 @@ impl Elevator {
                 self.mt.set(
                     ControlMode::MotionMagic,
                     self.goal.into(),
-                    // DemandType::ArbitraryFeedForward,
-                    // GRAVITY_KF,
-                    DemandType::Neutral,
-                    0.0,
+                    DemandType::ArbitraryFeedForward,
+                    Self::TARGET_KF
+                        * (self.goal - ((Self::MAX_HEIGHT_TICKS - Self::MIN_HEIGHT_TICKS) / 2))
+                            as f64,
                 )?;
                 self.last_sent_sp = self.goal;
                 dbg!(self.mt.get_selected_sensor_position(0));
