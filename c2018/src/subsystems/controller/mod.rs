@@ -62,7 +62,7 @@ impl<'a, T: Controls> Subsystem for Controller<'a, T> {
             // TODO user input
             let signal = self
                 .cheesy
-                .cheesy_drive(wheel, throttle, quick_turn, high_gear);
+                .cheesy_drive(throttle, wheel, quick_turn, high_gear);
             self.drive
                 .send(DriveCmd::Percentage(signal.l, signal.r))
                 .expect("DT disconnected: ");
