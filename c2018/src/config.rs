@@ -45,33 +45,33 @@ pub mod drive {
     /// Gear shifter for the drive base.
     pub mod shifter {
         /// Gear shifter solenoid channel ID for high gear
-        pub const SOLENOID_CHANNEL: i32 = 0;
+        pub const SOLENOID_CHANNEL: i32 = 2;
         pub const HIGH_GEAR: bool = true; // TODO
     }
 }
 
 pub mod superstructure {
     // TODO find
-    pub const GATE1: i32 = -1;
-    pub const GATE2: i32 = -1;
-    pub const GATE3: i32 = -1;
+    pub const GATE1: i32 = 6;
+    pub const GATE2: i32 = 7;
+    pub const GATE3: i32 = 8;
 
     pub mod elevator {
         // todo IDS
-        pub const MASTER_TALON: i32 = -1;
-        pub const SLAVE_TALON1: i32 = -1;
-        pub const SLAVE_TALON2: i32 = -1;
-        pub const LIMIT_SWITCH: i32 = -1;
+        pub const MASTER_TALON: i32 = 13;
+        pub const SLAVE_TALON1: i32 = 4;
+        pub const SLAVE_TALON2: i32 = 6;
+        pub const LIMIT_SWITCH: i32 = 9;
     }
 
     // TODO ids
-    pub const INTAKE_SOLENOID: i32 = -1;
-    pub const CHANNEL_TALON: i32 = -1;
-    pub const OUTTAKE_TALON: i32 = -1;
+    pub const INTAKE_SOLENOID: i32 = 1;
+    pub const CHANNEL_TALON: i32 = 9;
+    pub const OUTTAKE_TALON: i32 = 11;
 
     pub mod hatch {
         // TODO set ids
-        pub const EXTEND_PNEUMATICS_ID: i32 = -1;
-        pub const OUTTAKE_PNEUMATICS_ID: i32 = -1;
+        pub const EXTEND_PNEUMATICS_ID: i32 = 7;
+        pub const OUTTAKE_PNEUMATICS_ID: i32 = 6;
     }
 }

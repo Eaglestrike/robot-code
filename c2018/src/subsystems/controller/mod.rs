@@ -252,47 +252,47 @@ impl<'a> StandardControls<'a> {
 }
 impl<'a> Controls for StandardControls<'a> {
     fn throttle(&mut self) -> f64 {
-        get_axis(&self.ds, self.left, self.y).into()
+        (-get_axis(&self.ds, self.left, self.y)).into()
     }
     fn wheel(&mut self) -> f64 {
         get_axis(&self.ds, self.right, self.x).into()
     }
     fn low_gear(&mut self) -> bool {
-        false
+        get_button(&self.ds, self.left, 0)
     }
     fn quick_turn(&mut self) -> bool {
         get_button(&self.ds, self.right, 0)
     }
     //TODO: Bind these
     fn ball_intake(&mut self) -> bool {
-        false
+        get_button(&self.ds, self.oi, 4)
     }
     fn abort_ball_intake(&mut self) -> bool {
-        false
+        get_button(&self.ds, self.oi, 6)
     }
     fn outtake_ball(&mut self) -> bool {
-        false
+        get_button(&self.ds, self.oi, 5)
     }
     fn ball_unjam(&mut self) -> bool {
-        false
+        get_button(&self.ds, self.oi, 8)
     }
     fn hatch_extend(&mut self) -> bool {
-        false
+        get_axis(&self.ds, self.oi, JoystickAxis::new(2).unwrap()) > 0.8
     }
     fn hatch_outtake(&mut self) -> bool {
-        false
+        get_axis(&self.ds, self.oi, JoystickAxis::new(3).unwrap()) > 0.8
     }
     fn elevator_low(&mut self) -> bool {
-        false
+        get_button(&self.ds, self.oi, 0)
     }
     fn elevator_med(&mut self) -> bool {
-        false
+        get_button(&self.ds, self.oi, 1)
     }
     fn elevator_high(&mut self) -> bool {
-        false
+        get_button(&self.ds, self.oi, 3)
     }
     fn elevator_cargo(&mut self) -> bool {
-        false
+        get_button(&self.ds, self.oi, 2)
     }
 }
 fn get_button(ds: &DriverStation<'_>, port: JoystickPort, num: u8) -> bool {
