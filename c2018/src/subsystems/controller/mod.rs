@@ -65,7 +65,7 @@ impl<'a, T: Controls> Subsystem for Controller<'a, T> {
                 .cheesy_drive(wheel, throttle, quick_turn, high_gear);
             self.drive
                 .send(DriveCmd::Percentage(signal.l, signal.r))
-                .expect("Channel disconnected: ");
+                .expect("DT disconnected: ");
             // TODO log
             self.controls.low_gear().sig_send_val(
                 DriveCmd::GearShift(Gear::Low),
