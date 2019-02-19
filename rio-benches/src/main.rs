@@ -1,14 +1,15 @@
 #![allow(unused_imports, dead_code)]
-#![feature(test)]
-
+#![cfg_attr(feature = "nightly", feature(test))]
 use std::thread;
 
 use crossbeam_channel::{bounded, Receiver, Sender};
+#[cfg(feature = "nightly")]
 extern crate test;
+#[cfg(feature = "nightly")]
 use test::Bencher;
 
 fn main() {
-    println!("Hello, world!");
+    println!("This is designed to run the test binary only!");
 }
 
 #[derive(Copy, Clone)]
@@ -50,6 +51,7 @@ impl MethodCommunicator {
 
 const ITERS: usize = 100;
 
+#[cfg(feature = "nightly")]
 #[bench]
 fn bench_iters_send_recv(b: &mut Bencher) {
     let (s1, r1) = bounded(1000);
@@ -86,4 +88,13 @@ fn bench_iters_send_recv(b: &mut Bencher) {
     t1.join().unwrap();
     t2.join().unwrap();
     t3.join().unwrap();
+}
+
+#[cfg(not(feature = "nightly"))]
+#[test]
+fn test_non_nightly() {
+    println!(
+        "Designed to compiled with nightly (use the nightly feature) and run on the rio
+    This is just so tests pass."
+    );
 }
