@@ -5,8 +5,7 @@ mod hatch_hardware;
 use hatch_hardware::HatchHardware;
 
 mod channel;
-mod elevator;
-use elevator::Elevator;
+use ctre_elevator_tuning::Elevator;
 
 #[derive(Debug, Clone)]
 pub struct PeriodicOuts {
@@ -136,16 +135,15 @@ mod goal {
         High,
     }
 
-    // TODO tune these heights
     impl Into<units::Meter<f64>> for BallGoalHeight {
         fn into(self) -> units::Meter<f64> {
             use BallGoalHeight::*;
             match self {
-                None => 0. * units::M,
-                Low => 0. * units::M,
-                Cargo => 0. * units::M,
-                Med => 0. * units::M,
-                High => 0. * units::M,
+                None => 1337.0 * ctre_elevator_tuning::METERS_PER_TICK,
+                Low => 7800.0 * ctre_elevator_tuning::METERS_PER_TICK,
+                Cargo => 17100.0 * ctre_elevator_tuning::METERS_PER_TICK,
+                Med => 2400.0 * ctre_elevator_tuning::METERS_PER_TICK,
+                High => 38500.0 * ctre_elevator_tuning::METERS_PER_TICK,
             }
         }
     }
@@ -156,14 +154,13 @@ mod goal {
         Med,
         High,
     }
-    // TODO tune these heights
     impl Into<units::Meter<f64>> for HatchGoalHeight {
         fn into(self) -> units::Meter<f64> {
             use HatchGoalHeight::*;
             match self {
-                Low => 0. * units::M,
-                Med => 0. * units::M,
-                High => 0. * units::M,
+                Low => 700.0 * ctre_elevator_tuning::METERS_PER_TICK,
+                Med => 17900.0 * ctre_elevator_tuning::METERS_PER_TICK,
+                High => 35100.0 * ctre_elevator_tuning::METERS_PER_TICK,
             }
         }
     }
@@ -196,7 +193,7 @@ impl Superstructure {
             unjam: unjam::UnjamState::Disabled,
             hatch_hardware: hatch_hardware::HatchHardware::new()?,
             channel: channel::Channel::new()?,
-            elevator: elevator::Elevator::new()?,
+            elevator: Elevator::new()?,
             im: CachingTalon::new(TalonSRX::new(config::CHANNEL_TALON)),
             is: CachingSolenoid::new(Solenoid::new(config::INTAKE_SOLENOID)?)?,
             om: CachingTalon::new(TalonSRX::new(config::OUTTAKE_TALON)),

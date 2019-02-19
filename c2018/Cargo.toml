@@ -19,6 +19,7 @@ paste = "0.1.4"
 serde = "1.0.84"
 serde_derive = "1.0.84"
 serde_cbor = "0.9.0"
+ctre-elevator-tuning = {path = "ctre-elevator-tuning"}
 
 [package.metadata.frc]
 rio-address = "10.1.14.2"

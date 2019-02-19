@@ -39,7 +39,7 @@ const COMPLETION_THRESHOLD_TICKS: i32 =
     (COMPLETION_THRESHOLD.value_unsafe / METERS_PER_TICK.value_unsafe) as i32; // value_unsafe because no const_fn yet.
 
 use std::f64::consts::PI;
-const METERS_PER_TICK: si::Meter<f64> = const_unit!(1.982 /*in*/ * 0.0254 * PI / 4096.0);
+pub const METERS_PER_TICK: si::Meter<f64> = const_unit!(1.982 /*in*/ * 0.0254 * PI / 4096.0);
 
 impl Elevator {
     pub const ZEROING_SPEED: si::MeterPerSecond<f64> = const_unit!(0.04);
