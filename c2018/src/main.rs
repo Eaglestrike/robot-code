@@ -11,12 +11,14 @@ use wpilib::RobotBase;
 
 use bus::Bus;
 use crossbeam_channel::unbounded;
+use std::env;
 use std::thread;
 use subsystems::controller::*;
 use subsystems::drive::*;
 use subsystems::superstructure::*;
 
 fn main() {
+    env::set_var("RUST_BACKTRACE", "1");
     let bus = Bus::new(0);
     let (drive_send, drive_recv) = unbounded();
     let (super_send, super_recv) = unbounded();
@@ -48,6 +50,6 @@ fn main() {
 
     // NOTE: All new control bindings or functions should be added in subsystems/controller/mod.rs
     let controller = Controller::new(controls, drive_send, super_send, base.make_ds());
-    println!("controller: {:?}", controller);
+    println!("controller: {:#?}", controller);
     controller.run();
 }
