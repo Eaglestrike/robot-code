@@ -1,4 +1,5 @@
 use crate::config::superstructure::elevator as config;
+use crate::OkPrint;
 use controls::const_unit;
 use controls::units as si;
 use controls::util::clamp;
@@ -23,7 +24,7 @@ pub struct Elevator {
     last_sent_sp: i32, // encoder ticks
 }
 
-const RECT_PROF_PID_IDX: i32 = 1;
+const RECT_PROF_PID_IDX: i32 = 0;
 const ZEROING_COMMAND: f64 = -0.02;
 // TODO tune these
 const GRAVITY_KF: f64 = 0.02;
@@ -82,7 +83,7 @@ impl Elevator {
                         // TODO log
                         self.mt
                             .set_selected_sensor_position(0, RECT_PROF_PID_IDX, 10)
-                            .unwrap();
+                            .ok_print();
                         // TOOD config soft limits
                         self.state = LoopState::Running;
                         self.set_goal(0.0 * si::M);

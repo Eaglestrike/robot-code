@@ -17,6 +17,22 @@ use subsystems::controller::*;
 use subsystems::drive::*;
 use subsystems::superstructure::*;
 
+#[macro_use]
+extern crate std;
+
+pub trait OkPrint {
+    fn ok_print(self);
+}
+
+impl<T, E: std::fmt::Debug> OkPrint for Result<T, E> {
+    fn ok_print(self) {
+        match self {
+            Err(e) => println!("ok_print at {}:{}:{}:{:?}", file!(), line!(), column!(), e),
+            Ok(_) => (),
+        }
+    }
+}
+
 fn main() {
     env::set_var("RUST_BACKTRACE", "1");
     let bus = Bus::new(0);
