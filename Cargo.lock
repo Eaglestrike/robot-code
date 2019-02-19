@@ -184,6 +184,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ctre-elevator-tuning"
+version = "0.1.0"
+dependencies = [
+ "controls 0.1.0",
+ "ctre 0.6.1 (git+https://github.com/Lytigas/ctre-rs.git?branch=2019-cargo)",
+ "wpilib 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "ctre-sys"
 version = "5.12.1"
 source = "git+https://github.com/Lytigas/ctre-rs.git?branch=2019-cargo#94c2fa82f270e64e364bdff7b2aeff384879bc8d"

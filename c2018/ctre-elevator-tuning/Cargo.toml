@@ -1,0 +1,23 @@
+[package]
+name = "ctre-elevator-tuning"
+version = "0.1.0"
+authors = ["Josh Hejna <josh.hejna@gmail.com>"]
+edition = "2018"
+
+[lib]
+name = "ctre_elevator_tuning"
+path = "src/lib.rs"
+
+[[bin]]
+name = "elevator-tuning"
+path = "src/main.rs"
+
+[dependencies]
+ctre = { git = "https://github.com/Lytigas/ctre-rs.git", branch = "2019-cargo" }
+wpilib = "0.4.0"
+controls = {path = "../../first-party/controls"}
+
+[package.metadata.frc]
+rio-address = "10.1.14.2"
+target-dir = "../../target"
+executable-name = "elevator-tuning"

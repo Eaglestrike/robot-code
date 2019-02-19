@@ -4,6 +4,7 @@ members = [
     "first-party/interp-map",
     "rio-benches",
     "c2018",
+    "c2018/ctre-elevator-tuning"
 ]
 
 [profile.dev]
