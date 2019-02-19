@@ -22,18 +22,22 @@ fn main() {
     let (super_send, super_recv) = unbounded();
     let base = RobotBase::new().unwrap();
 
-    thread::spawn(move || {
-        let drive = Drive::new(bus, drive_recv);
-        println!("drive: {:?}", drive);
-        drive.run();
-    });
+    thread::Builder::new()
+        .name("Drive".to_string())
+        .spawn(move || {
+            let drive = Drive::new(bus, drive_recv);
+            println!("drive: {:#?}", drive);
+            drive.run();
+        });
 
-    thread::spawn(move || {
-        // TODO log
-        let sstruct = Superstructure::new(super_recv).unwrap();
-        println!("sstruct: {:?}", sstruct);
-        sstruct.run();
-    });
+    thread::Builder::new()
+        .name("SStruct".to_string())
+        .spawn(move || {
+            // TODO log
+            let sstruct = Superstructure::new(super_recv).unwrap();
+            println!("sstruct: {:#?}", sstruct);
+            sstruct.run();
+        });
 
     let lj = JoystickPort::new(0).unwrap();
     let rj = JoystickPort::new(1).unwrap();
