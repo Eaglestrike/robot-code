@@ -264,7 +264,7 @@ impl Subsystem for Superstructure {
                 GoalState::Hatch(height, ext_state) => {
                     // TODO log
                     self.channel.process_sensors(false).unwrap();
-                    self.elevator.set_goal(height.into());
+                    outs.elev_pos = height.into();
                     // TODO log
                     self.hatch_hardware.set(ext_state.clone()).unwrap();
                 }
@@ -279,7 +279,7 @@ impl Subsystem for Superstructure {
                         );
                         self.channel.reset();
                     } else {
-                        self.elevator.set_goal(goal_height.into());
+                        outs.elev_pos = goal_height.into();
                         // TODO log the two possible failures here
                         self.channel
                             .process_sensors(self.elevator.is_holding().unwrap_or(false))
