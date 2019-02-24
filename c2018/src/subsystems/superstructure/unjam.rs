@@ -55,7 +55,7 @@ impl UnjamState {
             Reverse(_) => {
                 outs.intk_pct = -UNJAM_CHAN_COMMAND;
                 outs.outk_pct = -UNJAM_OUTK_COMMAND;
-                outs.intk_pnm = IntakeExt::Retr.into()
+                outs.intk_pnm = IntakeExt::Ext.into()
             }
         }
     }
