@@ -46,8 +46,9 @@ impl Elevator {
     pub const MAX_HEIGHT: si::Meter<f64> = const_unit!(2.0);
     pub const MIN_HEIGHT: si::Meter<f64> = const_unit!(-0.02);
     pub const MAX_HEIGHT_TICKS: i32 = 38500;
-    pub const MIN_HEIGHT_TICKS: i32 = 100;
-    pub const TARGET_KF: f64 = 0.00010126582;
+    pub const MIN_HEIGHT_TICKS: i32 = -1;
+    // pub const TARGET_KF: f64 = 0.00004;
+    pub const TARGET_KF: f64 = 0.0;
     pub const DT: si::Second<f64> = const_unit!(1. / 200.);
     pub const KP: si::VoltPerMeter<f64> = const_unit!(300.0);
     pub const KD: si::VoltSecondPerMeter<f64> = const_unit!(30.);
@@ -69,9 +70,9 @@ impl Elevator {
                     reverseSoftLimitEnable: true,
                     voltageCompSaturation: 12.0,
                     slot_0: SlotConfiguration {
-                        kP: 0.18,
-                        kI: 0.001,
-                        kD: 7.0,
+                        kP: 0.15,
+                        kI: 0.0,
+                        kD: 4.0,
                         kF: 0.1,
                         integralZone: 700,
                         allowableClosedloopError: 0,
@@ -80,7 +81,7 @@ impl Elevator {
                         closedLoopPeriod: 1,
                     },
                     motionCruiseVelocity: 12500,
-                    motionAcceleration: 25000,
+                    motionAcceleration: 10000,
                     motionProfileTrajectoryPeriod: 0,
                     closedloopRamp: 0.1,
                     openloopRamp: 0.1,
@@ -127,7 +128,6 @@ impl Elevator {
 
 impl Elevator {
     pub fn iterate(&mut self) -> ctre::Result<()> {
-        println!("{:?}", self.limit.get());
         match self.state {
             LoopState::Unitialized => {
                 // TODO handle
@@ -169,9 +169,12 @@ impl Elevator {
                     Self::TARGET_KF
                         * (self.goal - ((Self::MAX_HEIGHT_TICKS - Self::MIN_HEIGHT_TICKS) / 2))
                             as f64,
+                    // DemandType::Neutral,
+                    // 0.0,
                 )?;
                 self.last_sent_sp = self.goal;
-                dbg!(self.mt.get_selected_sensor_position(0));
+                // dbg!(self.mt.get_selected_sensor_position(0));
+                // dbg!(self.goal);
                 Ok(())
             }
         }
@@ -183,7 +186,7 @@ impl Elevator {
             Self::MIN_HEIGHT_TICKS,
             Self::MAX_HEIGHT_TICKS,
         );
-        dbg!(self.goal);
+        // dbg!(self.goal);
     }
 
     pub fn is_holding(&self) -> ctre::Result<bool> {
