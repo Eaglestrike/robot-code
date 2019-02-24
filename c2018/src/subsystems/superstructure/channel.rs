@@ -4,10 +4,10 @@ use super::PeriodicOuts;
 use wpilib::{dio::DigitalInput, HalResult};
 
 // TODO tune
-const CHAN_INTAKE_COMMAND: f64 = 1.0;
-const CHAN_CONVEY_COMMAND: f64 = 1.0;
+const CHAN_INTAKE_COMMAND: f64 = 0.8;
+const CHAN_CONVEY_COMMAND: f64 = 0.6;
 const CHAN_TRANSFER_COMMAND: f64 = 1.0;
-const OUTK_INTK_COMMAND: f64 = -0.5;
+const OUTK_INTK_COMMAND: f64 = 0.8;
 const OUTK_OUTK_COMMAND: f64 = 1.0;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -95,12 +95,13 @@ impl Channel {
     }
 
     pub fn process_sensors(&mut self, elev_ready: bool) -> Result<(), HalCtreError> {
+        dbg!(self.state);
         use BallProgress::*;
         // TODO add backwards transitions for unjam
         self.state = match self.state {
             None => None,
             Intaking => {
-                if self.gates.0.get()? {
+                if !self.gates.0.get()? {
                     Inside
                 } else {
                     Intaking
@@ -108,7 +109,7 @@ impl Channel {
             }
             // TODO should be handled here to be on the safer side?
             Inside => {
-                if self.gates.1.get()? {
+                if !self.gates.1.get()? {
                     Queued
                 } else {
                     Inside
@@ -122,7 +123,7 @@ impl Channel {
                 }
             }
             CarriageVolatile => {
-                if self.gates.2.get()? {
+                if !self.gates.2.get()? {
                     CarriageSecure
                 } else {
                     CarriageVolatile
@@ -171,7 +172,7 @@ impl Channel {
             }
             Outtaking(_) => {
                 outs.intk_pnm = IntakeExt::Retr.into();
-                outs.intk_pct = OUTK_OUTK_COMMAND;
+                outs.outk_pct = OUTK_OUTK_COMMAND;
             }
         }
     }
