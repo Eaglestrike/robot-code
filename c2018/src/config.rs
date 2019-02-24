@@ -52,9 +52,9 @@ pub mod drive {
 
 pub mod superstructure {
     // TODO find
-    pub const GATE1: i32 = 6;
-    pub const GATE2: i32 = 7;
-    pub const GATE3: i32 = 8;
+    pub const GATE1: i32 = 8;
+    pub const GATE2: i32 = 6;
+    pub const GATE3: i32 = 7;
 
     pub mod elevator {
         // todo IDS
