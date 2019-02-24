@@ -218,6 +218,7 @@ impl Subsystem for Superstructure {
     fn run(mut self) {
         use goal::*;
         loop {
+            std::thread::sleep(std::time::Duration::from_millis(5));
             let mut outs = PeriodicOuts::default();
             for msg in self.receiver.try_iter() {
                 use Instruction::*;
