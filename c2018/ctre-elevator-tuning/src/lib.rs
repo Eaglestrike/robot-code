@@ -30,6 +30,7 @@ pub struct Elevator {
     last_sent_sp: i32, // encoder ticks
 }
 
+// WARNING: Changing this constant requires alterations to many configs using enum variants
 const RECT_PROF_PID_IDX: i32 = 0;
 const ZEROING_COMMAND: f64 = -0.3;
 // TODO tune these
@@ -47,8 +48,6 @@ impl Elevator {
     pub const MIN_HEIGHT: si::Meter<f64> = const_unit!(-0.02);
     pub const MAX_HEIGHT_TICKS: i32 = 38500;
     pub const MIN_HEIGHT_TICKS: i32 = -1;
-    // pub const TARGET_KF: f64 = 0.00004;
-    pub const TARGET_KF: f64 = 0.0;
     pub const DT: si::Second<f64> = const_unit!(1. / 200.);
     pub const KP: si::VoltPerMeter<f64> = const_unit!(300.0);
     pub const KD: si::VoltSecondPerMeter<f64> = const_unit!(30.);
@@ -100,8 +99,11 @@ impl Elevator {
         mt.override_limit_switches_enable(true);
         mt.override_soft_limits_enable(false); // enabled after zeroing
         mt.enable_voltage_compensation(true);
-        mt.set_status_frame_period(StatusFrameEnhanced::Status_2_Feedback0, 10, 20);
-        mt.set_status_frame_period(StatusFrameEnhanced::Status_10_MotionMagic, 10, 20);
+
+        // these need to run at 200hz to guarantee response time for velocity queries for the friction feed-forward
+        mt.set_status_frame_period(StatusFrameEnhanced::Status_2_Feedback0, 5, 20);
+        mt.set_status_frame_period(StatusFrameEnhanced::Status_10_MotionMagic, 5, 20);
+        mt.set_status_frame_period(StatusFrameEnhanced::Status_3_Quadrature, 5, 20);
 
         mt.set_inverted(false);
         mt.set_sensor_phase(true);
@@ -162,15 +164,26 @@ impl Elevator {
                 }
             }
             LoopState::Running => {
+                // elevator hella stiff, esp stiction
+                let friction;
+                if self.is_holding().unwrap_or(true) {
+                    friction = 0.0;
+                } else {
+
+                let target_vel = self.mt.get_active_trajectory_velocity()?;
+                let vel = self.mt.get_selected_sensor_velocity(RECT_PROF_PID_IDX)?;
+                // fast way to ensure stiction is accounted for properly and the error is tiny
+                friction = calculate_friction(f64::from(vel) + f64::from(target_vel.signum()) * std::f64::EPSILON);
+                }
+
+
+                // TODO could need to account for the case where the profile has ended
+                const KFRICTION: f64 = 0.1;
                 self.mt.set(
                     ControlMode::MotionMagic,
                     self.goal.into(),
                     DemandType::ArbitraryFeedForward,
-                    Self::TARGET_KF
-                        * (self.goal - ((Self::MAX_HEIGHT_TICKS - Self::MIN_HEIGHT_TICKS) / 2))
-                            as f64,
-                    // DemandType::Neutral,
-                    // 0.0,
+                    KFRICTION * friction
                 )?;
                 self.last_sent_sp = self.goal;
                 // dbg!(self.mt.get_selected_sensor_position(0));
@@ -208,4 +221,73 @@ impl Elevator {
     pub fn state(&self) -> LoopState {
         self.state
     }
+}
+
+// Rembember to add a small epsilon of desired direction so static friction is properly handled.
+#[allow(non_upper_case_globals)]
+fn calculate_friction(v: f64) -> f64 {
+/*  // mathworks model
+    // https://www.mathworks.com/help/physmod/simscape/ref/translationalfriction.html
+    // actual constants
+    // const sqrt2e: f64 = f64::sqrt(2.0 * std::f64::consts::E); // unusable on stable rust
+    const sqrt2e: f64 = 2.33164398159712416003230828209780156612396240234375;
+
+    // tune-able constants
+    const Fbrk: f64 = 0.0; // sum of static and couloumbic friction, overcome from rest
+    const vbrk: f64 = 0.0; // velocity of peak stribek friction
+    const Fc: f64 = 0.0; // constant coloubmic friction force
+    const f: f64 = 0.0; // Viscous friction coefficient
+
+    // derived constants
+    // const vst: f64 = vbrk * f64::sqrt(2.0); // unusable on stable rust
+    const vst: f64 = vbrk * 1.4142135623730951454746218587388284504413604736328125;
+    const vcoul: f64 = vbrk / 10.0;
+
+    sqrt2e * (Fbrk - Fc) * f64::exp(-((v/vst).powi(2))) * (v / vst) + Fc * f64::tanh(v / vcoul) + f*v
+*/
+
+    // more directly-represneted stribeck curve
+    // http://www.mogi.bme.hu/TAMOP/robot_applications/ch07.html#ch-8.4.1.1 eqn 8.19
+    // https://www.desmos.com/calculator/w8zzkxw4nz for visualization
+
+    // tune-able consts
+    const Fs: f64 = 0.0; // static friction
+    const Fc: f64 = 0.0; // coulombic friction
+    const Fv: f64 = 0.0; // coeficcient of viscous friction
+    const vs: f64 = 0.0; // characteristic velocity of stribeck curve (curve tuning param)
+                         // dictates how fast Fs falls off to Fc in the Stribeck curve approximation
+
+    // Tuning procedure:
+    // 0. Tune the entire rest of the motion profile as best you can
+    // 1. Set vs to a start based on the velocity of the mechanism.
+    // My first guess is 2/3 of the velocity at which point things really start to get easier.
+    // Large values will more compensate for static friction at higher velocities.
+    // Since our elevator has problems with bearings being pressed too hard (probably forcing boundary lubrication)
+    // this will be high
+    // 2. Measure the motor command to overcome static friction. Set Fs to 1.0 and KFriction to the motor command.
+    // If you like, you could remove KFriction entirely, its just an extra gain.
+    // 3. Tweak vs until actual velocity no longer lags target velocity during initial acceleration
+    // 4. Tweak Fc to further reduce velocity lag at V_cruise
+    // You may want to reduce Kv during this process, as some of the gain from Fc was probably lumped in there to start with if you tuned right
+    // 5. Tweak Fv. This is very close to just another Kv, but it runs on the actual velocity, not the desired velocity.
+    // This may be able to make a noticeable difference. If you increase Kv from zero, decrease Ka and Kv, as again these two got lumped in there.
+    // 6. Re-tune Kv
+
+    // Alternative (preferred?) tuning procudure:
+    // Run the mechanism hooked up to a joystick with the friction compensator as the only feedforward. No feedback.
+    // Tune with the above procedure.
+    // The tuning criteria should be:
+    // 1. Change in output velocity should be responsive and proportional to a change in motor command
+    // 2. Relatively quick, but not particularly fast, velocity settling time
+    // 3. The above is true across all velocity ranges
+    // Tune any closed loop system with the friction compensator on.
+
+    // derived consts
+    const rvs: f64 = 1.0 / vs; // inverse to save divide cycles
+
+    v.signum()*(Fc + ((Fs - Fc)/(1.0 + v*rvs*v*rvs)) + Fv*v)
+}
+
+/*const*/ fn meters_per_second_to_ticks_per_100ms(v: si::MeterPerSecond<f64>) -> f64 {
+    *(v / METERS_PER_TICK * (0.1 * si::S /* / 1 100ms interval*/ ))
 }
