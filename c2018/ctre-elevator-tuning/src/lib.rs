@@ -28,18 +28,25 @@ pub struct Elevator {
     state: LoopState,
     goal: i32,         // encoder ticks
     last_sent_sp: i32, // encoder ticks
+    stage_track: StageTracker,
 }
 
 const RECT_PROF_PID_IDX: i32 = 0;
 const ZEROING_COMMAND: f64 = -0.3;
 // TODO tune these
-const GRAVITY_KF: f64 = 0.05;
 const COMPLETION_THRESHOLD: si::Meter<f64> = const_unit!(0.01);
 const COMPLETION_THRESHOLD_TICKS: i32 =
     (COMPLETION_THRESHOLD.value_unsafe / METERS_PER_TICK.value_unsafe) as i32; // value_unsafe because no const_fn yet.
 
 use std::f64::consts::PI;
 pub const METERS_PER_TICK: si::Meter<f64> = const_unit!(1.982 /*in*/ * 0.0254 * PI / 4096.0);
+
+const STAGE_ONE_SLOT_IDX: i32 = 0;
+const STAGE_TWO_SLOT_IDX: i32 = 1;
+
+const GRAVITY_KF: f64 = 0.10;
+const STAGE_ONE_FRICTION_FF: f64 = 0.12;
+const STAGE_TWO_FRICTION_FF: f64 = 0.19;
 
 impl Elevator {
     pub const ZEROING_SPEED: si::MeterPerSecond<f64> = const_unit!(0.04);
@@ -69,14 +76,27 @@ impl Elevator {
                     reverseSoftLimitThreshold: Self::MIN_HEIGHT_TICKS,
                     reverseSoftLimitEnable: true,
                     voltageCompSaturation: 12.0,
+                    // Stage one slot
                     slot_0: SlotConfiguration {
                         kP: 0.15,
                         kI: 0.0,
                         kD: 4.0,
-                        kF: 0.1,
-                        integralZone: 700,
+                        kF: 0.0,
+                        integralZone: 0,
                         allowableClosedloopError: 0,
-                        maxIntegralAccumulator: 99999999.0,
+                        maxIntegralAccumulator: 0.0,
+                        closedLoopPeakOutput: 1.0,
+                        closedLoopPeriod: 1,
+                    },
+                    // stage two slot (more rigid)
+                    slot_1: SlotConfiguration {
+                        kP: 0.19,
+                        kI: 0.0,
+                        kD: 1.0,
+                        kF: 0.0,
+                        integralZone: 0,
+                        allowableClosedloopError: 0,
+                        maxIntegralAccumulator: 0.0,
                         closedLoopPeakOutput: 1.0,
                         closedLoopPeriod: 1,
                     },
@@ -96,7 +116,7 @@ impl Elevator {
         )
         .expect("CONFIG ALL FAILED");
         mt.enable_current_limit(true);
-        mt.select_profile_slot(0, 0);
+        mt.select_profile_slot(STAGE_ONE_SLOT_IDX, RECT_PROF_PID_IDX);
         mt.override_limit_switches_enable(true);
         mt.override_soft_limits_enable(false); // enabled after zeroing
         mt.enable_voltage_compensation(true);
@@ -122,6 +142,7 @@ impl Elevator {
             state: LoopState::Unitialized,
             goal: std::i32::MIN, // ticks
             last_sent_sp: std::i32::MIN,
+            stage_track: StageTracker::zeroed(),
         })
     }
 }
@@ -154,6 +175,7 @@ impl Elevator {
                             .set_selected_sensor_position(0, RECT_PROF_PID_IDX, 10)
                             .expect("SELECTED SENSOR POSITION");
                         // .ok_print();
+                        self.stage_track = StageTracker::zeroed();
                         self.state = LoopState::Running;
                         self.mt.override_soft_limits_enable(true);
                         self.set_goal(0.0 * si::M);
@@ -162,15 +184,17 @@ impl Elevator {
                 }
             }
             LoopState::Running => {
+                let current_pos = self.mt.get_selected_sensor_position(RECT_PROF_PID_IDX)?;
+                self.stage_track.update(current_pos);
+                let err = self.mt.get_closed_loop_target(RECT_PROF_PID_IDX)? - current_pos;
+                let moving_stage = self.stage_track.moving_stage(err);
+                self.mt
+                    .select_profile_slot(moving_stage.slot_idx(), RECT_PROF_PID_IDX)?;
                 self.mt.set(
                     ControlMode::MotionMagic,
                     self.goal.into(),
                     DemandType::ArbitraryFeedForward,
-                    Self::TARGET_KF
-                        * (self.goal - ((Self::MAX_HEIGHT_TICKS - Self::MIN_HEIGHT_TICKS) / 2))
-                            as f64,
-                    // DemandType::Neutral,
-                    // 0.0,
+                    GRAVITY_KF + f64::from(err.signum()) * moving_stage.ff(),
                 )?;
                 self.last_sent_sp = self.goal;
                 // dbg!(self.mt.get_selected_sensor_position(0));
@@ -207,5 +231,82 @@ impl Elevator {
     #[allow(dead_code)]
     pub fn state(&self) -> LoopState {
         self.state
+    }
+}
+
+use controls;
+
+#[derive(Debug, Copy, Clone)]
+pub enum Stage {
+    One,
+    Two,
+}
+
+impl Stage {
+    pub fn slot_idx(self) -> i32 {
+        match self {
+            Stage::One => STAGE_ONE_SLOT_IDX,
+            Stage::Two => STAGE_TWO_SLOT_IDX,
+        }
+    }
+
+    pub fn ff(self) -> f64 {
+        match self {
+            Stage::One => STAGE_ONE_FRICTION_FF,
+            Stage::Two => STAGE_TWO_FRICTION_FF,
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct StageTracker {
+    stage_two_pos: i32,
+    old_pos_ticks: i32,
+}
+
+impl StageTracker {
+    // TODO tune
+    /// Read encoder value when both stages have hit their bottom hardstops
+    const LOWEST_POS_TICKS: i32 = 0;
+    /// Read encoder value when the second stage rests on the first, and the first stage contacts the top hardstop
+    const HIGHEST_POS_TICKS: i32 = 23000;
+
+    pub fn zeroed() -> Self {
+        Self {
+            stage_two_pos: 0,
+            old_pos_ticks: 0,
+        }
+    }
+
+    pub fn moving_stage(&self, direction: i32) -> Stage {
+        if self.at_top_limit() && direction > 0 {
+            Stage::Two
+        } else if self.at_bot_limit() && direction < 0 {
+            Stage::Two
+        } else {
+            Stage::One
+        }
+    }
+
+    fn at_top_limit(&self) -> bool {
+        self.stage_two_pos >= Self::HIGHEST_POS_TICKS
+    }
+    fn at_bot_limit(&self) -> bool {
+        self.stage_two_pos <= Self::LOWEST_POS_TICKS
+    }
+
+    pub fn stage_two_pos(&self) -> i32 {
+        self.stage_two_pos
+    }
+
+    pub fn update(&mut self, new_pos: i32) {
+        let delta = new_pos - self.old_pos_ticks;
+        self.stage_two_pos += delta;
+        self.stage_two_pos = controls::util::clamp(
+            self.stage_two_pos,
+            Self::LOWEST_POS_TICKS,
+            Self::HIGHEST_POS_TICKS,
+        );
+        self.old_pos_ticks = new_pos;
     }
 }
