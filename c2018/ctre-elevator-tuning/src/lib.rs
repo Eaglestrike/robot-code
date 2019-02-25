@@ -34,8 +34,8 @@ pub struct Elevator {
 const RECT_PROF_PID_IDX: i32 = 0;
 const ZEROING_COMMAND: f64 = -0.3;
 // TODO tune these
-const GRAVITY_KF: f64 = 0.05;
-const COMPLETION_THRESHOLD: si::Meter<f64> = const_unit!(0.01);
+const GRAVITY_KF: f64 = 0.10;
+const COMPLETION_THRESHOLD: si::Meter<f64> = const_unit!(0.003); // 3 mm
 const COMPLETION_THRESHOLD_TICKS: i32 =
     (COMPLETION_THRESHOLD.value_unsafe / METERS_PER_TICK.value_unsafe) as i32; // value_unsafe because no const_fn yet.
 
@@ -71,11 +71,11 @@ impl Elevator {
                     slot_0: SlotConfiguration {
                         kP: 0.15,
                         kI: 0.0,
-                        kD: 4.0,
-                        kF: 0.1,
+                        kD: 0.0,
+                        kF: 0.0,
                         integralZone: 700,
                         allowableClosedloopError: 0,
-                        maxIntegralAccumulator: 99999999.0,
+                        maxIntegralAccumulator: 0.0,
                         closedLoopPeakOutput: 1.0,
                         closedLoopPeriod: 1,
                     },
@@ -169,25 +169,25 @@ impl Elevator {
                 if self.is_holding().unwrap_or(true) {
                     friction = 0.0;
                 } else {
-
-                let target_vel = self.mt.get_active_trajectory_velocity()?;
-                let vel = self.mt.get_selected_sensor_velocity(RECT_PROF_PID_IDX)?;
-                // fast way to ensure stiction is accounted for properly and the error is tiny
-                friction = calculate_friction(f64::from(vel) + f64::from(target_vel.signum()) * std::f64::EPSILON);
+                    let target_direction = self.mt.get_closed_loop_error(RECT_PROF_PID_IDX)?;
+                    let vel = self.mt.get_selected_sensor_velocity(RECT_PROF_PID_IDX)?;
+                    // fast way to ensure stiction is accounted for properly and the error is tiny
+                    friction = calculate_friction(
+                        f64::from(vel) + f64::from(target_direction.signum()) * std::f64::EPSILON,
+                    );
                 }
 
-
                 // TODO could need to account for the case where the profile has ended
-                const KFRICTION: f64 = 0.1;
                 self.mt.set(
                     ControlMode::MotionMagic,
                     self.goal.into(),
                     DemandType::ArbitraryFeedForward,
-                    KFRICTION * friction
+                    KFRICTION * dbg!(friction) + GRAVITY_KF,
                 )?;
                 self.last_sent_sp = self.goal;
-                // dbg!(self.mt.get_selected_sensor_position(0));
-                // dbg!(self.goal);
+                dbg!(self.goal);
+                let err = self.mt.get_selected_sensor_position(0)? - self.goal;
+                dbg!(err);
                 Ok(())
             }
         }
@@ -200,6 +200,24 @@ impl Elevator {
             Self::MAX_HEIGHT_TICKS,
         );
         // dbg!(self.goal);
+    }
+
+    pub fn set_fff_cmd(&mut self, cmd: f64) -> ctre::Result<i32> {
+        let friction;
+        let vel = self.mt.get_selected_sensor_velocity(RECT_PROF_PID_IDX)?;
+        if controls::approx::abs_diff_eq!(cmd, 0.0, epsilon = 0.02) {
+            friction = 0.0;
+        } else {
+            // fast way to ensure stiction is accounted for properly and the error is tiny
+            friction = calculate_friction(f64::from(vel) + cmd.signum() * std::f64::EPSILON);
+        }
+        self.mt.set(
+            ControlMode::PercentOutput,
+            cmd,
+            DemandType::ArbitraryFeedForward,
+            dbg!(KFRICTION * friction) * 0.0 + GRAVITY_KF,
+        )?;
+        Ok(vel)
     }
 
     pub fn is_holding(&self) -> ctre::Result<bool> {
@@ -223,39 +241,40 @@ impl Elevator {
     }
 }
 
+const KFRICTION: f64 = 0.19;
 // Rembember to add a small epsilon of desired direction so static friction is properly handled.
 #[allow(non_upper_case_globals)]
 fn calculate_friction(v: f64) -> f64 {
-/*  // mathworks model
-    // https://www.mathworks.com/help/physmod/simscape/ref/translationalfriction.html
-    // actual constants
-    // const sqrt2e: f64 = f64::sqrt(2.0 * std::f64::consts::E); // unusable on stable rust
-    const sqrt2e: f64 = 2.33164398159712416003230828209780156612396240234375;
+    /*  // mathworks model
+        // https://www.mathworks.com/help/physmod/simscape/ref/translationalfriction.html
+        // actual constants
+        // const sqrt2e: f64 = f64::sqrt(2.0 * std::f64::consts::E); // unusable on stable rust
+        const sqrt2e: f64 = 2.33164398159712416003230828209780156612396240234375;
 
-    // tune-able constants
-    const Fbrk: f64 = 0.0; // sum of static and couloumbic friction, overcome from rest
-    const vbrk: f64 = 0.0; // velocity of peak stribek friction
-    const Fc: f64 = 0.0; // constant coloubmic friction force
-    const f: f64 = 0.0; // Viscous friction coefficient
+        // tune-able constants
+        const Fbrk: f64 = 0.0; // sum of static and couloumbic friction, overcome from rest
+        const vbrk: f64 = 0.0; // velocity of peak stribek friction
+        const Fc: f64 = 0.0; // constant coloubmic friction force
+        const f: f64 = 0.0; // Viscous friction coefficient
 
-    // derived constants
-    // const vst: f64 = vbrk * f64::sqrt(2.0); // unusable on stable rust
-    const vst: f64 = vbrk * 1.4142135623730951454746218587388284504413604736328125;
-    const vcoul: f64 = vbrk / 10.0;
+        // derived constants
+        // const vst: f64 = vbrk * f64::sqrt(2.0); // unusable on stable rust
+        const vst: f64 = vbrk * 1.4142135623730951454746218587388284504413604736328125;
+        const vcoul: f64 = vbrk / 10.0;
 
-    sqrt2e * (Fbrk - Fc) * f64::exp(-((v/vst).powi(2))) * (v / vst) + Fc * f64::tanh(v / vcoul) + f*v
-*/
+        sqrt2e * (Fbrk - Fc) * f64::exp(-((v/vst).powi(2))) * (v / vst) + Fc * f64::tanh(v / vcoul) + f*v
+    */
 
     // more directly-represneted stribeck curve
     // http://www.mogi.bme.hu/TAMOP/robot_applications/ch07.html#ch-8.4.1.1 eqn 8.19
     // https://www.desmos.com/calculator/w8zzkxw4nz for visualization
 
     // tune-able consts
-    const Fs: f64 = 0.0; // static friction
-    const Fc: f64 = 0.0; // coulombic friction
+    const Fs: f64 = 1.0; // static friction
+    const Fc: f64 = 0.2; // coulombic friction
     const Fv: f64 = 0.0; // coeficcient of viscous friction
-    const vs: f64 = 0.0; // characteristic velocity of stribeck curve (curve tuning param)
-                         // dictates how fast Fs falls off to Fc in the Stribeck curve approximation
+    const vs: f64 = 60.0; // characteristic velocity of stribeck curve (curve tuning param)
+                          // dictates how fast Fs falls off to Fc in the Stribeck curve approximation
 
     // Tuning procedure:
     // 0. Tune the entire rest of the motion profile as best you can
@@ -285,9 +304,10 @@ fn calculate_friction(v: f64) -> f64 {
     // derived consts
     const rvs: f64 = 1.0 / vs; // inverse to save divide cycles
 
-    v.signum()*(Fc + ((Fs - Fc)/(1.0 + v*rvs*v*rvs)) + Fv*v)
+    v.signum() * (Fc + ((Fs - Fc) / (1.0 + v * rvs * v * rvs)) + Fv * v)
 }
 
-/*const*/ fn meters_per_second_to_ticks_per_100ms(v: si::MeterPerSecond<f64>) -> f64 {
-    *(v / METERS_PER_TICK * (0.1 * si::S /* / 1 100ms interval*/ ))
+/*const*/
+fn meters_per_second_to_ticks_per_100ms(v: si::MeterPerSecond<f64>) -> f64 {
+    *(v / METERS_PER_TICK * (0.1 * si::S/* / 1 100ms interval*/))
 }
