@@ -9,7 +9,7 @@ name = "ctre_elevator_tuning"
 path = "src/lib.rs"
 
 [[bin]]
-name = "elevator-tuning"
+name = "gain-elevator-tuning"
 path = "src/main.rs"
 
 [dependencies]
@@ -20,4 +20,4 @@ controls = {path = "../../first-party/controls"}
 [package.metadata.frc]
 rio-address = "10.1.14.2"
 target-dir = "../../target"
-executable-name = "elevator-tuning"
+executable-name = "gain-elevator-tuning"

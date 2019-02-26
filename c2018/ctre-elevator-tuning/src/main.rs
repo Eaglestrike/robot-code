@@ -2,6 +2,9 @@ use wpilib::RobotBase;
 extern crate ctre_elevator_tuning;
 use ctre_elevator_tuning::Elevator;
 fn main() {
+    std::env::set_var("RUST_BACKTRACE", "1");
+    println!("TEST\nTEST\nTEST\nTEST\nTEST\nTEST\nTEST\nTEST\nTEST\n");
+
     let base = RobotBase::new().expect("HAL");
 
     let ds = base.make_ds();

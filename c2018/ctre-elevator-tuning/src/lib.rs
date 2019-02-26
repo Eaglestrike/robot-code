@@ -44,9 +44,9 @@ pub const METERS_PER_TICK: si::Meter<f64> = const_unit!(1.982 /*in*/ * 0.0254 * 
 const STAGE_ONE_SLOT_IDX: i32 = 0;
 const STAGE_TWO_SLOT_IDX: i32 = 1;
 
-const GRAVITY_KF: f64 = 0.10;
-const STAGE_ONE_FRICTION_FF: f64 = 0.12;
-const STAGE_TWO_FRICTION_FF: f64 = 0.19;
+const GRAVITY_KF: f64 = 0.08;
+const STAGE_ONE_FRICTION_FF: f64 = 0.06;
+const STAGE_TWO_FRICTION_FF: f64 = 0.09;
 
 impl Elevator {
     pub const ZEROING_SPEED: si::MeterPerSecond<f64> = const_unit!(0.04);
@@ -78,10 +78,10 @@ impl Elevator {
                     voltageCompSaturation: 12.0,
                     // Stage one slot
                     slot_0: SlotConfiguration {
-                        kP: 0.15,
+                        kP: 0.30,
                         kI: 0.0,
                         kD: 4.0,
-                        kF: 0.0,
+                        kF: 0.04,
                         integralZone: 0,
                         allowableClosedloopError: 0,
                         maxIntegralAccumulator: 0.0,
@@ -92,8 +92,8 @@ impl Elevator {
                     slot_1: SlotConfiguration {
                         kP: 0.19,
                         kI: 0.0,
-                        kD: 1.0,
-                        kF: 0.0,
+                        kD: 2.0,
+                        kF: 0.04,
                         integralZone: 0,
                         allowableClosedloopError: 0,
                         maxIntegralAccumulator: 0.0,
@@ -112,7 +112,7 @@ impl Elevator {
                 peakCurrentDuration: 200,
                 ..Default::default()
             },
-            100,
+            3000,
         )
         .expect("CONFIG ALL FAILED");
         mt.enable_current_limit(true);
@@ -172,13 +172,20 @@ impl Elevator {
                     Ok(false) => {
                         // TODO log
                         self.mt
-                            .set_selected_sensor_position(0, RECT_PROF_PID_IDX, 10)
+                            .set_selected_sensor_position(0, RECT_PROF_PID_IDX, 1000)
                             .expect("SELECTED SENSOR POSITION");
                         // .ok_print();
                         self.stage_track = StageTracker::zeroed();
                         self.state = LoopState::Running;
                         self.mt.override_soft_limits_enable(true);
                         self.set_goal(0.0 * si::M);
+                        // we need to set the mode so get_closed_loop_target works in the next cycle
+                        self.mt.set(
+                            ControlMode::MotionMagic,
+                            self.goal.into(),
+                            DemandType::Neutral,
+                            0.0,
+                        )?;
                         return self.iterate();
                     }
                 }
@@ -187,7 +194,9 @@ impl Elevator {
                 let current_pos = self.mt.get_selected_sensor_position(RECT_PROF_PID_IDX)?;
                 self.stage_track.update(current_pos);
                 let err = self.mt.get_closed_loop_target(RECT_PROF_PID_IDX)? - current_pos;
+                // dbg!(err);
                 let moving_stage = self.stage_track.moving_stage(err);
+                // dbg!(moving_stage);
                 self.mt
                     .select_profile_slot(moving_stage.slot_idx(), RECT_PROF_PID_IDX)?;
                 self.mt.set(
