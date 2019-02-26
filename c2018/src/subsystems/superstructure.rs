@@ -142,7 +142,7 @@ mod goal {
                 None => 1337.0 * ctre_elevator_tuning::METERS_PER_TICK,
                 Low => 7800.0 * ctre_elevator_tuning::METERS_PER_TICK,
                 Cargo => 17100.0 * ctre_elevator_tuning::METERS_PER_TICK,
-                Med => 2400.0 * ctre_elevator_tuning::METERS_PER_TICK,
+                Med => 24000.0 * ctre_elevator_tuning::METERS_PER_TICK,
                 High => 38500.0 * ctre_elevator_tuning::METERS_PER_TICK,
             }
         }
