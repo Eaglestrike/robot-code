@@ -106,9 +106,9 @@ mod interface {
     pub enum Instruction {
         SetElevatorHeight(UserElevatorHeights),
         Unjam(bool),
-        BallOuttake,
-        BallIntake,
-        AbortIntake,
+        BallOuttake(bool),
+        BallIntake(bool),
+        ForceAbortBall,
         HatchExtend(HatchPneumaticExt),
         HatchOuttake(HatchPneumaticExt),
     }
@@ -236,7 +236,15 @@ impl Subsystem for Superstructure {
                         _ => (),
                     },
                     Unjam(x) => self.unjam.set_enabled(x),
-                    BallIntake => self.goal = GoalState::Ball(BallGoalHeight::None),
+                    BallIntake(true) => self.goal = GoalState::Ball(BallGoalHeight::None),
+                    BallIntake(false) => {
+                        if self.channel.try_abort_intk() {
+                            self.goal = GoalState::Hatch(
+                                HatchGoalHeight::Low,
+                                hatch_hardware::CLOSED_HATCH_STATE,
+                            );
+                        }
+                    }
                     SetElevatorHeight(wanted) => match self.goal {
                         GoalState::Hatch(ref mut height, _) => {
                             *height = wanted.into_hatch();
@@ -247,16 +255,18 @@ impl Subsystem for Superstructure {
                             }
                         }
                     },
-                    BallOuttake => {
+                    BallOuttake(true) => {
                         self.channel.try_init_outk();
                     }
-                    AbortIntake => {
-                        if self.channel.try_abort_intk() {
-                            self.goal = goal::GoalState::Hatch(
-                                goal::HatchGoalHeight::Low,
-                                hatch_hardware::CLOSED_HATCH_STATE,
-                            );
-                        }
+                    BallOuttake(false) => {
+                        self.channel.try_stop_outk();
+                    }
+                    ForceAbortBall => {
+                        self.channel.force_abort();
+                        self.goal = GoalState::Hatch(
+                            HatchGoalHeight::Low,
+                            hatch_hardware::CLOSED_HATCH_STATE,
+                        );
                     }
                 }
             }

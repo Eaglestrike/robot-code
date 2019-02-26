@@ -78,21 +78,22 @@ impl<'a, T: Controls> Subsystem for Controller<'a, T> {
             // SUPERSTRUCTURE
 
             // TODO log
-            if self.controls.ball_intake().rising() {
-                self.superstructure
-                    .send(SsCmd::BallIntake)
-                    .expect("SS disconnected");
-            }
             if self.controls.abort_ball_intake().rising() {
                 self.superstructure
-                    .send(SsCmd::AbortIntake)
+                    .send(SsCmd::ForceAbortBall)
                     .expect("SS disconnected");
             }
-            if self.controls.outtake_ball().rising() {
+            self.controls.ball_intake().sig_send(|is_intk| {
+                println!("SENT {}", is_intk);
                 self.superstructure
-                    .send(SsCmd::BallOuttake)
+                    .send(SsCmd::BallIntake(is_intk))
                     .expect("SS disconnected");
-            }
+            });
+            self.controls.outtake_ball().sig_send(|is_outk| {
+                self.superstructure
+                    .send(SsCmd::BallOuttake(is_outk))
+                    .expect("SS disconnected");
+            });
             self.controls.ball_unjam().sig_send(|is_unjam| {
                 self.superstructure
                     .send(SsCmd::Unjam(is_unjam))

@@ -18,7 +18,7 @@ pub enum BallProgress {
     Queued,
     CarriageVolatile,
     CarriageSecure,
-    Outtaking(u16),
+    Outtaking,
     Done,
 }
 
@@ -27,8 +27,6 @@ pub struct Channel {
     state: BallProgress,
     gates: (DigitalInput, DigitalInput, DigitalInput),
 }
-
-const OUTK_TIME_TICKS: u16 = 200;
 
 use crate::config::superstructure::{GATE1, GATE2, GATE3};
 impl Channel {
@@ -58,7 +56,18 @@ impl Channel {
         use BallProgress::*;
         return match self.state {
             CarriageSecure => {
-                self.state = Outtaking(OUTK_TIME_TICKS);
+                self.state = Outtaking;
+                true
+            }
+            _ => false,
+        };
+    }
+
+    pub fn try_stop_outk(&mut self) -> bool {
+        use BallProgress::*;
+        return match self.state {
+            Outtaking => {
+                self.state = Done;
                 true
             }
             _ => false,
@@ -89,13 +98,17 @@ impl Channel {
 
     pub fn is_in_carriage(&self) -> bool {
         match self.state {
-            BallProgress::CarriageSecure | BallProgress::Outtaking(_) => true,
+            BallProgress::CarriageSecure | BallProgress::Outtaking => true,
             _ => false,
         }
     }
 
+    pub fn force_abort(&mut self) {
+        self.state = BallProgress::None;
+    }
+
     pub fn process_sensors(&mut self, elev_ready: bool) -> Result<(), HalCtreError> {
-        dbg!(self.state);
+        // dbg!(self.state);
         use BallProgress::*;
         // TODO add backwards transitions for unjam
         self.state = match self.state {
@@ -130,13 +143,7 @@ impl Channel {
                 }
             }
             CarriageSecure => CarriageSecure,
-            Outtaking(ticks) => {
-                if ticks > 0 {
-                    Outtaking(ticks - 1)
-                } else {
-                    Done
-                }
-            }
+            Outtaking => Outtaking,
             Done => Done,
         };
         Ok(())
@@ -170,7 +177,7 @@ impl Channel {
                 outs.intk_pnm = IntakeExt::Retr.into();
                 outs.intk_pct = 0.0;
             }
-            Outtaking(_) => {
+            Outtaking => {
                 outs.intk_pnm = IntakeExt::Retr.into();
                 outs.outk_pct = OUTK_OUTK_COMMAND;
             }
