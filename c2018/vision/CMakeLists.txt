@@ -1,5 +1,5 @@
 project(c2019-vision)
-add_subdirectory(cam-calibration/interactive-calibration)
+# add_subdirectory(cam-calibration/interactive-calibration)
 
 find_package( OpenCV 3.3 REQUIRED )
 

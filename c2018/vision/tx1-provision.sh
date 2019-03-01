@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -x
+set -ex
 
 VISION_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
@@ -13,9 +13,10 @@ sudo apt remove popularity-contest
 sudo systemctl stop apt-daily.timer
 sudo systemctl disable apt-daily.timer
 sudo systemctl disable apt-daily.service
-sudo systemctl stop apt-daily-upgrade.timer
-sudo systemctl disable apt-daily-upgrade.timer
-sudo systemctl disable apt-daily-upgrade.service
+# These seem to not work
+# sudo systemctl stop apt-daily-upgrade.timer
+# sudo systemctl disable apt-daily-upgrade.timer
+# sudo systemctl disable apt-daily-upgrade.service
 
 sudo dpkg-reconfigure -plow unattended-upgrades
 # sudo apt purge update-manager-core # requires internet
@@ -34,10 +35,11 @@ sudo cp frc-cams-j120-tx1-firmware-3.0.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules && sudo udevadm trigger
 
 # Build code
+sudo apt install base-devel cmake g++
 cd ../..
 mkdir -p build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
-make del-mar-cams
+make -j3 del-mar-cams
 cd $VISION_DIR
 cp bin/del-mar-cams /home/nvidia/
 

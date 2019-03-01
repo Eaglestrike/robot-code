@@ -54,6 +54,9 @@ set(uv_linux_src
 add_library(wpiutil ${wpiutil_native_src} ${uv_native_src} ${wpiutil_resources_src})
 set_target_properties(wpiutil PROPERTIES DEBUG_POSTFIX "d")
 
+# to support jetson compile
+target_compile_options(wpiutil PRIVATE -Wno-error)
+
 set_property(TARGET wpiutil PROPERTY FOLDER "libraries")
 
 if(NOT MSVC)
