@@ -44,7 +44,7 @@ cd $VISION_DIR
 cp bin/del-mar-cams /home/nvidia/
 
 # Configure autostart
-cp del-mar-cams.service /etc/systemd/system
+sudo cp del-mar-cams.service /etc/systemd/system/
 sudo systemctl start del-mar-cams
 sudo systemctl enable del-mar-cams
 

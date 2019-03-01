@@ -1,9 +1,11 @@
 #include "config.hpp"
 #include "mjpeg_stream.hpp"
 
+#include <chrono>
 #include <cscore_oo.h>
 #include <iomanip>
 #include <iostream>
+#include <thread>
 #include <unistd.h>
 #include <wpi/raw_ostream.h>
 
@@ -40,5 +42,7 @@ int main(int argc, char **argv)
         cs::RawEvent::kTelemetryUpdated, false, &status);
     cs::SetTelemetryPeriod(2.5);
 #endif
-    std::getchar();
+    for (;;) {
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+    }
 }
