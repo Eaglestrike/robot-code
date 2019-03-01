@@ -3,6 +3,7 @@
 #define DEBUG
 
 #include <string>
+#include <wpi/Twine.h>
 
 namespace team114
 {
@@ -11,8 +12,8 @@ namespace c2019
 namespace vision
 {
 
-const int CAM_FORWARD_ID = 0;
-const int CAM_REVERSE_ID = 1;
+const wpi::Twine CAM_FORWARD_ID("/dev/frc/videoforward");
+const wpi::Twine CAM_REVERSE_ID("/dev/frc/videoreverse");
 
 const int MJPEG_FORWARD_PORT = 5808;
 const int MJPEG_REVERSE_PORT = 5809;
