@@ -1,2 +1,2 @@
-KERNEL=="video0", SYMLINK="videodummy0", TAG+="systemd"
-KERNEL=="video1", SYMLINK="videodummy1", TAG+="systemd"
+KERNEL=="video0", SYMLINK+="videodummy0", TAG+="systemd"
+KERNEL=="video1", SYMLINK+="videodummy1", TAG+="systemd"
