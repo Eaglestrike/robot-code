@@ -1,2 +1,2 @@
-SUBSYSTEM=="usb", KERNEL=="2-2", ATTR{idVendor}=="05a3", ATTR{idProduct}=="9210", SYMLINK+="frc/videoforward"
-SUBSYSTEM=="usb", KERNEL=="2-1", ATTR{idVendor}=="05a3", ATTR{idProduct}=="9210", SYMLINK+="frc/videoreverse"
+SUBSYSTEM=="usb", KERNEL=="2-2", ATTR{idVendor}=="05a3", ATTR{idProduct}=="9210", NAME="videoforward"
+SUBSYSTEM=="usb", KERNEL=="2-1", ATTR{idVendor}=="05a3", ATTR{idProduct}=="9210", NAME="videoreverse"
