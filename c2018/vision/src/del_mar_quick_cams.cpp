@@ -39,4 +39,5 @@ int main(int argc, char **argv)
         cs::RawEvent::kTelemetryUpdated, false, &status);
     cs::SetTelemetryPeriod(2.5);
 #endif
+    std::getchar();
 }
