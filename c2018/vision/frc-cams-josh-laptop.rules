@@ -1,2 +1,0 @@
-SUBSYSTEM=="usb", KERNEL=="2-2", ATTR{idVendor}=="05a3", ATTR{idProduct}=="9210", SYMLINK+="videoforward"
-SUBSYSTEM=="usb", KERNEL=="2-1", ATTR{idVendor}=="05a3", ATTR{idProduct}=="9210", SYMLINK+="videoreverse"

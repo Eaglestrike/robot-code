@@ -1,7 +1,7 @@
 [Unit]
 Description=Del Mar Cams
 After=network.target systemd-udevd.service
-Wants=dev-videoforward.device dev-videoreverse.device
+Wants=dev-video0.device dev-video1.device
 # Could add more dependencies, like bindsTo, but we want to keep running if at all possible
 
 [Service]

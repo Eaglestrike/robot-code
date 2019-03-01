@@ -17,24 +17,6 @@ int main(int argc, char **argv)
     for (const auto &addr : cs::GetNetworkInterfaces())
         wpi::outs() << "  " << addr << '\n';
 
-    // char buf[512];
-    // static_assert(sizeof(buf) == 512, "MISMATCHED SIZEOF");
-    // memset(buf, 0, sizeof(buf));
-    // int count = readlink(CAM_FORWARD_ID.c_str(), buf, sizeof(buf) - 1);
-    // if (count <= 0) {
-    //     wpi::outs() << "Could not resolve link to " << CAM_FORWARD_ID << '\n';
-    //     return 1;
-    // }
-    // std::string camForwardResolved(buf);
-
-    // memset(buf, 0, sizeof(buf));
-    // count = readlink(CAM_REVERSE_ID.c_str(), buf, sizeof(buf) - 1);
-    // if (count <= 0) {
-    //     wpi::outs() << "Could not resolve link to " << CAM_REVERSE_ID << '\n';
-    //     return 1;
-    // }
-    // std::string camReverseResolved(buf);
-
     UsbCamera fcam{"ForwardCamera", CAM_FORWARD_ID};
     fcam.SetVideoMode(cs::VideoMode::kMJPEG, MJPEG_WIDTH, MJPEG_HEIGHT, MJPEG_FPS);
     cs::MjpegServer fMjpegServer{"ForwardHTTPMjpeg", MJPEG_FORWARD_PORT};
