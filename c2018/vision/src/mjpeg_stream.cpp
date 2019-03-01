@@ -17,7 +17,7 @@ void create_server(std::string name, int cam_id)
         wpi::outs() << "  " << addr << '\n';
     UsbCamera camera{name, cam_id};
     camera.SetVideoMode(cs::VideoMode::kMJPEG, MJPEG_WIDTH, MJPEG_HEIGHT, MJPEG_FPS);
-    cs::MjpegServer mjpegServer{"httpserver", MJPEG_PORT};
+    cs::MjpegServer mjpegServer{"httpserver", MJPEG_FORWARD_PORT};
     mjpegServer.SetSource(camera);
     mjpegServer.SetFPS(MJPEG_FPS);
 

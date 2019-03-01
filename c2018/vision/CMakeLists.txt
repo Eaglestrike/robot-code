@@ -5,15 +5,23 @@ find_package( OpenCV 3.3 REQUIRED )
 
 
 
-file(GLOB_RECURSE c2019_vision_src src/*.cpp)
+include_directories(${OpenCV_INCLUDE_DIRS})
 
-add_executable(c2019-vision ${c2019_vision_src})
+add_executable(c2019-vision src/main src/mjpeg_stream.cpp)
 target_link_libraries(c2019-vision ${OpenCV_LIBS})
 target_link_libraries(c2019-vision cscore)
-include_directories(${OpenCV_INCLUDE_DIRS})
 target_link_libraries(c2019-vision copcomp)
 
 set_target_properties(c2019-vision
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin"
+)
+
+add_executable(del-mar-cams src/del_mar_quick_cams.cpp)
+target_link_libraries(del-mar-cams ${OpenCV_LIBS})
+target_link_libraries(del-mar-cams cscore)
+
+set_target_properties(del-mar-cams
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin"
 )

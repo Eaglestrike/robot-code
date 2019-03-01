@@ -1,0 +1,2 @@
+SUBSYSTEM=="usb", KERNEL=="1-3", ATTR{idVendor}=="05a3", ATTR{idProduct}=="9210", SYMLINK+="frc/videoforward" TAG+="systemd"
+SUBSYSTEM=="usb", KERNEL=="1-4", ATTR{idVendor}=="05a3", ATTR{idProduct}=="9210", SYMLINK+="frc/videoreverse" TAG+="systemd"
