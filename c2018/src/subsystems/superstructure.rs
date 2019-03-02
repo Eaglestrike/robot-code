@@ -283,14 +283,14 @@ impl Subsystem for Superstructure {
             match self.goal.clone() {
                 GoalState::Hatch(height, ext_state) => {
                     // TODO log
-                    self.channel.process_sensors(false).unwrap();
+                    self.channel.process_sensors(false).ok();
                     outs.elev_pos = height.into();
                     // TODO log
-                    self.hatch_hardware.set(ext_state.clone()).unwrap();
+                    self.hatch_hardware.set(ext_state.clone()).ok();
                 }
                 GoalState::Ball(goal_height) => {
                     // TODO log error
-                    self.hatch_hardware.set_closed().unwrap();
+                    self.hatch_hardware.set_closed().ok();
                     self.channel.idempotent_start();
                     if self.channel.is_done() {
                         self.goal = GoalState::Hatch(
@@ -303,19 +303,19 @@ impl Subsystem for Superstructure {
                         // TODO log the two possible failures here
                         self.channel
                             .process_sensors(self.elevator.is_holding().unwrap_or(false))
-                            .unwrap();
+                            .ok();
                     }
                 }
             }
             // TODO log
-            self.elevator.iterate().unwrap();
+            self.elevator.iterate().ok();
 
             self.channel.write_outs(&mut outs);
             // Unjam gets to override everyone else
             self.unjam.process();
             self.unjam.write_outs(&mut outs);
             // TODO log
-            self.flush_outs(&outs).unwrap();
+            self.flush_outs(&outs).ok();
         }
     }
 }
