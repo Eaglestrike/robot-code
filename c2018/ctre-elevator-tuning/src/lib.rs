@@ -44,9 +44,9 @@ pub const METERS_PER_TICK: si::Meter<f64> = const_unit!(1.982 /*in*/ * 0.0254 * 
 const STAGE_ONE_SLOT_IDX: i32 = 0;
 const STAGE_TWO_SLOT_IDX: i32 = 1;
 
-const GRAVITY_KF: f64 = 0.08;
-const STAGE_ONE_FRICTION_FF: f64 = 0.06;
-const STAGE_TWO_FRICTION_FF: f64 = 0.09;
+const GRAVITY_KF: f64 = 0.06;
+const STAGE_ONE_FRICTION_FF: f64 = 0.05;
+const STAGE_TWO_FRICTION_FF: f64 = 0.07;
 
 impl Elevator {
     pub const ZEROING_SPEED: si::MeterPerSecond<f64> = const_unit!(0.04);
@@ -78,7 +78,7 @@ impl Elevator {
                     voltageCompSaturation: 12.0,
                     // Stage one slot
                     slot_0: SlotConfiguration {
-                        kP: 0.30,
+                        kP: 0.18,
                         kI: 0.0,
                         kD: 4.0,
                         kF: 0.04,
@@ -90,7 +90,7 @@ impl Elevator {
                     },
                     // stage two slot (more rigid)
                     slot_1: SlotConfiguration {
-                        kP: 0.19,
+                        kP: 0.23,
                         kI: 0.0,
                         kD: 2.0,
                         kF: 0.04,

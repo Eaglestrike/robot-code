@@ -139,11 +139,11 @@ mod goal {
         fn into(self) -> units::Meter<f64> {
             use BallGoalHeight::*;
             match self {
-                None => 1337.0 * ctre_elevator_tuning::METERS_PER_TICK,
-                Low => 7800.0 * ctre_elevator_tuning::METERS_PER_TICK,
-                Cargo => 17100.0 * ctre_elevator_tuning::METERS_PER_TICK,
-                Med => 24000.0 * ctre_elevator_tuning::METERS_PER_TICK,
-                High => 38500.0 * ctre_elevator_tuning::METERS_PER_TICK,
+                None => 1337.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M,
+                Low => 7800.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M,
+                Cargo => 17100.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M,
+                Med => 24000.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M,
+                High => 38500.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M,
             }
         }
     }
@@ -158,9 +158,18 @@ mod goal {
         fn into(self) -> units::Meter<f64> {
             use HatchGoalHeight::*;
             match self {
-                Low => 700.0 * ctre_elevator_tuning::METERS_PER_TICK,
-                Med => 17900.0 * ctre_elevator_tuning::METERS_PER_TICK,
-                High => 35100.0 * ctre_elevator_tuning::METERS_PER_TICK,
+                Low => {
+                    700.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M
+                        + 0.216 * units::M
+                }
+                Med => {
+                    17900.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M
+                        + 0.216 * units::M
+                }
+                High => {
+                    35100.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M
+                        + 0.216 * units::M
+                }
             }
         }
     }
