@@ -40,12 +40,17 @@ cd ../..
 mkdir -p build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j3 del-mar-cams
+set +e
+sudo systemctl stop del-mar-cams.service
+set -e
 cd $VISION_DIR
 cp bin/del-mar-cams /home/nvidia/
+set +e
+sudo systemctl start del-mar-cams
+set -e
 
 # Configure autostart
 sudo cp del-mar-cams.service /etc/systemd/system/
-sudo systemctl start del-mar-cams
 sudo systemctl enable del-mar-cams
 
 # Configure static IP
