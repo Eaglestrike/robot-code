@@ -34,7 +34,7 @@ pub struct Elevator {
 const RECT_PROF_PID_IDX: i32 = 0;
 const ZEROING_COMMAND: f64 = -0.3;
 // TODO tune these
-const COMPLETION_THRESHOLD: si::Meter<f64> = const_unit!(0.01);
+const COMPLETION_THRESHOLD: si::Meter<f64> = const_unit!(0.03);
 const COMPLETION_THRESHOLD_TICKS: i32 =
     (COMPLETION_THRESHOLD.value_unsafe / METERS_PER_TICK.value_unsafe) as i32; // value_unsafe because no const_fn yet.
 
@@ -194,7 +194,6 @@ impl Elevator {
                 let current_pos = self.mt.get_selected_sensor_position(RECT_PROF_PID_IDX)?;
                 self.stage_track.update(current_pos);
                 let err = self.mt.get_closed_loop_target(RECT_PROF_PID_IDX)? - current_pos;
-                // dbg!(err);
                 let moving_stage = self.stage_track.moving_stage(err);
                 // dbg!(moving_stage);
                 self.mt

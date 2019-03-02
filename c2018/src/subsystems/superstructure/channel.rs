@@ -111,6 +111,11 @@ impl Channel {
         // dbg!(self.state);
         use BallProgress::*;
         // TODO add backwards transitions for unjam
+        // dbg!((
+        //     self.gates.0.get()?,
+        //     self.gates.1.get()?,
+        //     self.gates.2.get()?
+        // ));
         self.state = match self.state {
             None => None,
             Intaking => {

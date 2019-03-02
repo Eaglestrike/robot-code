@@ -40,6 +40,9 @@ fn main() {
     let (super_send, super_recv) = unbounded();
     let base = RobotBase::new().unwrap();
 
+    // let comp = wpilib::pneumatics::Compressor::new().unwrap();
+    // comp.stop();
+
     thread::Builder::new()
         .name("Drive".to_string())
         .spawn(move || {
