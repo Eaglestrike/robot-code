@@ -7,7 +7,7 @@ use wpilib::{dio::DigitalInput, HalResult};
 const CHAN_INTAKE_COMMAND: f64 = 0.8;
 const CHAN_CONVEY_COMMAND: f64 = 0.6;
 const CHAN_TRANSFER_COMMAND: f64 = 1.0;
-const OUTK_INTK_COMMAND: f64 = 0.8;
+const OUTK_INTK_COMMAND: f64 = 0.5;
 const OUTK_OUTK_COMMAND: f64 = 1.0;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
