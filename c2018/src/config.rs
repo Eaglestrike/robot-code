@@ -69,6 +69,8 @@ pub mod superstructure {
     pub const CHANNEL_TALON: i32 = 9;
     pub const OUTTAKE_TALON: i32 = 11;
 
+    pub const CLIMB_SOLENOID: i32 = 0;
+
     pub mod hatch {
         // TODO set ids
         pub const EXTEND_PNEUMATICS_ID: i32 = 7;

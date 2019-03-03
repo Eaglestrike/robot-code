@@ -137,6 +137,12 @@ impl<'a, T: Controls> Subsystem for Controller<'a, T> {
                     ))
                     .expect("SS disconnected");
             }
+            self.controls.climb().sig_send(|is_climb_ext| {
+                println!("SENT {}", is_climb_ext);
+                self.superstructure
+                    .send(SsCmd::Climb(is_climb_ext))
+                    .expect("SS disconnected");
+            });
         }
     }
 }
@@ -197,7 +203,8 @@ mod _wrapper {
         elevator_low,
         elevator_med,
         elevator_high,
-        elevator_cargo
+        elevator_cargo,
+        climb
     }
 
     impl<T: Controls> EdgeWrapper<T> {
@@ -228,6 +235,7 @@ pub trait Controls {
     fn elevator_med(&mut self) -> bool;
     fn elevator_high(&mut self) -> bool;
     fn elevator_cargo(&mut self) -> bool;
+    fn climb(&mut self) -> bool;
 }
 
 #[derive(Debug)]
@@ -300,6 +308,12 @@ impl<'a> Controls for StandardControls<'a> {
     }
     fn elevator_cargo(&mut self) -> bool {
         get_button(&self.ds, self.oi, 2)
+    }
+    fn climb(&mut self) -> bool {
+        self.ds
+            .stick_pov(self.oi, JoystickPOV::new(0).unwrap())
+            .unwrap()
+            != -1
     }
 }
 fn get_button(ds: &DriverStation<'_>, port: JoystickPort, num: u8) -> bool {

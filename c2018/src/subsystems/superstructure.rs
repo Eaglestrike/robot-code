@@ -111,6 +111,7 @@ mod interface {
         ForceAbortBall,
         HatchExtend(HatchPneumaticExt),
         HatchOuttake(HatchPneumaticExt),
+        Climb(bool),
     }
 
 }
@@ -188,6 +189,7 @@ pub struct Superstructure {
     elevator: Elevator,
     im: CachingTalon,
     is: CachingSolenoid,
+    climb: CachingSolenoid,
     om: CachingTalon,
     receiver: Receiver<Instruction>,
 }
@@ -206,6 +208,7 @@ impl Superstructure {
             im: CachingTalon::new(TalonSRX::new(config::CHANNEL_TALON)),
             is: CachingSolenoid::new(Solenoid::new(config::INTAKE_SOLENOID)?)?,
             om: CachingTalon::new(TalonSRX::new(config::OUTTAKE_TALON)),
+            climb: CachingSolenoid::new(Solenoid::new(config::CLIMB_SOLENOID)?)?,
             receiver: recv,
         })
     }
@@ -276,6 +279,9 @@ impl Subsystem for Superstructure {
                             HatchGoalHeight::Low,
                             hatch_hardware::CLOSED_HATCH_STATE,
                         );
+                    }
+                    Climb(do_ext) => {
+                        self.climb.set(do_ext).ok();
                     }
                 }
             }
