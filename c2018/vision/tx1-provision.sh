@@ -39,7 +39,7 @@ sudo apt install libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugin
 # sudo udevadm control --reload-rules && sudo udevadm trigger
 
 # Build code
-sudo apt install base-devel cmake g++
+sudo apt install build-essential cmake g++
 # cd ../..
 # mkdir -p build && cd build
 # cmake -DCMAKE_BUILD_TYPE=Release ..
