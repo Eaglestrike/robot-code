@@ -27,31 +27,38 @@ sudo apt purge snapd ubuntu-core-launcher squashfs-tools
 # No openCV 3.3 install; its installed by default on TX1
 echo "OpenCV 3.3 should be installed!"
 
+# Install deps of gstreamer streams
+sudo apt install v4l-utils
+sudo apt install libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools
+
 # Configure Camera udev rules
 # For this ruleset to work, ensure you are running a TX1 on a J120 with our exact camera spec and updated J120 firmware
 # TODO add camera link
-sudo cp frc-cams-j120-tx1-firmware-3.0.rules /etc/udev/rules.d/
+# sudo cp frc-cams-j120-tx1-firmware-3.0.rules /etc/udev/rules.d/
 # Reload rules
-sudo udevadm control --reload-rules && sudo udevadm trigger
+# sudo udevadm control --reload-rules && sudo udevadm trigger
 
 # Build code
 sudo apt install base-devel cmake g++
-cd ../..
-mkdir -p build && cd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make -j3 del-mar-cams
-set +e
-sudo systemctl stop del-mar-cams.service
-set -e
-cd $VISION_DIR
-cp bin/del-mar-cams /home/nvidia/
-set +e
-sudo systemctl start del-mar-cams
-set -e
+# cd ../..
+# mkdir -p build && cd build
+# cmake -DCMAKE_BUILD_TYPE=Release ..
+# make -j3 del-mar-cams
+# set +e
+# sudo systemctl stop del-mar-cams.service
+# set -e
+# cd $VISION_DIR
+# cp bin/del-mar-cams /home/nvidia/
+cp dmargstream /home/nvidia/
+# set +e
+# sudo systemctl start del-mar-cams
+# set -e
 
 # Configure autostart
-sudo cp del-mar-cams.service /etc/systemd/system/
-sudo systemctl enable del-mar-cams
+# sudo cp del-mar-cams.service /etc/systemd/system/
+# sudo systemctl enable del-mar-cams
+sudo cp dmargstream.service /etc/systemd/system/
+sudo systemctl enable dmargstream
 
 # Configure static IP
 #sudo systemctl stop NetworkManager.service
