@@ -191,6 +191,7 @@ pub struct Superstructure {
     is: CachingSolenoid,
     climb: CachingSolenoid,
     om: CachingTalon,
+    pressure_sensor: Rev111107DS00PressureSensor,
     receiver: Receiver<Instruction>,
 }
 use crate::config::superstructure as config;
@@ -209,6 +210,7 @@ impl Superstructure {
             is: CachingSolenoid::new(Solenoid::new(config::INTAKE_SOLENOID)?)?,
             om: CachingTalon::new(TalonSRX::new(config::OUTTAKE_TALON)),
             climb: CachingSolenoid::new(Solenoid::new(config::CLIMB_SOLENOID)?)?,
+            pressure_sensor: Rev111107DS00PressureSensor::new(AnalogInput::new(3)?, 5.0),
             receiver: recv,
         })
     }
@@ -229,8 +231,17 @@ impl Superstructure {
 impl Subsystem for Superstructure {
     fn run(mut self) {
         use goal::*;
+        let mut pnm_print_count: u32 = 0;
         loop {
             std::thread::sleep(std::time::Duration::from_millis(5));
+            if pnm_print_count > 100 {
+                pnm_print_count = 0;
+                println!(
+                    "Pnuematic System PSI: {}",
+                    self.pressure_sensor.get_psi().unwrap_or(std::f64::NAN)
+                );
+            }
+            pnm_print_count += 1;
             let mut outs = PeriodicOuts::default();
             for msg in self.receiver.try_iter() {
                 use Instruction::*;
@@ -391,5 +402,19 @@ impl CachingSolenoid {
         }
         self.1 = b;
         self.0.set(b)
+    }
+}
+
+use wpilib::AnalogInput;
+#[derive(Debug)]
+struct Rev111107DS00PressureSensor(AnalogInput, f64);
+
+impl Rev111107DS00PressureSensor {
+    fn new(ain: AnalogInput, supply_voltage: f64) -> Self {
+        Self(ain, supply_voltage)
+    }
+
+    fn get_psi(&self) -> HalResult<f64> {
+        Ok((250.0 * (self.0.voltage()? / self.1)) - 25.0)
     }
 }
