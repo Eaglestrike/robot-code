@@ -1,0 +1,11 @@
+[package]
+name = "path-gen"
+version = "0.1.0"
+authors = ["Josh Hejna <josh.hejna@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+coord-frames = {path = "../coord-frames"}
+dimensioned = "0.7.0"
+eta3-spline = {git = "https://github.com/Lytigas/eta3-spline"}
+csv = "1.0.0"

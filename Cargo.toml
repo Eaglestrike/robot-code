@@ -5,7 +5,9 @@ members = [
     "first-party/copcomp/rust",
     "rio-benches",
     "c2018",
-    "c2018/ctre-elevator-tuning"
+    "c2018/ctre-elevator-tuning",
+    "c2018/path-gen",
+    "c2018/coord-frames",
 ]
 
 [profile.dev]
