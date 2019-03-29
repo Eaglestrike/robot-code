@@ -206,6 +206,7 @@ impl Elevator {
             }
             LoopState::Running => {
                 let current_pos = self.mt.get_selected_sensor_position(RECT_PROF_PID_IDX)?;
+                // println!("ELEVATOR POS {}", current_pos);
                 self.stage_track.update(current_pos);
                 let err = self.mt.get_closed_loop_target(RECT_PROF_PID_IDX)? - current_pos;
                 let moving_stage = self.stage_track.moving_stage(err);
@@ -301,7 +302,7 @@ impl StageTracker {
     /// Read encoder value when both stages have hit their bottom hardstops
     const LOWEST_POS_TICKS: i32 = 0;
     /// Read encoder value when the second stage rests on the first, and the first stage contacts the top hardstop
-    const HIGHEST_POS_TICKS: i32 = 23000;
+    const HIGHEST_POS_TICKS: i32 = 20305;
 
     pub fn zeroed() -> Self {
         Self {

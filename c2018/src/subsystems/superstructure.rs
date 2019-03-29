@@ -142,10 +142,13 @@ mod goal {
             use BallGoalHeight::*;
             match self {
                 None => 100.0 * ctre_elevator_tuning::METERS_PER_TICK,
-                Low => 7800.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M,
+                Low => 5325.0 * ctre_elevator_tuning::METERS_PER_TICK + 0.0343 * units::M,
                 Cargo => 17100.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M,
                 Med => 24000.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M,
-                High => 38500.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M,
+                High => {
+                    35100.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M
+                        + 0.216 * units::M
+                }
             }
         }
     }
@@ -241,6 +244,7 @@ impl Subsystem for Superstructure {
                     "Pnuematic System PSI: {}",
                     self.pressure_sensor.get_psi().unwrap_or(std::f64::NAN)
                 );
+                println!("Elevator State: {:?}", self.elevator.state());
             }
             pnm_print_count += 1;
             let mut outs = PeriodicOuts::default();
