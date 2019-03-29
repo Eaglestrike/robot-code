@@ -112,6 +112,7 @@ mod interface {
         HatchExtend(HatchPneumaticExt),
         HatchOuttake(HatchPneumaticExt),
         Climb(bool),
+        BeginElevatorPanic,
     }
 
 }
@@ -293,6 +294,9 @@ impl Subsystem for Superstructure {
                     }
                     Climb(do_ext) => {
                         self.climb.set(do_ext).ok();
+                    }
+                    BeginElevatorPanic => {
+                        self.elevator.try_init_panic();
                     }
                 }
             }

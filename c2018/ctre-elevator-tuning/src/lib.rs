@@ -15,6 +15,7 @@ use wpilib::{dio::DigitalInput, HalResult};
 #[derive(Copy, Clone, Debug)]
 pub enum LoopState {
     Unitialized,
+    Panicking(u32),
     Zeroing,
     Running,
 }
@@ -155,6 +156,19 @@ impl Elevator {
                 self.state = LoopState::Zeroing;
                 return self.iterate();
             }
+            LoopState::Panicking(0) => {
+                self.state = LoopState::Unitialized;
+                return self.iterate();
+            }
+            LoopState::Panicking(ticks) => {
+                self.state = LoopState::Panicking(ticks - 1);
+                self.mt.set(
+                    ControlMode::PercentOutput,
+                    PANIC_COMMAND,
+                    DemandType::Neutral,
+                    0.0,
+                )
+            }
             LoopState::Zeroing => {
                 match self.limit.get() {
                     Err(_) => {
@@ -240,7 +254,17 @@ impl Elevator {
     pub fn state(&self) -> LoopState {
         self.state
     }
+
+    pub fn try_init_panic(&mut self) -> LoopState {
+        match self.state {
+            LoopState::Zeroing => self.state = LoopState::Panicking(PANIC_TICKS),
+            _ => (),
+        }
+        return self.state();
+    }
 }
+const PANIC_TICKS: u32 = 400;
+const PANIC_COMMAND: f64 = 0.3;
 
 use controls;
 
