@@ -263,6 +263,11 @@ impl Elevator {
         }
         return self.state();
     }
+
+    pub fn force_begin_zero(&mut self) -> LoopState {
+        self.state = LoopState::Zeroing;
+        self.state()
+    }
 }
 const PANIC_TICKS: u32 = 400;
 const PANIC_COMMAND: f64 = 0.3;

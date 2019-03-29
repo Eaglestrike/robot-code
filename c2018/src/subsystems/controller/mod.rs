@@ -148,6 +148,11 @@ impl<'a, T: Controls> Subsystem for Controller<'a, T> {
                     .send(SsCmd::BeginElevatorPanic)
                     .expect("SS disconnected");
             }
+            if self.controls.force_zero().rising() {
+                self.superstructure
+                    .send(SsCmd::ForceElevatorZero)
+                    .expect("SS disconnected");
+            }
         }
     }
 }
@@ -210,7 +215,8 @@ mod _wrapper {
         elevator_high,
         elevator_cargo,
         climb,
-        begin_elevator_panic
+        begin_elevator_panic,
+        force_zero
     }
 
     impl<T: Controls> EdgeWrapper<T> {
@@ -243,6 +249,7 @@ pub trait Controls {
     fn elevator_cargo(&mut self) -> bool;
     fn climb(&mut self) -> bool;
     fn begin_elevator_panic(&mut self) -> bool;
+    fn force_zero(&mut self) -> bool;
 }
 
 #[derive(Debug)]
@@ -324,6 +331,9 @@ impl<'a> Controls for StandardControls<'a> {
     }
     fn begin_elevator_panic(&mut self) -> bool {
         get_button(&self.ds, self.oi, 7)
+    }
+    fn force_zero(&mut self) -> bool {
+        get_button(&self.ds, self.oi, 9)
     }
 }
 fn get_button(ds: &DriverStation<'_>, port: JoystickPort, num: u8) -> bool {

@@ -113,6 +113,7 @@ mod interface {
         HatchOuttake(HatchPneumaticExt),
         Climb(bool),
         BeginElevatorPanic,
+        ForceElevatorZero,
     }
 
 }
@@ -301,6 +302,9 @@ impl Subsystem for Superstructure {
                     }
                     BeginElevatorPanic => {
                         self.elevator.try_init_panic();
+                    }
+                    ForceElevatorZero => {
+                        self.elevator.force_begin_zero();
                     }
                 }
             }
