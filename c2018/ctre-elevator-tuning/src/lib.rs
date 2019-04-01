@@ -12,7 +12,7 @@ use ctre::motor_control::config::*;
 use ctre::motor_control::*;
 use wpilib::{dio::DigitalInput, HalResult};
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum LoopState {
     Unitialized,
     Panicking(u32),
@@ -117,12 +117,15 @@ impl Elevator {
         )
         .expect("CONFIG ALL FAILED");
         mt.enable_current_limit(true);
-        mt.select_profile_slot(STAGE_ONE_SLOT_IDX, RECT_PROF_PID_IDX);
+        mt.select_profile_slot(STAGE_ONE_SLOT_IDX, RECT_PROF_PID_IDX)
+            .unwrap();
         mt.override_limit_switches_enable(true);
         mt.override_soft_limits_enable(false); // enabled after zeroing
         mt.enable_voltage_compensation(true);
-        mt.set_status_frame_period(StatusFrameEnhanced::Status_2_Feedback0, 10, 20);
-        mt.set_status_frame_period(StatusFrameEnhanced::Status_10_MotionMagic, 10, 20);
+        mt.set_status_frame_period(StatusFrameEnhanced::Status_2_Feedback0, 10, 20)
+            .unwrap();
+        mt.set_status_frame_period(StatusFrameEnhanced::Status_10_MotionMagic, 10, 20)
+            .unwrap();
 
         mt.set_inverted(false);
         mt.set_sensor_phase(true);
@@ -154,11 +157,11 @@ impl Elevator {
             LoopState::Unitialized => {
                 // TODO handle
                 self.state = LoopState::Zeroing;
-                return self.iterate();
+                self.iterate()
             }
             LoopState::Panicking(0) => {
                 self.state = LoopState::Unitialized;
-                return self.iterate();
+                self.iterate()
             }
             LoopState::Panicking(ticks) => {
                 self.state = LoopState::Panicking(ticks - 1);
@@ -200,7 +203,7 @@ impl Elevator {
                             DemandType::Neutral,
                             0.0,
                         )?;
-                        return self.iterate();
+                        self.iterate()
                     }
                 }
             }
@@ -257,11 +260,10 @@ impl Elevator {
     }
 
     pub fn try_init_panic(&mut self) -> LoopState {
-        match self.state {
-            LoopState::Zeroing => self.state = LoopState::Panicking(PANIC_TICKS),
-            _ => (),
+        if self.state == LoopState::Zeroing {
+            self.state = LoopState::Panicking(PANIC_TICKS)
         }
-        return self.state();
+        self.state
     }
 
     pub fn force_begin_zero(&mut self) -> LoopState {
@@ -317,13 +319,10 @@ impl StageTracker {
     }
 
     pub fn moving_stage(&self, direction: i32) -> Stage {
-        if self.at_top_limit() && direction > 0 {
-            Stage::Two
-        } else if self.at_bot_limit() && direction < 0 {
-            Stage::Two
-        } else {
-            Stage::One
+        if (self.at_top_limit() && direction > 0) || (self.at_bot_limit() && direction < 0) {
+            return Stage::Two;
         }
+        Stage::One
     }
 
     fn at_top_limit(&self) -> bool {

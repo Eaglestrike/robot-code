@@ -6,7 +6,7 @@ use ctre::motor_control::config::*;
 use ctre::motor_control::*;
 use debug_stub_derive::DebugStub;
 use lazy_static::lazy_static;
-use navx::AHRS;
+//use navx::AHRS;
 use wpilib::pneumatics::Solenoid;
 
 use controls::const_unit;
@@ -42,11 +42,11 @@ pub struct Pose {
 }
 
 #[derive(Debug, Copy, Clone)]
-#[allow(dead_code)]
 pub enum Instruction {
     GearShift(Gear),
-    Velocity(MeterPerSecond<f64>, MeterPerSecond<f64>),
     Percentage(f64, f64),
+    #[allow(dead_code)]
+    Velocity(MeterPerSecond<f64>, MeterPerSecond<f64>),
 }
 
 #[derive(DebugStub)]

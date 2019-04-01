@@ -29,7 +29,6 @@ pub struct Channel {
 }
 
 use crate::config::superstructure::{GATE1, GATE2, GATE3};
-use BallProgress::{Inside, Intaking, Outtaking};
 
 impl Channel {
     pub fn new() -> HalResult<Self> {

@@ -1,4 +1,5 @@
 mod cheesy_drive;
+#[allow(dead_code)]
 mod config;
 mod subsystems;
 
@@ -20,9 +21,8 @@ pub trait OkPrint {
 
 impl<T, E: std::fmt::Debug> OkPrint for Result<T, E> {
     fn ok_print(self) {
-        match self {
-            Err(e) => println!("ok_print at {}:{}:{}:{:?}", file!(), line!(), column!(), e),
-            Ok(_) => (),
+        if let Err(e) = self {
+            println!("ok_print at {}:{}:{}:{:?}", file!(), line!(), column!(), e)
         }
     }
 }
@@ -43,7 +43,8 @@ fn main() {
             let drive = Drive::new(bus, drive_recv);
             println!("drive: {:#?}", drive);
             drive.run();
-        });
+        })
+        .unwrap();
 
     thread::Builder::new()
         .name("SStruct".to_string())
@@ -52,7 +53,8 @@ fn main() {
             let sstruct = Superstructure::new(super_recv).unwrap();
             println!("sstruct: {:#?}", sstruct);
             sstruct.run();
-        });
+        })
+        .unwrap();
 
     let lj = JoystickPort::new(0).unwrap();
     let rj = JoystickPort::new(1).unwrap();

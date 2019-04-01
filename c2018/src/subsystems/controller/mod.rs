@@ -75,7 +75,7 @@ impl<'a, T: Controls> Subsystem for Controller<'a, T> {
             // SUPERSTRUCTURE
 
             // TODO log
-            if self.controls.abort_ball_intake().rising() {
+            if self.controls.abort_ball_intake() == Edge::Rising {
                 self.superstructure
                     .send(SsCmd::ForceAbortBall)
                     .expect("SS disconnected");
@@ -110,24 +110,24 @@ impl<'a, T: Controls> Subsystem for Controller<'a, T> {
                     self.superstructure.send(cmd).expect("SS disconnected");
                 },
             );
-            if self.controls.elevator_low().rising() {
+            if self.controls.elevator_low() == Edge::Rising {
                 self.superstructure
                     .send(SsCmd::SetElevatorHeight(UserElevatorHeights::Low))
                     .expect("SS disconnected");
             }
-            if self.controls.elevator_med().rising() {
+            if self.controls.elevator_med() == Edge::Rising {
                 self.superstructure
                     .send(SsCmd::SetElevatorHeight(UserElevatorHeights::Med))
                     .expect("SS disconnected");
             }
-            if self.controls.elevator_high().rising() {
+            if self.controls.elevator_high() == Edge::Rising {
                 self.superstructure
                     .send(SsCmd::SetElevatorHeight(
                         superstructure::UserElevatorHeights::High,
                     ))
                     .expect("SS disconnected");
             }
-            if self.controls.elevator_cargo().rising() {
+            if self.controls.elevator_cargo() == Edge::Rising {
                 self.superstructure
                     .send(SsCmd::SetElevatorHeight(
                         superstructure::UserElevatorHeights::Cargo,
@@ -140,12 +140,12 @@ impl<'a, T: Controls> Subsystem for Controller<'a, T> {
                     .send(SsCmd::Climb(is_climb_ext))
                     .expect("SS disconnected");
             });
-            if self.controls.begin_elevator_panic().rising() {
+            if self.controls.begin_elevator_panic() == Edge::Rising {
                 self.superstructure
                     .send(SsCmd::BeginElevatorPanic)
                     .expect("SS disconnected");
             }
-            if self.controls.force_zero().rising() {
+            if self.controls.force_zero() == Edge::Rising {
                 self.superstructure
                     .send(SsCmd::ForceElevatorZero)
                     .expect("SS disconnected");
@@ -226,6 +226,7 @@ mod _wrapper {
         }
     }
 }
+use crate::subsystems::controller::edge_detect::Edge;
 use _wrapper::EdgeWrapper;
 
 // Implement this for a raw controller struct

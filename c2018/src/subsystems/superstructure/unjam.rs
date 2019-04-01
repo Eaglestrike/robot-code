@@ -32,7 +32,7 @@ impl UnjamState {
         }
     }
 
-    pub fn write_outs(&self, outs: &mut super::PeriodicOuts) {
+    pub fn write_outs(self, outs: &mut super::PeriodicOuts) {
         match self {
             Disabled => (),
             Forward(_) => {

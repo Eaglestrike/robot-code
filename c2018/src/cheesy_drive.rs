@@ -175,29 +175,37 @@ mod tests {
     use super::*;
     use controls::approx::*;
 
-    fn tester(c: &mut CheesyDrive, t: f64, w: f64, q: bool, h: bool, l: f64, r: f64) {
-        let sig = c.cheesy_drive(t, w, q, h);
-        assert_abs_diff_eq!(sig.l, l);
-        assert_abs_diff_eq!(sig.r, r);
+    fn tester(
+        drive: &mut CheesyDrive,
+        throttle: f64,
+        wheel: f64,
+        quick_turn: bool,
+        high_gear: bool,
+        left: f64,
+        right: f64,
+    ) {
+        let signal = drive.cheesy_drive(throttle, wheel, quick_turn, high_gear);
+        assert_abs_diff_eq!(signal.l, left);
+        assert_abs_diff_eq!(signal.r, right);
     }
 
     #[test]
     fn extrema() {
-        let mut d = CheesyDrive::new();
+        let mut drive = CheesyDrive::new();
         let c = &mut d;
-        tester(c, 1.0, 0.0, false, true, 1.0, 1.0);
-        tester(c, -1.0, 0.0, false, true, -1.0, -1.0);
+        tester(&mut drive, 1.0, 0.0, false, true, 1.0, 1.0);
+        tester(&mut drive, -1.0, 0.0, false, true, -1.0, -1.0);
 
-        tester(c, 1.0, 0.0, true, true, 1.0, 1.0);
-        tester(c, -1.0, 0.0, true, true, -1.0, -1.0);
+        tester(&mut drive, 1.0, 0.0, true, true, 1.0, 1.0);
+        tester(&mut drive, -1.0, 0.0, true, true, -1.0, -1.0);
 
-        tester(c, 1.0, 0.0, true, false, 1.0, 1.0);
-        tester(c, -1.0, 0.0, true, false, -1.0, -1.0);
+        tester(&mut drive, 1.0, 0.0, true, false, 1.0, 1.0);
+        tester(&mut drive, -1.0, 0.0, true, false, -1.0, -1.0);
 
-        tester(c, 1.0, 0.0, false, false, 1.0, 1.0);
-        tester(c, -1.0, 0.0, false, false, -1.0, -1.0);
+        tester(&mut drive, 1.0, 0.0, false, false, 1.0, 1.0);
+        tester(&mut drive, -1.0, 0.0, false, false, -1.0, -1.0);
 
-        tester(c, 0.0, 1.0, false, false, 0.0, 0.0);
-        tester(c, 0.0, -1.0, false, false, 0.0, 0.0);
+        tester(&mut drive, 0.0, 1.0, false, false, 0.0, 0.0);
+        tester(&mut drive, 0.0, -1.0, false, false, 0.0, 0.0);
     }
 }
