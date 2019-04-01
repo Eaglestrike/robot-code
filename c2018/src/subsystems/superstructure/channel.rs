@@ -29,6 +29,8 @@ pub struct Channel {
 }
 
 use crate::config::superstructure::{GATE1, GATE2, GATE3};
+use BallProgress::{Inside, Intaking, Outtaking};
+
 impl Channel {
     pub fn new() -> HalResult<Self> {
         Ok(Self {
@@ -42,65 +44,47 @@ impl Channel {
     }
 
     pub fn try_abort_intk(&mut self) -> bool {
-        use BallProgress::*;
-        return match self.state {
-            Intaking => {
-                self.state = None;
-                true
-            }
-            _ => false,
-        };
+        if self.state == BallProgress::Intaking {
+            self.state = BallProgress::None;
+            return true;
+        }
+        false
     }
 
     pub fn try_init_outk(&mut self) -> bool {
-        use BallProgress::*;
-        return match self.state {
-            CarriageSecure => {
-                self.state = Outtaking;
-                true
-            }
-            _ => false,
-        };
+        if self.state == BallProgress::CarriageSecure {
+            self.state = BallProgress::Outtaking;
+            return true;
+        }
+        false
     }
 
     pub fn try_stop_outk(&mut self) -> bool {
-        use BallProgress::*;
-        return match self.state {
-            Outtaking => {
-                self.state = Done;
-                true
-            }
-            _ => false,
-        };
+        if self.state == BallProgress::Outtaking {
+            self.state = BallProgress::Done;
+            return true;
+        }
+        false
     }
 
     pub fn reset(&mut self) {
-        self.state = match self.state {
-            BallProgress::Done => BallProgress::None,
-            x => x,
+        if self.state == BallProgress::Done {
+            self.state = BallProgress::None;
         }
     }
 
     pub fn is_done(&self) -> bool {
-        match self.state {
-            BallProgress::Done => true,
-            _ => false,
-        }
+        self.state == BallProgress::Done
     }
 
     pub fn idempotent_start(&mut self) {
-        use BallProgress::*;
-        self.state = match self.state {
-            None => Intaking,
-            x => x,
+        if self.state == BallProgress::None {
+            self.state = BallProgress::Intaking;
         }
     }
 
     pub fn is_in_carriage(&self) -> bool {
-        match self.state {
-            BallProgress::CarriageSecure | BallProgress::Outtaking => true,
-            _ => false,
-        }
+        self.state == BallProgress::CarriageSecure || self.state == BallProgress::Outtaking
     }
 
     pub fn force_abort(&mut self) {
@@ -117,39 +101,12 @@ impl Channel {
         //     self.gates.2.get()?
         // ));
         self.state = match self.state {
-            None => None,
-            Intaking => {
-                if !self.gates.0.get()? {
-                    Inside
-                } else {
-                    Intaking
-                }
-            }
+            Intaking if !self.gates.0.get()? => Inside,
             // TODO should be handled here to be on the safer side?
-            Inside => {
-                if !self.gates.1.get()? {
-                    Queued
-                } else {
-                    Inside
-                }
-            }
-            Queued => {
-                if elev_ready {
-                    CarriageVolatile
-                } else {
-                    Queued
-                }
-            }
-            CarriageVolatile => {
-                if !self.gates.2.get()? {
-                    CarriageSecure
-                } else {
-                    CarriageVolatile
-                }
-            }
-            CarriageSecure => CarriageSecure,
-            Outtaking => Outtaking,
-            Done => Done,
+            Inside if !self.gates.1.get()? => Queued,
+            Queued if elev_ready => CarriageVolatile,
+            CarriageVolatile if !self.gates.2.get()? => CarriageSecure,
+            x => x,
         };
         Ok(())
     }
@@ -157,7 +114,7 @@ impl Channel {
     pub fn write_outs(&self, outs: &mut PeriodicOuts) {
         use BallProgress::*;
         match self.state {
-            None | Done => {
+            None | Done | Queued | CarriageSecure => {
                 outs.intk_pnm = IntakeExt::Retr.into();
                 outs.intk_pct = 0.0;
             }
@@ -169,18 +126,10 @@ impl Channel {
                 outs.intk_pnm = IntakeExt::Retr.into();
                 outs.intk_pct = CHAN_CONVEY_COMMAND;
             }
-            Queued => {
-                outs.intk_pnm = IntakeExt::Retr.into();
-                outs.intk_pct = 0.0;
-            }
             CarriageVolatile => {
                 outs.intk_pnm = IntakeExt::Retr.into();
                 outs.intk_pct = CHAN_TRANSFER_COMMAND;
                 outs.outk_pct = OUTK_INTK_COMMAND;
-            }
-            CarriageSecure => {
-                outs.intk_pnm = IntakeExt::Retr.into();
-                outs.intk_pct = 0.0;
             }
             Outtaking => {
                 outs.intk_pnm = IntakeExt::Retr.into();

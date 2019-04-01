@@ -45,11 +45,8 @@ impl<'a, T: Controls> Subsystem for Controller<'a, T> {
     fn run(mut self) {
         loop {
             self.ds.wait_for_data();
-            match self.ds.robot_state() {
-                RobotState::Disabled => {
-                    continue;
-                }
-                _ => {}
+            if self.ds.robot_state() == RobotState::Disabled {
+                continue;
             }
 
             // TODO add logging to all this

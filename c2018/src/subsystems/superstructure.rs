@@ -58,10 +58,7 @@ pub enum IntakeExt {
 
 impl Into<bool> for IntakeExt {
     fn into(self) -> bool {
-        match self {
-            IntakeExt::Ext => true,
-            IntakeExt::Retr => false,
-        }
+        self == IntakeExt::Ext
     }
 }
 
@@ -71,7 +68,7 @@ pub struct HatchState {
     pub outtake: HatchPneumaticExt,
 }
 
-// Interface for the controlling channel
+/// Interface for the controlling channel
 mod interface {
     use super::goal::BallGoalHeight;
     use super::goal::HatchGoalHeight;
@@ -252,18 +249,16 @@ impl Subsystem for Superstructure {
             for msg in self.receiver.try_iter() {
                 use Instruction::*;
                 match msg {
-                    HatchExtend(ext) => match &mut self.goal {
-                        GoalState::Hatch(ref _height, ref mut ext_state) => {
+                    HatchExtend(ext) => {
+                        if let GoalState::Hatch(_, ref mut ext_state) = self.goal {
                             ext_state.extend = ext;
                         }
-                        _ => (),
-                    },
-                    HatchOuttake(ext) => match &mut self.goal {
-                        GoalState::Hatch(ref _height, ref mut ext_state) => {
+                    }
+                    HatchOuttake(ext) => {
+                        if let GoalState::Hatch(_, ref mut ext_state) = self.goal {
                             ext_state.outtake = ext;
                         }
-                        _ => (),
-                    },
+                    }
                     Unjam(x) => self.unjam.set_enabled(x),
                     BallIntake(true) => self.goal = GoalState::Ball(BallGoalHeight::None),
                     BallIntake(false) => {

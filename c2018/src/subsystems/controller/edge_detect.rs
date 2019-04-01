@@ -18,7 +18,7 @@ impl Edge {
         self == Edge::Flat
     }
 
-    pub fn sig_send(self, mut f: impl FnMut(bool) -> ()) {
+    pub fn sig_send(self, mut f: impl FnMut(bool)) {
         match self {
             Edge::Rising => f(true),
             Edge::Falling => f(false),
@@ -26,12 +26,12 @@ impl Edge {
         };
     }
 
-    pub fn sig_send_val<T>(self, rise: T, fall: T, mut f: impl FnMut(T) -> ()) {
+    pub fn sig_send_val<T>(self, rise: T, fall: T, mut f: impl FnMut(T)) {
         match self {
             Edge::Rising => f(rise),
             Edge::Falling => f(fall),
             Edge::Flat => (),
-        };
+        }
     }
 }
 
@@ -46,12 +46,10 @@ impl EdgeDetector {
     }
 
     pub fn get(&mut self, new_value: bool) -> Edge {
-        let edge = if self.last_value && !new_value {
-            Edge::Falling
-        } else if !self.last_value && new_value {
-            Edge::Rising
-        } else {
-            Edge::Flat
+        let edge = match (self.last_value, new_value) {
+            (true, false) => Edge::Falling,
+            (false, true) => Edge::Rising,
+            _ => Edge::Flat,
         };
         self.last_value = new_value;
         edge

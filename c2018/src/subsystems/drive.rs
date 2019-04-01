@@ -4,6 +4,7 @@ use bus::Bus;
 use crossbeam_channel::Receiver;
 use ctre::motor_control::config::*;
 use ctre::motor_control::*;
+use debug_stub_derive::DebugStub;
 use lazy_static::lazy_static;
 use navx::AHRS;
 use wpilib::pneumatics::Solenoid;

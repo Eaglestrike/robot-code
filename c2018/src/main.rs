@@ -1,6 +1,3 @@
-#[macro_use]
-extern crate debug_stub_derive;
-
 mod cheesy_drive;
 mod config;
 mod subsystems;
@@ -16,9 +13,6 @@ use std::thread;
 use subsystems::controller::*;
 use subsystems::drive::*;
 use subsystems::superstructure::*;
-
-#[macro_use]
-extern crate std;
 
 pub trait OkPrint {
     fn ok_print(self);

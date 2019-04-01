@@ -1,4 +1,4 @@
-use super::HatchPneumaticExt;
+use super::HatchPneumaticExt::*;
 use super::HatchState;
 use crate::config::superstructure::hatch as config;
 use wpilib::pneumatics::Solenoid;
@@ -12,34 +12,25 @@ pub struct HatchHardware {
 }
 
 pub const CLOSED_HATCH_STATE: HatchState = HatchState {
-    extend: HatchPneumaticExt::Retracted,
-    outtake: HatchPneumaticExt::Retracted,
+    extend: Retracted,
+    outtake: Retracted,
 };
 
 impl HatchHardware {
     pub fn new() -> HalResult<Self> {
-        Ok(Self {
+        Ok(HatchHardware {
             extend: Solenoid::new(config::EXTEND_PNEUMATICS_ID)?,
             outtake: Solenoid::new(config::OUTTAKE_PNEUMATICS_ID)?,
-            state: HatchState {
-                extend: HatchPneumaticExt::Retracted,
-                outtake: HatchPneumaticExt::Retracted,
-            },
+            state: CLOSED_HATCH_STATE,
         })
     }
 
     pub fn set(&mut self, new: HatchState) -> HalResult<()> {
         if self.state.extend != new.extend {
-            self.extend.set(match new.extend {
-                HatchPneumaticExt::Extended => true,
-                HatchPneumaticExt::Retracted => false,
-            })?;
+            self.extend.set(new.extend == Extended)?;
         }
         if self.state.outtake != new.outtake {
-            self.outtake.set(match new.outtake {
-                HatchPneumaticExt::Extended => true,
-                HatchPneumaticExt::Retracted => false,
-            })?;
+            self.outtake.set(new.outtake == Extended)?;
         }
         self.state = new;
         Ok(())
@@ -47,8 +38,8 @@ impl HatchHardware {
 
     pub fn set_closed(&mut self) -> HalResult<()> {
         self.set(HatchState {
-            extend: HatchPneumaticExt::Retracted,
-            outtake: HatchPneumaticExt::Retracted,
+            extend: Retracted,
+            outtake: Retracted,
         })
     }
 }
