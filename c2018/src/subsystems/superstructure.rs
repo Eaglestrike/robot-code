@@ -56,9 +56,9 @@ pub enum IntakeExt {
     Retr,
 }
 
-impl Into<bool> for IntakeExt {
-    fn into(self) -> bool {
-        self == IntakeExt::Ext
+impl From<IntakeExt> for bool {
+    fn from(intake: IntakeExt) -> bool {
+        intake == IntakeExt::Ext
     }
 }
 
@@ -135,10 +135,10 @@ mod goal {
         High,
     }
 
-    impl Into<units::Meter<f64>> for BallGoalHeight {
-        fn into(self) -> units::Meter<f64> {
+    impl From<BallGoalHeight> for units::Meter<f64> {
+        fn from(goal_height: BallGoalHeight) -> units::Meter<f64> {
             use BallGoalHeight::*;
-            match self {
+            match goal_height {
                 None => 100.0 * ctre_elevator_tuning::METERS_PER_TICK,
                 Low => 5325.0 * ctre_elevator_tuning::METERS_PER_TICK + 0.0343 * units::M,
                 Cargo => 17100.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M,
@@ -157,10 +157,10 @@ mod goal {
         Med,
         High,
     }
-    impl Into<units::Meter<f64>> for HatchGoalHeight {
-        fn into(self) -> units::Meter<f64> {
+    impl From<HatchGoalHeight> for units::Meter<f64> {
+        fn from(goal_height: HatchGoalHeight) -> units::Meter<f64> {
             use HatchGoalHeight::*;
-            match self {
+            match goal_height {
                 Low => {
                     700.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M
                         + 0.216 * units::M
