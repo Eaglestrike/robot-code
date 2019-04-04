@@ -74,13 +74,13 @@ impl<T: Float> Deref for OrdFloat<T> {
 
 impl<T: Float> From<T> for OrdFloat<T> {
     fn from(t: T) -> Self {
-        OrdFloat(t)
+        Self(t)
     }
 }
 
 impl<T: Float + Interpolatable> Interpolatable for OrdFloat<T> {
     fn interp(low: Self, high: Self, percent: f64) -> Self {
-        OrdFloat(T::interp(low.0, high.0, percent))
+        Self(T::interp(low.0, high.0, percent))
     }
 }
 

@@ -144,7 +144,7 @@ impl Drive {
             .follow(&r_mstr, FollowerType::PercentOutput)
             .unwrap();
 
-        Drive {
+        Self {
             l_mstr,
             r_mstr,
             _l_slave: l_slave,
