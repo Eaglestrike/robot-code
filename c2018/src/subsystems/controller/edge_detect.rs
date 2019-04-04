@@ -30,7 +30,7 @@ pub struct EdgeDetector {
 
 impl EdgeDetector {
     pub fn new() -> Self {
-        EdgeDetector { last_value: false }
+        Self { last_value: false }
     }
 
     pub fn get(&mut self, new_value: bool) -> Edge {

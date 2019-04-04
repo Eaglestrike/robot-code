@@ -379,19 +379,6 @@ impl CachingTalon {
         self.1 .3 = g;
         self.0.set(c, f, d, g)
     }
-
-    #[allow(dead_code)]
-    pub fn talon(&self) -> &TalonSRX {
-        &self.0
-    }
-
-    #[allow(dead_code)]
-    pub fn talon_mut(&mut self) -> &mut TalonSRX {
-        // set the cache to something that will force a change next time
-        self.1 .1 = std::f64::NAN;
-        self.1 .3 = std::f64::NAN;
-        &mut self.0
-    }
 }
 
 #[derive(Debug)]

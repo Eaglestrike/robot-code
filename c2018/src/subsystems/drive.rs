@@ -45,8 +45,6 @@ pub struct Pose {
 pub enum Instruction {
     GearShift(Gear),
     Percentage(f64, f64),
-    #[allow(dead_code)]
-    Velocity(MeterPerSecond<f64>, MeterPerSecond<f64>),
 }
 
 #[derive(DebugStub)]
@@ -97,11 +95,6 @@ impl TypedQuadrature for TalonSRX {
 }
 
 impl Drive {
-    #[allow(dead_code)]
-    fn config_talons<T>(&mut self, f: impl Fn(&mut TalonSRX) -> T) -> (T, T) {
-        (f(&mut self.l_mstr), f(&mut self.r_mstr))
-    }
-
     /// Generates the next pose from the previous pose and current gyro data
     fn generate_pose(&self, previous: &Pose) -> Pose {
         // let new_heading: f64 = self.ahrs.yaw().into();
@@ -195,7 +188,6 @@ impl Subsystem for Drive {
                             .set(ControlMode::PercentOutput, rpct, DemandType::Neutral, 0.0)
                             .unwrap();
                     }
-                    Instruction::Velocity(_left, _right) => unimplemented!(),
                 }
             }
 

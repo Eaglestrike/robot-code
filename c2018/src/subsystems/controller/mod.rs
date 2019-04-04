@@ -1,4 +1,5 @@
 pub mod edge_detect;
+
 #[allow(dead_code)]
 pub mod xbox;
 
@@ -14,7 +15,6 @@ use wpilib::ds::*;
 type Drive = Sender<DriveCmd>;
 type Superstructure = Sender<SsCmd>;
 
-#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Controller<'a, T: Controls> {
     controls: EdgeWrapper<T>,
@@ -192,6 +192,7 @@ macro_rules! wrapper_fields {
     };
 }
 
+// TODO Check if there is a better way to do this with traits
 #[allow(dead_code)]
 mod _wrapper {
     use super::{

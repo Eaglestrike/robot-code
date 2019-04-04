@@ -49,7 +49,7 @@ impl Connection {
         udp.set_write_timeout(wt)?;
 
         Ok(Connection {
-            udp: udp,
+            udp,
             data: vec![0u8; Self::BUF_LEN].into_boxed_slice(),
         })
     }

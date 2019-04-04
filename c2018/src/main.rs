@@ -1,5 +1,4 @@
 mod cheesy_drive;
-#[allow(dead_code)]
 mod config;
 mod subsystems;
 

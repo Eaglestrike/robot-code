@@ -56,14 +56,6 @@ pub mod superstructure {
     pub const GATE2: i32 = 7;
     pub const GATE3: i32 = 6;
 
-    pub mod elevator {
-        // todo IDS
-        pub const MASTER_TALON: i32 = 13;
-        pub const SLAVE_TALON1: i32 = 4;
-        pub const SLAVE_TALON2: i32 = 6;
-        pub const LIMIT_SWITCH: i32 = 9;
-    }
-
     // TODO ids
     pub const INTAKE_SOLENOID: i32 = 1;
     pub const CHANNEL_TALON: i32 = 9;

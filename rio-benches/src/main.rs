@@ -1,4 +1,4 @@
-#![allow(unused_imports, dead_code)]
+#![allow(unused_imports)]
 #![cfg_attr(feature = "nightly", feature(test))]
 use std::thread;
 
@@ -14,42 +14,6 @@ fn main() {
 
 #[derive(Copy, Clone)]
 struct Data(pub [f64; 5]);
-
-struct MethodCommunicator {
-    int: f64,
-    rec: Receiver<Data>,
-    ext1: Sender<Data>,
-    ext2: Sender<Data>,
-}
-
-impl MethodCommunicator {
-    pub const fn new(a: f64, b: Receiver<Data>, c: Sender<Data>, d: Sender<Data>) -> Self {
-        Self {
-            int: a,
-            rec: b,
-            ext1: c,
-            ext2: d,
-        }
-    }
-
-    pub fn process(&mut self) {
-        let mut a = self.int;
-        self.rec.try_iter().for_each(|d| {
-            a *= d.0[0];
-        });
-        self.int = a;
-    }
-
-    pub fn send(&self) {
-        if self.int > 0. {
-            self.ext1.try_send(Data([self.int; 5])).ok();
-        } else {
-            self.ext2.try_send(Data([self.int; 5])).ok();
-        }
-    }
-}
-
-const ITERS: usize = 100;
 
 #[cfg(feature = "nightly")]
 #[bench]

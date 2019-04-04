@@ -245,7 +245,6 @@ impl Elevator {
                 < COMPLETION_THRESHOLD_TICKS)
     }
 
-    #[allow(dead_code)]
     pub fn is_at_height(&self, pos: si::Meter<f64>) -> ctre::Result<bool> {
         let ticks: i32 = *(pos / METERS_PER_TICK) as i32;
         Ok(
@@ -254,7 +253,6 @@ impl Elevator {
         )
     }
 
-    #[allow(dead_code)]
     pub fn state(&self) -> LoopState {
         self.state
     }
