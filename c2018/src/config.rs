@@ -72,8 +72,11 @@ pub mod superstructure {
     pub const CLIMB_SOLENOID: i32 = 0;
 
     pub mod hatch {
-        // TODO set ids
+        // COMPETITION
         pub const EXTEND_PNEUMATICS_ID: i32 = 6;
         pub const OUTTAKE_PNEUMATICS_ID: i32 = 7;
+        // PRACTICE
+        // pub const EXTEND_PNEUMATICS_ID: i32 = 7;
+        // pub const OUTTAKE_PNEUMATICS_ID: i32 = 6;
     }
 }
