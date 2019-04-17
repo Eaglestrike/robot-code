@@ -33,7 +33,7 @@ pub struct Elevator {
 }
 
 const RECT_PROF_PID_IDX: i32 = 0;
-const ZEROING_COMMAND: f64 = -0.3;
+const ZEROING_COMMAND: f64 = -0.2;
 // TODO tune these
 const COMPLETION_THRESHOLD: si::Meter<f64> = const_unit!(0.03);
 const COMPLETION_THRESHOLD_TICKS: i32 =
