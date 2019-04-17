@@ -306,10 +306,10 @@ impl<'a> Controls for StandardControls<'a> {
         get_button(&self.ds, self.oi, 8)
     }
     fn hatch_extend(&mut self) -> bool {
-        get_axis(&self.ds, self.oi, JoystickAxis::new(2).unwrap()) > 0.8
+        get_axis(&self.ds, self.oi, JoystickAxis::new(2).unwrap()) > 0.3
     }
     fn hatch_outtake(&mut self) -> bool {
-        get_axis(&self.ds, self.oi, JoystickAxis::new(3).unwrap()) > 0.8
+        get_axis(&self.ds, self.oi, JoystickAxis::new(3).unwrap()) > 0.3
     }
     fn elevator_low(&mut self) -> bool {
         get_button(&self.ds, self.oi, 0)
