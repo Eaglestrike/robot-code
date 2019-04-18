@@ -58,7 +58,7 @@ impl<'a, T: Controls> Subsystem for Controller<'a, T> {
             let wheel = self.controls.wheel();
             let throttle = self.controls.throttle();
             let quick_turn = self.controls.quick_turn_raw();
-            let high_gear = !self.controls.low_gear_raw();
+            let high_gear = self.controls.high_gear_raw();
             // TODO user input
             let signal = self
                 .cheesy
@@ -67,9 +67,9 @@ impl<'a, T: Controls> Subsystem for Controller<'a, T> {
                 .send(DriveCmd::Percentage(signal.l, signal.r))
                 .expect("DT disconnected: ");
             // TODO log
-            self.controls.low_gear().sig_send_val(
-                DriveCmd::GearShift(Gear::Low),
+            self.controls.high_gear().sig_send_val(
                 DriveCmd::GearShift(Gear::High),
+                DriveCmd::GearShift(Gear::Low),
                 |cmd| {
                     self.drive.send(cmd).expect("DT disconnected");
                 },
@@ -202,7 +202,7 @@ mod _wrapper {
         Controls,
     };
     wrapper_fields! { EdgeWrapper,
-        low_gear,
+        high_gear,
         quick_turn,
         ball_intake,
         abort_ball_intake,
@@ -235,7 +235,7 @@ use _wrapper::EdgeWrapper;
 pub trait Controls {
     fn throttle(&mut self) -> f64;
     fn wheel(&mut self) -> f64;
-    fn low_gear(&mut self) -> bool;
+    fn high_gear(&mut self) -> bool;
     fn quick_turn(&mut self) -> bool;
     fn ball_intake(&mut self) -> bool;
     fn abort_ball_intake(&mut self) -> bool;
@@ -286,7 +286,7 @@ impl<'a> Controls for StandardControls<'a> {
     fn wheel(&mut self) -> f64 {
         get_axis(&self.ds, self.right, self.x).into()
     }
-    fn low_gear(&mut self) -> bool {
+    fn high_gear(&mut self) -> bool {
         get_button(&self.ds, self.left, 0)
     }
     fn quick_turn(&mut self) -> bool {
