@@ -15,13 +15,13 @@ pub mod drive {
     pub const LEFT_MASTER: i32 = 12;
 
     /// ID of the slave talon on the left side of the robot
-    pub const LEFT_SLAVE: i32 = 14;
+    pub const LEFT_SLAVE: i32 = 8;
 
     /// ID of the master talon on the right side of the robot
     pub const RIGHT_MASTER: i32 = 3;
 
     /// ID of the slave talon on the right side of the robot
-    pub const RIGHT_SLAVE: i32 = 1;
+    pub const RIGHT_SLAVE: i32 = 7;
 
     /// The number of meters per tick of the drive encoders
     pub const ENCODER_METERS_PER_TICK: Meter<f64> = const_unit!(-1.0); //TODO
