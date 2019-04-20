@@ -188,4 +188,8 @@ impl Channel {
             }
         }
     }
+
+    pub fn state(&self) -> &BallProgress {
+        &self.state
+    }
 }

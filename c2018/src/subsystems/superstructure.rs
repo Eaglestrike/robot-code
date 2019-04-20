@@ -246,6 +246,7 @@ impl Subsystem for Superstructure {
                     self.pressure_sensor.get_psi().unwrap_or(std::f64::NAN)
                 );
                 println!("Elevator State: {:?}", self.elevator.state());
+                println!("Channel State: {:?}", self.channel.state());
             }
             pnm_print_count += 1;
             let mut outs = PeriodicOuts::default();
