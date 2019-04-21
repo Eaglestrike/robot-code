@@ -243,7 +243,7 @@ impl Subsystem for Superstructure {
                 pnm_print_count = 0;
                 println!(
                     "Pnuematic System PSI: {}",
-                    self.pressure_sensor.get_psi().unwrap_or(std::f64::NAN)
+                    self.pressure_sensor.psi().unwrap_or(std::f64::NAN)
                 );
                 println!("Elevator State: {:?}", self.elevator.state());
                 println!("Channel State: {:?}", self.channel.state());
@@ -418,16 +418,5 @@ impl CachingSolenoid {
     }
 }
 
+use hardware::Rev111107DS00PressureSensor;
 use wpilib::AnalogInput;
-#[derive(Debug)]
-struct Rev111107DS00PressureSensor(AnalogInput, f64);
-
-impl Rev111107DS00PressureSensor {
-    fn new(ain: AnalogInput, supply_voltage: f64) -> Self {
-        Self(ain, supply_voltage)
-    }
-
-    fn get_psi(&self) -> HalResult<f64> {
-        Ok((250.0 * (self.0.voltage()? / self.1)) - 25.0)
-    }
-}

@@ -3,6 +3,7 @@ members = [
     "first-party/controls",
     "first-party/interp-map",
     "first-party/copcomp/rust",
+    "first-party/hardware",
     "rio-benches",
     "c2018",
     "c2018/ctre-elevator-tuning"
