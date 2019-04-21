@@ -1,7 +1,8 @@
 use super::HalCtreError;
 use super::IntakeExt;
 use super::PeriodicOuts;
-use wpilib::{dio::DigitalInput, HalResult};
+use hardware::Qmic0N0A;
+use wpilib::HalResult;
 
 // TODO tune
 const CHAN_INTAKE_COMMAND: f64 = 0.8;
@@ -25,7 +26,7 @@ pub enum BallProgress {
 #[derive(Debug)]
 pub struct Channel {
     state: BallProgress,
-    gates: (DigitalInput, DigitalInput, DigitalInput),
+    gates: (Qmic0N0A, Qmic0N0A, Qmic0N0A),
 }
 
 use crate::config::superstructure::{GATE1, GATE2, GATE3};
@@ -34,9 +35,9 @@ impl Channel {
         Ok(Self {
             state: BallProgress::None,
             gates: (
-                DigitalInput::new(GATE1)?,
-                DigitalInput::new(GATE2)?,
-                DigitalInput::new(GATE3)?,
+                Qmic0N0A::new(GATE1)?,
+                Qmic0N0A::new(GATE2)?,
+                Qmic0N0A::new(GATE3)?,
             ),
         })
     }
