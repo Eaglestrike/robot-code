@@ -4,8 +4,16 @@ version = "0.1.0"
 authors = ["Josh Hejna <josh.hejna@gmail.com>"]
 edition = "2018"
 
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "channel_latency"
+path = "src/channel_latency.rs"
+
 [features]
 nightly = []
 
 [dependencies]
 crossbeam-channel = "0.3"
+libc = "0.2.54"

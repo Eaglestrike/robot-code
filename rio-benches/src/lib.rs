@@ -8,10 +8,6 @@ extern crate test;
 #[cfg(feature = "nightly")]
 use test::Bencher;
 
-fn main() {
-    println!("This is designed to run the test binary only!");
-}
-
 #[derive(Copy, Clone)]
 struct Data(pub [f64; 5]);
 
