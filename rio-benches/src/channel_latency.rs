@@ -1,16 +1,20 @@
 use crossbeam_channel::*;
+use std::convert::TryInto;
 use std::thread;
 use std::time::{Duration, Instant};
 
 /// Setup to test the latency of a crossbeam channel
 /// should probably run as root, panic otherwise most likely
 fn main() {
-    set_thread_priority(20);
-    pin_thread_to_cpu(0).unwrap();
-    let iters = 100;
-    let mut v = Vec::new();
+    let iters: u32 = 100;
+    let pin_prio = true;
+    if pin_prio {
+        set_thread_priority(20);
+        pin_thread_to_cpu(0).unwrap();
+    }
+    let mut v = Vec::with_capacity(iters.try_into().unwrap());
     for i in 0..iters {
-        v.push(bench(1000));
+        v.push(bench(1000, pin_prio));
         println!(
             "iter {} of {} finished with {:?}",
             i + 1,
@@ -28,6 +32,29 @@ fn main() {
     });
     let stddev = (stddev as f64 / iters as f64).sqrt();
     println!("mean: {:?} stddev: {:0.3}us", mean, stddev as f64 / 1000.);
+    print_rusage();
+}
+
+fn print_rusage() {
+    println!("Thread stats");
+    unsafe {
+        let mut r: libc::rusage = std::mem::uninitialized();
+        let ret = libc::getrusage(libc::RUSAGE_THREAD, &mut r);
+        if ret != 0 {
+            panic!();
+        }
+        println!(
+            r#"rusage {{
+    ru_minflt: {},
+    ru_majflt: {},
+    ru_inblock: {},
+    ru_oublock: {},
+    ru_nvcsw: {},
+    ru_nivcsw: {},
+}}"#,
+            r.ru_minflt, r.ru_majflt, r.ru_inblock, r.ru_oublock, r.ru_nvcsw, r.ru_nvcsw
+        )
+    }
 }
 
 fn set_thread_priority(prio: i32) {
@@ -60,12 +87,14 @@ fn pin_thread_to_cpu(cpu: usize) -> Result<(), libc::c_int> {
     }
 }
 
-fn bench(iters: usize) -> Duration {
+fn bench(iters: usize, pin_prio: bool) -> Duration {
     let (s, r) = unbounded();
     let mut v = Vec::with_capacity(iters);
     let handle = thread::spawn(move || {
-        set_thread_priority(10);
-        pin_thread_to_cpu(1).unwrap();
+        if pin_prio {
+            set_thread_priority(10);
+            pin_thread_to_cpu(1).unwrap();
+        }
         std::thread::sleep(Duration::from_millis(10));
         send(s, iters);
     });
