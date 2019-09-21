@@ -5,13 +5,15 @@ CONFIG = {
         {
             "name": "front",
             "dev_num": 0,
-            "ip": "0.0.0.0",
+            "ip": "10.1.14.5",
             "port": "5808"
         },
-        # {
-        #     "name": "back",
-        #     "dev_num": 1,
-        # },
+        {
+            "name": "back",
+            "dev_num": 1,
+            "ip": "10.1.14.5",
+            "port": "5809"
+        },
     ],
     "check_interval": 0.1
 }
@@ -63,7 +65,6 @@ class Camera:
         if self.stdout_r is None or self.stdout_w is None:
             self.stdout_w = open(self.usb_info, 'w+b')
             self.stdout_r = open(self.usb_info, 'rt', buffering=1)
-        cmd = 'gst-launch-1.0 -v v4l2src device=/dev/video1 ! "video/x-raw,width=320,height=240,framerate=30/1" ! x264enc speed-preset=1 tune=zerolatency bitrate=512 ! rtph264pay ! udpsink host=10.1.14.5 port=5809'
         self.process = subprocess.Popen([
             'gst-launch-1.0',
             '-v', 'v4l2src',
