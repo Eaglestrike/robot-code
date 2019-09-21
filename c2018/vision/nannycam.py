@@ -43,7 +43,7 @@ class Camera:
     @staticmethod
     def get_usb_info(dev_num):
         KEY = "ID_PATH_TAG"
-        cmd = "udevadm info --query=property /dev/video{}".format(dev_num, KEY).split(' ')
+        cmd = "udevadm info --query=property /dev/video{}".format(dev_num).split(' ')
         p1 = subprocess.Popen(cmd, stdout=subprocess.PIPE)
         p2 = subprocess.Popen(["grep", KEY], stdin=p1.stdout, stdout=subprocess.PIPE)
         p1.stdout.close()  # Allow p1 to receive a SIGPIPE if p2 exits.
