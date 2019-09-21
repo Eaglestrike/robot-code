@@ -5,3 +5,9 @@ gst-launch-1.0 -v v4l2src device=/dev/video0 ! "video/x-raw,width=320,height=240
 v4l2-ctl -d /dev/video1 -c exposure_auto=1 -c exposure_absolute=300
 gst-launch-1.0 -v v4l2src device=/dev/video1 ! "video/x-raw,width=320,height=240,framerate=30/1" ! x264enc speed-preset=1 tune=zerolatency bitrate=512 ! rtph264pay ! udpsink host=10.1.14.5 port=5809 &
 wait
+
+# recv
+# gst-launch-1.0 udpsrc port=5000 ! application/x-rtp, clock-rate=90000,payload=96 ! rtph263pdepay queue-delay=0 ! ffdec_h263 ! xvimagesink
+# ^^ seems broken atm
+# this one wokrs on linux: gst-launch-1.0 udpsrc port={} caps="application/x-rtp" ! rtph264depay ! avdec_h264 ! autovideosink sync=false
+# TODO: grab the final one from the driver station
