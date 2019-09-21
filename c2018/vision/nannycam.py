@@ -19,6 +19,7 @@ CONFIG = {
 from time import sleep
 import subprocess
 from pathlib import Path
+from sys import stdout
 
 def run_cap(ar, *args):
     return subprocess.run(ar, *args, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -131,6 +132,7 @@ def main(cfg):
                 # finish printing stdout, rebuild
                 print(cam, "process spuriously finished, attempting restart...")
                 cam.spawn_process()
+            stdout.flush() # required for non-interactive stdout, such as tee-ing to a log file
         sleep(cfg["check_interval"])
 
 
