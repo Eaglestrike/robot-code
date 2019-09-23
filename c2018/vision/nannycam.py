@@ -15,7 +15,8 @@ CONFIG = {
             "port": "5809"
         },
     ],
-    "check_interval": 0.1
+    "check_interval": 0.1,
+    "do_config_cameras": False
 }
 
 from time import sleep
@@ -104,7 +105,8 @@ def main(cfg):
         c.resolve_usb_info()
         cameras.append(c)
     for cam in cameras:
-        cam.cfg_v4l2()
+        if cfg["do_config_cameras"]:
+            cam.cfg_v4l2()
         cam.spawn_process()
     while True:
         for cam in cameras:
@@ -126,7 +128,8 @@ def main(cfg):
                         print("Found matching candidate on /dev/video{}".format(cand_num))
                         cam.end_process()
                         cam.dev_num = cand_num
-                        cam.cfg_v4l2()
+                        if cfg["do_config_cameras"]:
+                            cam.cfg_v4l2()
                         cam.spawn_process()
                         break
             elif cam.process.poll() is not None:
