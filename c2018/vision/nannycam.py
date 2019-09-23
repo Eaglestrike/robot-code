@@ -117,12 +117,14 @@ def main(cfg):
             if not cam.exists():
                 print(cam, "no longer exists, searching for candidate...")
                 # Assume camera was unplugged, find untracked camera with the proper USB info
-                existing_dev_nums = ['video' + c.dev_num for c in cameras]
-                candidates = [int(p.name[5:]) for p in Path("/dev/").glob("video*")]
-
+                candidates = []
+                for cand in (p.name[5:] for p in Path("/dev/").glob("video*")):
+                    try:
+                        candidates.append(int(cand))
+                    except ValueError:
+                        pass
+                print("Examining candidates on /dev/video + ", candidates)
                 for cand_num in candidates:
-                    if cand_num in existing_dev_nums:
-                        continue
                     usb_info = Camera.get_usb_info(cand_num)
                     if usb_info == cam.usb_info:
                         print("Found matching candidate on /dev/video{}".format(cand_num))
