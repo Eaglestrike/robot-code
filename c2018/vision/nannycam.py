@@ -23,6 +23,7 @@ from time import sleep
 import subprocess
 from pathlib import Path
 from sys import stdout
+import traceback
 
 def run_cap(ar, *args):
     return subprocess.run(ar, *args, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -110,35 +111,39 @@ def main(cfg):
         cam.spawn_process()
     while True:
         for cam in cameras:
-            # Flush IO
-            for l in cam.stdout_r.readlines():
-                print("STDOUTERR", cam, ':', l, end='')
-            # Health checks
-            if not cam.exists():
-                print(cam, "no longer exists, searching for candidate...")
-                # Assume camera was unplugged, find untracked camera with the proper USB info
-                candidates = []
-                for cand in (p.name[5:] for p in Path("/dev/").glob("video*")):
-                    try:
-                        candidates.append(int(cand))
-                    except ValueError:
-                        pass
-                print("Examining candidates on /dev/video + ", candidates)
-                for cand_num in candidates:
-                    usb_info = Camera.get_usb_info(cand_num)
-                    if usb_info == cam.usb_info:
-                        print("Found matching candidate on /dev/video{}".format(cand_num))
-                        cam.end_process()
-                        cam.dev_num = cand_num
-                        if cfg["do_config_cameras"]:
-                            cam.cfg_v4l2()
-                        cam.spawn_process()
-                        break
-            elif cam.process.poll() is not None:
-                # finish printing stdout, rebuild
-                print(cam, "process spuriously finished, attempting restart...")
-                cam.spawn_process()
-            stdout.flush() # required for non-interactive stdout, such as tee-ing to a log file
+            try:
+                # Flush IO
+                for l in cam.stdout_r.readlines():
+                    print("STDOUTERR", cam, ':', l, end='')
+                # Health checks
+                if not cam.exists():
+                    print(cam, "no longer exists, searching for candidate...")
+                    # Assume camera was unplugged, find untracked camera with the proper USB info
+                    candidates = []
+                    for cand in (p.name[5:] for p in Path("/dev/").glob("video*")):
+                        try:
+                            candidates.append(int(cand))
+                        except ValueError:
+                            pass
+                    print("Examining candidates on /dev/video + ", candidates)
+                    for cand_num in candidates:
+                        usb_info = Camera.get_usb_info(cand_num)
+                        if usb_info == cam.usb_info:
+                            print("Found matching candidate on /dev/video{}".format(cand_num))
+                            cam.end_process()
+                            cam.dev_num = cand_num
+                            if cfg["do_config_cameras"]:
+                                cam.cfg_v4l2()
+                            cam.spawn_process()
+                            break
+                elif cam.process.poll() is not None:
+                    # finish printing stdout, rebuild
+                    print(cam, "process spuriously finished, attempting restart...")
+                    cam.spawn_process()
+            except: # bad practice but we don't want to stop the process
+                print("Exception occurred while handling", cam, ":")
+                traceback.print_exc()
+        stdout.flush() # required for non-interactive stdout, such as tee-ing to a log file
         sleep(cfg["check_interval"])
 
 
