@@ -10,4 +10,5 @@ wait
 # gst-launch-1.0 udpsrc port=5000 ! application/x-rtp, clock-rate=90000,payload=96 ! rtph263pdepay queue-delay=0 ! ffdec_h263 ! xvimagesink
 # ^^ seems broken atm
 # this one wokrs on linux: gst-launch-1.0 udpsrc port={} caps="application/x-rtp" ! rtph264depay ! avdec_h264 ! autovideosink sync=false
-# TODO: grab the final one from the driver station
+# The one that currently runs on DS:
+# gst-launch-1.0 udpsrc port=5000 caps="application/x-rtp" ! rtph264depay ! avdec_h264 ! autovideosink sync=false
