@@ -5,13 +5,13 @@ CONFIG = {
     "cameras": [
         {
             "name": "front",
-            "dev_num": 0,
+            "dev_num": None,
             "ip": "10.1.14.5",
             "port": "5808"
         },
         {
             "name": "back",
-            "dev_num": 1,
+            "dev_num": None,
             "ip": "10.1.14.5",
             "port": "5809"
         },
