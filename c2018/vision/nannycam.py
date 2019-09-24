@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+# `None` for dev_num makes the camera fill in automatically
 CONFIG = {
     "cameras": [
         {
@@ -38,9 +39,13 @@ class Camera:
         self.stdout_w = None
         self.stdout_r = None
 
-    def exists(self):
-        path = Path("/dev/video{}".format(self.dev_num))
+    @staticmethod
+    def dev_num_exists(dev_num):
+        path = Path("/dev/video{}".format(dev_num))
         return path.exists()
+
+    def exists(self):
+        return self.dev_num_exists(self.dev_num)
 
     @staticmethod
     def get_usb_info(dev_num):
@@ -95,16 +100,46 @@ class Camera:
     def __str__(self):
         return "Camera({}, {})".format(self.dev_num, self.usb_info)
 
+def list_dev_nums():
+    candidates = []
+    for cand in (p.name[5:] for p in Path("/dev/").glob("video*")):
+        try:
+            dev_num = int(cand)
+            if Camera.dev_num_exists(dev_num):
+                candidates.append(dev_num)
+        except ValueError:
+            pass
+    return candidates
 
+# Not robust to unplugs during call
+def make_cam_list(cfg):
+    cameras = []
+    candidates = list_dev_nums()
+    # Sort None dev_nums last, they'll fill in
+    for camera in sorted(cfg["cameras"], key=lambda c: (c["dev_num"] is None, c["dev_num"])):
+        filtered_dev_num = camera["dev_num"]
+        if filtered_dev_num is None:
+            print("Encountered null dev_num in config for camera `", camera["name"], "`, attempting to assign from remaining devices")
+            if len(candidates) > 0:
+                filtered_dev_num = candidates[0]
+            else:
+                print("ERROR: device candidate list exhausted! Camera will not be instantiated!")
+                continue
+        c = Camera(filtered_dev_num, camera["ip"], camera["port"], None)
+        if not c.exists():
+            print("ERROR: Resolved camera `", camera["name"], "` does not exist on dev", filtered_dev_num , "! It will not be instantiated!")
+            continue
+        c.resolve_usb_info()
+        print("Config", camera["name"], "successfully mapped to", c)
+        cameras.append(c)
+        candidates.remove(c.dev_num)
+    return cameras
 
 
 def main(cfg):
-    cameras = []
-    for camera in cfg["cameras"]:
-        c = Camera(camera["dev_num"], camera["ip"], camera["port"], None)
-        assert(c.exists())
-        c.resolve_usb_info()
-        cameras.append(c)
+    print("======= Grabbing Cameras =======")
+    cameras = make_cam_list(cfg)
+    print("===== Initializing Cameras =====")
     for cam in cameras:
         if cfg["do_config_cameras"]:
             cam.cfg_v4l2()
@@ -118,13 +153,8 @@ def main(cfg):
                 # Health checks
                 if not cam.exists():
                     print(cam, "no longer exists, searching for candidate...")
-                    # Assume camera was unplugged, find untracked camera with the proper USB info
-                    candidates = []
-                    for cand in (p.name[5:] for p in Path("/dev/").glob("video*")):
-                        try:
-                            candidates.append(int(cand))
-                        except ValueError:
-                            pass
+                    # Assume camera was unplugged, find another camera with the proper USB info
+                    candidates = list_dev_nums()
                     print("Examining candidates on /dev/video + ", candidates)
                     for cand_num in candidates:
                         usb_info = Camera.get_usb_info(cand_num)
