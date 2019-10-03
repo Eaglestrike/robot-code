@@ -33,8 +33,22 @@ impl<T, E: std::fmt::Debug> OkPrint for Result<T, E> {
     }
 }
 
+pub mod built_info {
+    // The file has been placed there by the build script.
+    include!(concat!(env!("OUT_DIR"), "/built.rs"));
+}
+
 fn main() {
     env::set_var("RUST_BACKTRACE", "1");
+    println!(
+        "=====BUILD INFO=====\nBuild Time: {}\nGit Hash: {:?}\nRustc Version: {}\nProfile & Opt Level: {} {}",
+        built_info::BUILT_TIME_UTC,
+        built_info::GIT_VERSION,
+        built_info::RUSTC_VERSION,
+        built_info::PROFILE,
+        built_info::OPT_LEVEL
+    );
+
     let bus = Bus::new(0);
     let (drive_send, drive_recv) = unbounded();
     let (super_send, super_recv) = unbounded();
