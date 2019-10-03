@@ -20,16 +20,22 @@ use subsystems::superstructure::*;
 #[macro_use]
 extern crate std;
 
-pub trait OkPrint {
+pub trait OkPrint<T> {
+    fn print(self) -> T;
     fn ok_print(self);
 }
 
-impl<T, E: std::fmt::Debug> OkPrint for Result<T, E> {
-    fn ok_print(self) {
+impl<T, E: std::fmt::Debug> OkPrint<Result<T, E>> for Result<T, E> {
+    fn print(self) -> Self {
         match self {
-            Err(e) => println!("ok_print at {}:{}:{}:{:?}", file!(), line!(), column!(), e),
+            Err(ref e) => println!("Err at {}:{}:{}: {:?}", file!(), line!(), column!(), e),
             Ok(_) => (),
         }
+        self
+    }
+
+    fn ok_print(self) {
+        self.print().ok();
     }
 }
 
@@ -63,7 +69,8 @@ fn main() {
             let drive = Drive::new(bus, drive_recv);
             println!("drive: {:#?}", drive);
             drive.run();
-        });
+        })
+        .unwrap();
 
     thread::Builder::new()
         .name("SStruct".to_string())
@@ -72,7 +79,8 @@ fn main() {
             let sstruct = Superstructure::new(super_recv).unwrap();
             println!("sstruct: {:#?}", sstruct);
             sstruct.run();
-        });
+        })
+        .unwrap();
 
     let lj = JoystickPort::new(0).unwrap();
     let rj = JoystickPort::new(1).unwrap();

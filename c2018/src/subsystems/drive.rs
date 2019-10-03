@@ -12,6 +12,7 @@ use controls::const_unit;
 use controls::units::*;
 
 use crate::config::drive::*;
+use crate::OkPrint;
 
 use super::Subsystem;
 
@@ -185,14 +186,14 @@ impl Subsystem for Drive {
                         .gear_shifter
                         .set(g.into())
                         // TODO log
-                        .expect("Unable to set gear shifter!"),
+                        .ok_print(),
                     Instruction::Percentage(lpct, rpct) => {
                         self.l_mstr
                             .set(ControlMode::PercentOutput, lpct, DemandType::Neutral, 0.0)
-                            .unwrap();
+                            .ok_print();
                         self.r_mstr
                             .set(ControlMode::PercentOutput, rpct, DemandType::Neutral, 0.0)
-                            .unwrap();
+                            .ok_print();
                     }
                     Instruction::Velocity(_left, _right) => unimplemented!(),
                 }
