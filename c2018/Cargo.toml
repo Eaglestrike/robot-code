@@ -12,14 +12,9 @@ debug_stub_derive = "0.3"
 lazy_static = "1"
 wpilib = "0.4.0"
 crossbeam-channel = "0.3.6"
-parking_lot = "0.7.1"
 bus = "2.0.1"
-ws = "0.7.9"
 controls = { path = "../first-party/controls" }
 paste = "0.1.4"
-serde = "1.0.84"
-serde_derive = "1.0.84"
-serde_cbor = "0.9.0"
 ctre-elevator-tuning = {path = "ctre-elevator-tuning"}
 
 [package.metadata.frc]
