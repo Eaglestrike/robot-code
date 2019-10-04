@@ -33,7 +33,13 @@ pub struct Elevator {
 }
 
 const RECT_PROF_PID_IDX: i32 = 0;
-const ZEROING_COMMAND: f64 = -0.2;
+
+// Exact value doesn't matter, should trail zero goal at some steady state distance provided is low enough
+// 20% power at 15cm
+const ZEROING_KP: f64 = 0.20 / (0.15 / METERS_PER_TICK.value_unsafe);
+// speed: -0.05m / s
+const ZEROING_SPEED_TICKS_PER_ITER: i32 = (-0.05 / METERS_PER_TICK.value_unsafe / 200.0) as i32;
+const ZERO_CMD_MAX: f64 = 0.25;
 // TODO tune these
 const COMPLETION_THRESHOLD: si::Meter<f64> = const_unit!(0.03);
 const COMPLETION_THRESHOLD_TICKS: i32 =
@@ -154,6 +160,7 @@ impl Elevator {
             LoopState::Unitialized => {
                 // TODO handle
                 self.state = LoopState::Zeroing;
+                self.goal = self.mt.get_selected_sensor_position(RECT_PROF_PID_IDX)?;
                 return self.iterate();
             }
             LoopState::Panicking(0) => {
@@ -177,12 +184,18 @@ impl Elevator {
                             .set(ControlMode::PercentOutput, 0.0, DemandType::Neutral, 0.0)
                     }
                     // limit is normally closed
-                    Ok(true) => self.mt.set(
-                        ControlMode::PercentOutput,
-                        ZEROING_COMMAND,
-                        DemandType::Neutral,
-                        0.0,
-                    ),
+                    Ok(true) => {
+                        let pos = self.mt.get_selected_sensor_position(RECT_PROF_PID_IDX)?;
+                        let cmd = ZEROING_KP * f64::from(self.goal - pos);
+                        self.mt.set(
+                            ControlMode::PercentOutput,
+                            clamp(cmd, -ZERO_CMD_MAX, ZERO_CMD_MAX),
+                            DemandType::Neutral,
+                            0.0,
+                        )?;
+                        self.goal += ZEROING_SPEED_TICKS_PER_ITER;
+                        Ok(())
+                    }
                     Ok(false) => {
                         // TODO log
                         self.mt
@@ -265,7 +278,7 @@ impl Elevator {
     }
 
     pub fn force_begin_zero(&mut self) -> LoopState {
-        self.state = LoopState::Zeroing;
+        self.state = LoopState::Unitialized;
         self.state()
     }
 }
