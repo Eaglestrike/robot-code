@@ -202,6 +202,8 @@ pub struct Superstructure {
 use crate::config::superstructure as config;
 impl Superstructure {
     pub fn new(recv: Receiver<Instruction>) -> HalResult<Self> {
+        let mut im = TalonSRX::new(config::CHANNEL_TALON);
+        im.config_openloop_ramp(0.1, 100);
         Ok(Self {
             goal: goal::GoalState::Hatch(
                 goal::HatchGoalHeight::Low,
@@ -211,7 +213,7 @@ impl Superstructure {
             hatch_hardware: hatch_hardware::HatchHardware::new()?,
             channel: channel::Channel::new()?,
             elevator: Elevator::new()?,
-            im: CachingTalon::new(TalonSRX::new(config::CHANNEL_TALON)),
+            im: CachingTalon::new(im),
             is: CachingSolenoid::new(Solenoid::new(config::INTAKE_SOLENOID)?)?,
             om: CachingTalon::new(TalonSRX::new(config::OUTTAKE_TALON)),
             climb: CachingSolenoid::new(Solenoid::new(config::CLIMB_SOLENOID)?)?,
