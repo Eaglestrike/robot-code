@@ -28,6 +28,7 @@ pub struct Elevator {
     limit: DigitalInput,
     state: LoopState,
     goal: i32,         // encoder ticks
+    zero_goal: i32,    // encoder ticks
     last_sent_sp: i32, // encoder ticks
     stage_track: StageTracker,
 }
@@ -36,10 +37,10 @@ const RECT_PROF_PID_IDX: i32 = 0;
 
 // Exact value doesn't matter, should trail zero goal at some steady state distance provided is low enough
 // 20% power at 15cm
-const ZEROING_KP: f64 = 0.20 / (0.15 / METERS_PER_TICK.value_unsafe);
+const ZEROING_KP: f64 = 0.5 / (0.15 / METERS_PER_TICK.value_unsafe);
 // speed: -0.05m / s
-const ZEROING_SPEED_TICKS_PER_ITER: i32 = (-0.05 / METERS_PER_TICK.value_unsafe / 200.0) as i32;
-const ZERO_CMD_MAX: f64 = 0.25;
+const ZEROING_SPEED_TICKS_PER_ITER: i32 = (-0.10 / METERS_PER_TICK.value_unsafe / 200.0) as i32;
+const ZERO_CMD_MAX: f64 = 0.35;
 // TODO tune these
 const COMPLETION_THRESHOLD: si::Meter<f64> = const_unit!(0.03);
 const COMPLETION_THRESHOLD_TICKS: i32 =
@@ -148,6 +149,7 @@ impl Elevator {
             limit: DigitalInput::new(config::LIMIT_SWITCH)?,
             state: LoopState::Unitialized,
             goal: std::i32::MIN, // ticks
+            zero_goal: std::i32::MIN,
             last_sent_sp: std::i32::MIN,
             stage_track: StageTracker::zeroed(),
         })
@@ -160,7 +162,8 @@ impl Elevator {
             LoopState::Unitialized => {
                 // TODO handle
                 self.state = LoopState::Zeroing;
-                self.goal = self.mt.get_selected_sensor_position(RECT_PROF_PID_IDX)?;
+                self.zero_goal = self.mt.get_selected_sensor_position(RECT_PROF_PID_IDX)?;
+                println!("ZERO TICKS PER: {}", ZEROING_SPEED_TICKS_PER_ITER);
                 return self.iterate();
             }
             LoopState::Panicking(0) => {
@@ -186,14 +189,21 @@ impl Elevator {
                     // limit is normally closed
                     Ok(true) => {
                         let pos = self.mt.get_selected_sensor_position(RECT_PROF_PID_IDX)?;
-                        let cmd = ZEROING_KP * f64::from(self.goal - pos);
+                        let cmd = ZEROING_KP * f64::from(self.zero_goal - pos);
+                        // stay in stasis around CMD_MAX for cases when robot disabled
+                        if cmd.abs() < ZERO_CMD_MAX {
+                            self.zero_goal += ZEROING_SPEED_TICKS_PER_ITER;
+                        } else {
+                            self.zero_goal -= ZEROING_SPEED_TICKS_PER_ITER;
+                        }
+                        let cmd = clamp(cmd, -ZERO_CMD_MAX, ZERO_CMD_MAX);
+                        println!("Zero Info: pos: {}, goal: {}, CMD {}", pos, self.zero_goal, cmd);
                         self.mt.set(
                             ControlMode::PercentOutput,
-                            clamp(cmd, -ZERO_CMD_MAX, ZERO_CMD_MAX),
+                            cmd,
                             DemandType::Neutral,
                             0.0,
                         )?;
-                        self.goal += ZEROING_SPEED_TICKS_PER_ITER;
                         Ok(())
                     }
                     Ok(false) => {
