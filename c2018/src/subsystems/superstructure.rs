@@ -142,7 +142,7 @@ mod goal {
         fn into(self) -> units::Meter<f64> {
             use BallGoalHeight::*;
             match self {
-                None => 100.0 * ctre_elevator_tuning::METERS_PER_TICK,
+                None => 50.0 * ctre_elevator_tuning::METERS_PER_TICK,
                 Low => 5325.0 * ctre_elevator_tuning::METERS_PER_TICK + 0.0343 * units::M,
                 Cargo => 17100.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M,
                 Med => 24000.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M,
@@ -166,7 +166,7 @@ mod goal {
             match self {
                 Low => {
                     700.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M
-                        + 0.216 * units::M
+                        + 0.216 * units::M + 0.0127 * units::M
                 }
                 Med => {
                     17900.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M
