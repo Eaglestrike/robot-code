@@ -197,7 +197,7 @@ impl Elevator {
                             self.zero_goal -= ZEROING_SPEED_TICKS_PER_ITER;
                         }
                         let cmd = clamp(cmd, -ZERO_CMD_MAX, ZERO_CMD_MAX);
-                        println!("Zero Info: pos: {}, goal: {}, CMD {}", pos, self.zero_goal, cmd);
+                        // println!("Zero Info: pos: {}, goal: {}, CMD {}", pos, self.zero_goal, cmd);
                         self.mt.set(
                             ControlMode::PercentOutput,
                             cmd,
