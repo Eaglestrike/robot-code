@@ -163,6 +163,7 @@ impl Elevator {
                 // TODO handle
                 self.state = LoopState::Zeroing;
                 self.zero_goal = self.mt.get_selected_sensor_position(RECT_PROF_PID_IDX)?;
+                self.mt.override_soft_limits_enable(false);
                 println!("ZERO TICKS PER: {}", ZEROING_SPEED_TICKS_PER_ITER);
                 return self.iterate();
             }
@@ -198,12 +199,8 @@ impl Elevator {
                         }
                         let cmd = clamp(cmd, -ZERO_CMD_MAX, ZERO_CMD_MAX);
                         // println!("Zero Info: pos: {}, goal: {}, CMD {}", pos, self.zero_goal, cmd);
-                        self.mt.set(
-                            ControlMode::PercentOutput,
-                            cmd,
-                            DemandType::Neutral,
-                            0.0,
-                        )?;
+                        self.mt
+                            .set(ControlMode::PercentOutput, cmd, DemandType::Neutral, 0.0)?;
                         Ok(())
                     }
                     Ok(false) => {
