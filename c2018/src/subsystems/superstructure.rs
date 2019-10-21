@@ -115,7 +115,6 @@ mod interface {
         BeginElevatorPanic,
         ForceElevatorZero,
     }
-
 }
 pub use interface::*;
 
@@ -166,7 +165,8 @@ mod goal {
             match self {
                 Low => {
                     700.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M
-                        + 0.216 * units::M + 0.0127 * units::M
+                        + 0.216 * units::M
+                        + 0.0127 * units::M
                 }
                 Med => {
                     17900.0 * ctre_elevator_tuning::METERS_PER_TICK - 0.0343 * units::M
