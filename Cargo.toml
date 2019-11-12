@@ -5,8 +5,8 @@ members = [
     "first-party/copcomp/rust",
     "first-party/hardware",
     "rio-benches",
-    "c2018",
-    "c2018/ctre-elevator-tuning"
+    "c2019",
+    "c2019/ctre-elevator-tuning"
 ]
 
 [profile.dev]
