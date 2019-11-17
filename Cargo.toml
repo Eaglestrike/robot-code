@@ -1,12 +1,7 @@
 [workspace]
 members = [
-    "first-party/controls",
-    "first-party/interp-map",
-    "first-party/copcomp/rust",
-    "first-party/hardware",
-    "rio-benches",
     "c2019",
-    "c2019/ctre-elevator-tuning"
+    "rio-benches",
 ]
 
 [profile.dev]
