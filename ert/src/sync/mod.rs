@@ -91,10 +91,8 @@ impl Drop for AosMutexRaw {
 unsafe impl Send for AosMutexRaw {}
 unsafe impl Sync for AosMutexRaw {}
 
-use lock_api::{GuardNoSend, Mutex, RawMutex};
-
-unsafe impl RawMutex for AosMutexRaw {
-    type GuardMarker = GuardNoSend;
+unsafe impl lock_api::RawMutex for AosMutexRaw {
+    type GuardMarker = lock_api::GuardNoSend;
 
     const INIT: AosMutexRaw = Self {
         m: UnsafeCell::new(raw::aos_mutex {
@@ -126,6 +124,7 @@ unsafe impl RawMutex for AosMutexRaw {
 pub type AosMutex<T> = lock_api::Mutex<AosMutexRaw, T>;
 pub type AosMutexGuard<'a, T> = lock_api::MutexGuard<'a, AosMutexRaw, T>;
 
+#[cfg(test)]
 mod aos_mutex_test {
     use super::*;
     #[test]
@@ -135,7 +134,6 @@ mod aos_mutex_test {
         let other: [u8; size] = unsafe { std::mem::transmute(AosMutexRaw::new()) };
         assert_eq!(init, other);
     }
-
     // TODO add actual functionality tests for AosMutex
 }
 
@@ -204,6 +202,7 @@ impl AosFutexNotifier {
 unsafe impl Send for AosFutexNotifier {}
 unsafe impl Sync for AosFutexNotifier {}
 
+#[cfg(test)]
 mod aos_notifier_tests {
     use super::*;
     use std::sync::atomic::AtomicU32;
