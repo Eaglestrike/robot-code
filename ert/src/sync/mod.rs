@@ -35,7 +35,6 @@ impl LockSuccessReason {
     fn ok(self) {}
 }
 
-
 impl AosMutexRaw {
     pub fn new() -> Self {
         Self {
@@ -217,7 +216,7 @@ mod aos_notifier_tests {
             if a.load(SeqCst) == v {
                 std::thread::sleep(Duration::from_millis(10));
                 assert_eq!(a.load(SeqCst), v);
-                break
+                break;
             }
             if start.elapsed() > timeout {
                 panic!("Atomic busywait timeout");
@@ -226,8 +225,8 @@ mod aos_notifier_tests {
     }
     #[test]
     fn aos_notifier_many_threads() {
-        use std::thread;
         use std::sync::Arc;
+        use std::thread;
 
         let ct = Arc::new(AtomicU32::new(0));
         let notif = Arc::new(AosFutexNotifier::new());
@@ -248,11 +247,11 @@ mod aos_notifier_tests {
         let to = Duration::from_millis(300);
         atomic_busywait_timeout(&ct, num_threads, to);
         notif.notify();
-        atomic_busywait_timeout(&ct, 2*num_threads, to);
+        atomic_busywait_timeout(&ct, 2 * num_threads, to);
         notif.notify();
-        atomic_busywait_timeout(&ct, 3*num_threads, to);
+        atomic_busywait_timeout(&ct, 3 * num_threads, to);
         notif.notify();
-        atomic_busywait_timeout(&ct, 4*num_threads, to);
+        atomic_busywait_timeout(&ct, 4 * num_threads, to);
     }
 
     // TODO add additional functionality tests for AosFutexNotifier
