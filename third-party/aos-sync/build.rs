@@ -4,6 +4,9 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
+    let version = bindgen::clang_version().parsed.unwrap();
+    assert!(version.0 == 6, "libclang must be ^6.0");
+
     let mut build = cc::Build::new();
     build
         .file("cpp/aos/ipc_lib/aos_sync.cc")
