@@ -31,6 +31,9 @@ fn main() {
 
     let bindings = bindgen::Builder::default()
         .header("cpp/aos/ipc_lib/aos_sync.h")
+        .clang_arg("-x")
+        .clang_arg("c++")
+        .clang_arg("-std=c++14")
         .whitelist_type("aos_.*")
         .whitelist_function("mutex_.*")
         .whitelist_function("futex_.*")
