@@ -29,7 +29,7 @@ macro_rules! die {
 #[macro_export]
 macro_rules! die_with_errno {
     ($fmt:expr, $($arg:tt)*) => {
-        $crate::die!(concat!($fmt, "(error code {}, {})"), $($arg)*, nix::errno::errno(), nix::errno::last());
+        $crate::die!(concat!($fmt, "(error code {}, {})"), $($arg)*, nix::errno::errno(), nix::errno::Errno::last());
     };
     ($fmt:expr) => {
         $crate::die!(concat!($fmt, "(error code {}, {})"), nix::errno::errno(), nix::errno::Errno::last());

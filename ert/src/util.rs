@@ -1,7 +1,7 @@
 // no invariants to uphold for these
 // they're just unsafe because theyre intrinsics
 
-#[cfg(not(RUSTC_IS_STABLE))]
+#[cfg(feature_flaggable)]
 #[macro_export]
 macro_rules! likely {
     ($($arg:tt)*) => {
@@ -9,13 +9,13 @@ macro_rules! likely {
     };
 }
 
-#[cfg(RUSTC_IS_STABLE)]
+#[cfg(not(feature_flaggable))]
 #[macro_export]
 macro_rules! likely {
     ($($arg:tt)*) => { $($arg)* };
 }
 
-#[cfg(not(RUSTC_IS_STABLE))]
+#[cfg(feature_flaggable)]
 #[macro_export]
 macro_rules! unlikely {
     ($($arg:tt)*) => {
@@ -23,7 +23,7 @@ macro_rules! unlikely {
     };
 }
 
-#[cfg(RUSTC_IS_STABLE)]
+#[cfg(not(feature_flaggable))]
 #[macro_export]
 macro_rules! unlikely {
     ($($arg:tt)*) => { $($arg)* };

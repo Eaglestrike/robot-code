@@ -1,4 +1,4 @@
-#[cfg_attr(RUSTC_IS_NIGHTLY, feature(core_intrinsics))]
+#[cfg_attr(feature_flaggable, feature(core_intrinsics))]
 #[macro_use]
 pub mod die;
 pub mod init;
