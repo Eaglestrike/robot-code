@@ -9,7 +9,7 @@ pub fn fatal_dump_filename() -> String {
 #[macro_export]
 macro_rules! die {
     ($($arg:tt)*) => {
-        eprintln!("ERT encountered a fatal error! Info:");
+        eprintln!("ERT encountered a fatal error! Info to follow:");
         eprintln!($($arg)*);
         let name = $crate::die::fatal_dump_filename();
         use std::io::Write;
@@ -29,9 +29,9 @@ macro_rules! die {
 #[macro_export]
 macro_rules! die_with_errno {
     ($fmt:expr, $($arg:tt)*) => {
-        $crate::die!(concat!($fmt, "(error code {}, {})"), $($arg)*, nix::errno::errno(), nix::errno::Errno::last());
+        $crate::die!(concat!($fmt, " (caused by error code {}, {})"), $($arg)*, nix::errno::errno(), nix::errno::Errno::last());
     };
     ($fmt:expr) => {
-        $crate::die!(concat!($fmt, "(error code {}, {})"), nix::errno::errno(), nix::errno::Errno::last());
+        $crate::die!(concat!($fmt, " (caused by error code {}, {})"), nix::errno::errno(), nix::errno::Errno::last());
     };
 }
