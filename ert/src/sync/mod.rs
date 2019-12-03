@@ -130,7 +130,8 @@ mod aos_mutex_test {
     #[test]
     fn raw_mutex_const_init_eq_memset() {
         const size: usize = std::mem::size_of::<AosMutexRaw>();
-        let init: [u8; size] = unsafe { std::mem::transmute(AosMutexRaw::INIT) };
+        let init: [u8; size] =
+            unsafe { std::mem::transmute(<AosMutexRaw as lock_api::RawMutex>::INIT) };
         let other: [u8; size] = unsafe { std::mem::transmute(AosMutexRaw::new()) };
         assert_eq!(init, other);
     }
