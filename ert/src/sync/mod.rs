@@ -138,12 +138,15 @@ mod aos_mutex_test {
     // TODO add actual functionality tests for AosMutex
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum FutexWakeReason {
     SignalInterrupt,
     Timeout,
     Errno(i32),
 }
 
+#[derive(Debug)]
+#[repr(transparent)]
 pub struct AosFutexNotifier {
     m: UnsafeCell<raw::aos_futex>,
 }
@@ -228,6 +231,7 @@ mod aos_notifier_tests {
         use std::sync::Arc;
         use std::thread;
 
+        let mut t = Vec::new();
         let ct = Arc::new(AtomicU32::new(0));
         let notif = Arc::new(AosFutexNotifier::new());
         let num_threads = 500;
@@ -236,13 +240,14 @@ mod aos_notifier_tests {
             let c = Arc::clone(&ct);
             let h = thread::spawn(move || {
                 c.fetch_add(1, SeqCst);
-                n.wait();
+                n.wait().unwrap();
                 c.fetch_add(1, SeqCst);
-                n.wait();
+                n.wait().unwrap();
                 c.fetch_add(1, SeqCst);
-                n.wait();
+                n.wait().unwrap();
                 c.fetch_add(1, SeqCst);
             });
+            t.push(h);
         }
         let to = Duration::from_millis(300);
         atomic_busywait_timeout(&ct, num_threads, to);
@@ -252,6 +257,7 @@ mod aos_notifier_tests {
         atomic_busywait_timeout(&ct, 3 * num_threads, to);
         notif.notify();
         atomic_busywait_timeout(&ct, 4 * num_threads, to);
+        t.into_iter().for_each(|h| h.join().unwrap());
     }
 
     // TODO add additional functionality tests for AosFutexNotifier
