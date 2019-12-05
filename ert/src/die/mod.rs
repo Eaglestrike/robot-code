@@ -46,3 +46,13 @@ macro_rules! die_with_errno {
         $crate::die!(concat!($fmt, " (caused by error code {}, {})"), nix::errno::errno(), nix::errno::Errno::last());
     };
 }
+
+#[macro_export]
+macro_rules! panic_with_errno {
+    ($fmt:expr, $($arg:tt)*) => {
+        panic!(concat!($fmt, " (caused by error code {}, {})"), $($arg)*, nix::errno::errno(), nix::errno::Errno::last());
+    };
+    ($fmt:expr) => {
+        panic!(concat!($fmt, " (caused by error code {}, {})"), nix::errno::errno(), nix::errno::Errno::last());
+    };
+}
