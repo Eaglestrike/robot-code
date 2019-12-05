@@ -23,5 +23,8 @@ nix = "0.15.0"
 lock_api = "0.3.1"
 libc = "0.2.66"
 
+[dev-dependencies]
+rusty-fork = "0.2.2"
+
 [build-dependencies]
 version_check = "0.9"
