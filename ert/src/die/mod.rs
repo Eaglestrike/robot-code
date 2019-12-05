@@ -1,3 +1,9 @@
+//! Handle failures we can't or don't want to recover from.
+//! Unlike AOS, which handles logging in another process,
+//! these will take down the whole system.
+//! Thread-level issues should just be panics.
+//! A wrapper that logs then panics is planned.
+
 /// Implementation detail.
 #[doc(hidden)]
 pub fn fatal_dump_filename() -> String {
@@ -9,11 +15,16 @@ pub fn fatal_dump_filename() -> String {
 #[macro_export]
 macro_rules! die {
     ($($arg:tt)*) => {
+        let info = concat!("At ", std::file!(), ":", std::line!());
         eprintln!("ERT encountered a fatal error! Info to follow:");
+        eprintln!("{}", info);
         eprintln!($($arg)*);
         let name = $crate::die::fatal_dump_filename();
         use std::io::Write;
-        let res = std::fs::File::create(&name).and_then(|mut file| write!(file, $($arg)*));
+        let res = std::fs::File::create(&name).and_then(|mut file| {
+            writeln!(file, "{}", info);
+            writeln!(file, $($arg)*)
+        });
         if res.is_ok() {
             eprintln!("Info reproduced to {}", &name);
         } else {
