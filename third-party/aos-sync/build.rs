@@ -5,7 +5,12 @@ use std::path::PathBuf;
 
 fn main() {
     let version = bindgen::clang_version().parsed.unwrap();
-    assert!(version.0 == 6, "libclang must be ^6.0, found version {}.{}", version.0, version.1);
+    assert!(
+        version.0 == 6,
+        "libclang must be ^6.0, found version {}.{}",
+        version.0,
+        version.1
+    );
 
     let mut build = cc::Build::new();
     build
