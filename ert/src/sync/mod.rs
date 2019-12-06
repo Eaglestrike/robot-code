@@ -129,10 +129,10 @@ mod aos_mutex_test {
     use super::*;
     #[test]
     fn raw_mutex_const_init_eq_memset() {
-        const size: usize = std::mem::size_of::<AosMutexRaw>();
-        let init: [u8; size] =
+        const SIZE: usize = std::mem::size_of::<AosMutexRaw>();
+        let init: [u8; SIZE] =
             unsafe { std::mem::transmute(<AosMutexRaw as lock_api::RawMutex>::INIT) };
-        let other: [u8; size] = unsafe { std::mem::transmute(AosMutexRaw::new()) };
+        let other: [u8; SIZE] = unsafe { std::mem::transmute(AosMutexRaw::new()) };
         assert_eq!(init, other);
     }
     // TODO add actual functionality tests for AosMutex
@@ -251,11 +251,11 @@ mod aos_notifier_tests {
         }
         let to = Duration::from_millis(300);
         atomic_busywait_timeout(&ct, num_threads, to);
-        notif.notify();
+        notif.notify().unwrap();
         atomic_busywait_timeout(&ct, 2 * num_threads, to);
-        notif.notify();
+        notif.notify().unwrap();
         atomic_busywait_timeout(&ct, 3 * num_threads, to);
-        notif.notify();
+        notif.notify().unwrap();
         atomic_busywait_timeout(&ct, 4 * num_threads, to);
         t.into_iter().for_each(|h| h.join().unwrap());
     }
