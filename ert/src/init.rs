@@ -91,6 +91,7 @@ fn set_current_thread_realtime_priority(priority: c_int) {
 mod isolated_tests {
     use super::*;
     use crate::test_prelude::*;
+    use crate::thread::*;
 
     fn recurse() -> usize {
         if 2 + 2 == 4 {
@@ -144,19 +145,6 @@ mod isolated_tests {
             }).unwrap().join().unwrap();
         }
     }
-}
-
-// Rust's default is 2MB, we prolly don't need that
-pub const DEFAULT_STACK_SIZE: usize = 512 * 1024;
-
-pub fn thread_with_stack_size(name: impl Into<String>, stack_size: usize) -> std::thread::Builder {
-    std::thread::Builder::new()
-        .name(name.into())
-        .stack_size(stack_size)
-}
-
-pub fn thread(name: impl Into<String>) -> std::thread::Builder {
-    thread_with_stack_size(name, PTHREAD_STACK_MIN + DEFAULT_STACK_SIZE)
 }
 
 /// Init everything that's not RT related
