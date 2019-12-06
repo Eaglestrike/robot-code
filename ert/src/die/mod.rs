@@ -22,7 +22,7 @@ macro_rules! die {
         let name = $crate::die::fatal_dump_filename();
         use std::io::Write;
         let res = std::fs::File::create(&name).and_then(|mut file| {
-            writeln!(file, "{}", info);
+            writeln!(file, "{}", info)?;
             writeln!(file, $($arg)*)
         });
         if res.is_ok() {
