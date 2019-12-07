@@ -40,10 +40,12 @@ macro_rules! die {
 #[macro_export]
 macro_rules! die_with_errno {
     ($fmt:expr, $($arg:tt)*) => {
-        $crate::die!(concat!($fmt, " (caused by error code {}, {})"), $($arg)*, nix::errno::errno(), nix::errno::Errno::last());
+        let errno_save = nix::errno::errno();
+        $crate::die!(concat!($fmt, " (caused by error code {}, {})"), $($arg)*, errno_save, nix::errno::from_i32(errno_save));
     };
     ($fmt:expr) => {
-        $crate::die!(concat!($fmt, " (caused by error code {}, {})"), nix::errno::errno(), nix::errno::Errno::last());
+        let errno_save = nix::errno::errno();
+        $crate::die!(concat!($fmt, " (caused by error code {}, {})"), errno_save, nix::errno::from_i32(errno_save));
     };
 }
 
