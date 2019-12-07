@@ -172,10 +172,7 @@ impl AosFutexNotifier {
     }
 
     pub fn wait_timeout(&self, timeout: std::time::Duration) -> Result<(), FutexWakeReason> {
-        let ts = raw::timespec {
-            tv_sec: timeout.as_secs() as _,
-            tv_nsec: timeout.subsec_nanos().into(),
-        };
+        let ts = crate::time::duration_to_timespec(timeout);
         let ret = unsafe { raw::futex_wait_timeout(self.m.get(), &ts) };
         match ret {
             0 => Ok(()),

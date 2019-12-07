@@ -43,6 +43,11 @@ fn main() {
         .whitelist_function("mutex_.*")
         .whitelist_function("futex_.*")
         .whitelist_function("condition_.*")
+        .whitelist_recursively(false)
+        .impl_debug(true)
+        // TODO investigate why bindgen wont derive Debug on aos_mutex
+        // It's manual impl leaves out some fields
+        // This only became a problem after whitelist_recursively became false
         .generate()
         .expect("Unable to generate bindings");
 
