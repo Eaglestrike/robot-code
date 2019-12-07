@@ -2,7 +2,8 @@
 
 use aos_sync as raw;
 
-use nix::errno::errno;
+use crate::panic_with_errno;
+use nix::errno::Errno;
 use std::cell::UnsafeCell;
 
 // does this need to be heap allocated to deal with move semantics?
@@ -140,9 +141,9 @@ mod aos_mutex_test {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum FutexWakeReason {
+    Notified,
     SignalInterrupt,
     Timeout,
-    Errno(i32),
 }
 
 #[derive(Debug)]
@@ -159,26 +160,54 @@ impl AosFutexNotifier {
         }
     }
 
-    pub fn wait(&self) -> Result<(), FutexWakeReason> {
-        let ret = unsafe { raw::futex_wait(self.m.get()) };
-        match ret {
-            0 => {
-                self.unset();
-                Ok(())
-            }
-            1 => Err(FutexWakeReason::SignalInterrupt),
-            _ => Err(FutexWakeReason::Errno(errno())),
+    #[inline]
+    pub fn wait(&self) -> FutexWakeReason {
+        match self.wait_checked() {
+            Ok(r) => r,
+            Err(errno) => panic_with_errno!(
+                "AosFutexNotifier::wait_checked errored, manual errno {}",
+                errno
+            ),
         }
     }
 
-    pub fn wait_timeout(&self, timeout: std::time::Duration) -> Result<(), FutexWakeReason> {
+    #[inline]
+    pub fn wait_checked(&self) -> Result<FutexWakeReason, Errno> {
+        let ret = unsafe { raw::futex_wait(self.m.get()) };
+        match ret {
+            0 => {
+                // TODO remove this unset
+                self.unset();
+                Ok(FutexWakeReason::Notified)
+            }
+            1 => Ok(FutexWakeReason::SignalInterrupt),
+            _ => Err(Errno::last()),
+        }
+    }
+
+    #[inline]
+    pub fn wait_timeout(&self, timeout: std::time::Duration) -> FutexWakeReason {
+        match self.wait_timeout_checked(timeout) {
+            Ok(r) => r,
+            Err(errno) => panic_with_errno!(
+                "AosFutexNotifier::wait_timeout_checked errored, manual errno {}",
+                errno
+            ),
+        }
+    }
+
+    #[inline]
+    pub fn wait_timeout_checked(
+        &self,
+        timeout: std::time::Duration,
+    ) -> Result<FutexWakeReason, Errno> {
         let ts = crate::time::duration_to_timespec(timeout);
         let ret = unsafe { raw::futex_wait_timeout(self.m.get(), &ts) };
         match ret {
-            0 => Ok(()),
-            1 => Err(FutexWakeReason::SignalInterrupt),
-            2 => Err(FutexWakeReason::Timeout),
-            _ => Err(FutexWakeReason::Errno(errno())),
+            0 => Ok(FutexWakeReason::Notified),
+            1 => Ok(FutexWakeReason::SignalInterrupt),
+            2 => Ok(FutexWakeReason::Timeout),
+            _ => Err(Errno::last()),
         }
     }
 
@@ -188,14 +217,26 @@ impl AosFutexNotifier {
         unsafe { raw::futex_unset(self.m.get()) != 0 }
     }
 
-    pub fn notify(&self) -> Result<(), i32> {
+    #[inline]
+    pub fn notify(&self) -> i32 {
+        match self.notify_checked() {
+            Ok(r) => r,
+            Err(errno) => panic_with_errno!(
+                "AosFutexNotifier::notify_checked errored, manual errno {}",
+                errno
+            ),
+        }
+    }
+
+    #[inline]
+    pub fn notify_checked(&self) -> Result<i32, Errno> {
         let ret = unsafe { raw::futex_set(self.m.get()) };
         std::sync::atomic::compiler_fence(std::sync::atomic::Ordering::SeqCst);
         self.unset();
         if ret < 0 {
-            Err(errno())
+            Err(Errno::last())
         } else {
-            Ok(())
+            Ok(ret)
         }
     }
 }
@@ -237,25 +278,29 @@ mod aos_notifier_tests {
             let c = Arc::clone(&ct);
             let h = thread::spawn(move || {
                 c.fetch_add(1, SeqCst);
-                n.wait().unwrap();
+                n.wait();
                 c.fetch_add(1, SeqCst);
-                n.wait().unwrap();
+                n.wait();
                 c.fetch_add(1, SeqCst);
-                n.wait().unwrap();
+                n.wait();
                 c.fetch_add(1, SeqCst);
             });
             t.push(h);
         }
         let to = Duration::from_millis(300);
         atomic_busywait_timeout(&ct, num_threads, to);
-        notif.notify().unwrap();
+        notif.notify();
         atomic_busywait_timeout(&ct, 2 * num_threads, to);
-        notif.notify().unwrap();
+        notif.notify();
         atomic_busywait_timeout(&ct, 3 * num_threads, to);
-        notif.notify().unwrap();
+        notif.notify();
         atomic_busywait_timeout(&ct, 4 * num_threads, to);
         t.into_iter().for_each(|h| h.join().unwrap());
     }
 
     // TODO add additional functionality tests for AosFutexNotifier
+
+    // TODO test racing wakers
+
+    // TODO test RT priority is respected when notifying all
 }
