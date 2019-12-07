@@ -5,6 +5,7 @@
 #[macro_use]
 pub mod die;
 pub mod init;
+pub mod queue;
 pub mod sync;
 pub mod thread;
 pub mod time;
