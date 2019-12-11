@@ -249,7 +249,8 @@ impl<T: Copy> Queue<T> {
 }
 
 // The way Queue writes to Cell guarantees no data races
-unsafe impl<T: Copy> Sync for Queue<T> {}
+// TODO: can we relax Send + Sync?
+unsafe impl<T: Copy + Send + Sync> Sync for Queue<T> {}
 
 /// A streaming reader and writer holding an`Arc` to a queue buffer.
 ///
@@ -265,9 +266,9 @@ unsafe impl<T: Copy> Sync for Queue<T> {}
 ///     Arc,
 /// };
 /// use std::thread;
-/// use ert::queue::QueueClient;
+/// use ert::queue::QClient;
 ///
-/// let w = QueueClient::new_queue(100);
+/// let w = QClient::new_queue(100);
 /// assert_eq!(w.size(), 128);
 ///
 /// let mut r = w.clone();
@@ -323,9 +324,17 @@ impl<T: Copy> QueueClient<T> {
 
     /// Resets the read stream to the most recently written data. This guarantees
     /// at least one valid read provided the thread is not pre-empted.
+    /// Does not affect `latest`- or `another`-like calls.
     #[inline]
     pub fn reset(&mut self) {
         self.to_read = self.queue.next_write_ptr() - 1;
+    }
+
+    /// "Forgets" all data in the read stream that has been written.
+    /// This queue will only see data written after this call in it's `next` stream.
+    /// Does not affect `latest`- or `another`-like calls.
+    pub fn forget(&mut self) {
+        self.to_read = self.queue.next_write_ptr();
     }
 
     /// Advances the read pointer `n` elements, faster than calling

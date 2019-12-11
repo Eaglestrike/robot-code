@@ -17,6 +17,4 @@ mod test_prelude {
     pub use rusty_fork::{rusty_fork_id, rusty_fork_test, rusty_fork_test_name};
 }
 
-// TODO queue datastructure
-// TODO queue infra
 // TODO logging

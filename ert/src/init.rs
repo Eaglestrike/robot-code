@@ -99,7 +99,11 @@ pub fn pin_current_thread(cpu_number: usize) {
         CPU_SET(cpu_number, &mut cpuset);
         let ret = pthread_setaffinity_np(pthread_self(), std::mem::size_of_val(&cpuset), &cpuset);
         if ret != 0 {
-            die!("pthread_setaffinity_np, errno: {} {}", ret, nix::errno::Errno::from_i32(ret));
+            die!(
+                "pthread_setaffinity_np, errno: {} {}",
+                ret,
+                nix::errno::Errno::from_i32(ret)
+            );
         }
     }
 }
