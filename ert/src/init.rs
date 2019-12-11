@@ -31,8 +31,12 @@ fn set_soft_rlimit(resource: c_uint, soft: rlim64_t) {
     }
 }
 
+pub fn init() {
+    init_common_idempotent();
+}
+
 /// Process-level common init
-pub fn init_common_idempotent() {
+fn init_common_idempotent() {
     write_core_dumps();
     // TODO init logging here
 }
@@ -85,6 +89,23 @@ fn set_current_thread_realtime_priority(priority: c_int) {
     if unsafe { sched_setscheduler(0, SCHED_FIFO, &param) } == -1 {
         panic_with_errno!("sched_setscheduler(0, SCHED_FIFO, {}) failed", priority)
     }
+}
+
+// TODO: test this with sched_getcpu ?
+pub fn pin_current_thread(cpu_number: usize) {
+    let mut cpuset = unsafe { std::mem::zeroed() };
+    unsafe {
+        CPU_ZERO(&mut cpuset);
+        CPU_SET(cpu_number, &mut cpuset);
+        let ret = pthread_setaffinity_np(pthread_self(), std::mem::size_of_val(&cpuset), &cpuset);
+        if ret != 0 {
+            die!("pthread_setaffinity_np, errno: {} {}", ret, nix::errno::Errno::from_i32(ret));
+        }
+    }
+}
+
+pub fn get_nprocs() -> c_long {
+    unsafe { sysconf(_SC_NPROCESSORS_ONLN) }
 }
 
 #[cfg(test)]
@@ -149,10 +170,10 @@ mod isolated_tests {
 
 /// Init everything that's not RT related
 /// `thread_go_rt` after
-pub fn thread_init_non_rt() {}
+pub fn thread_init_nrt() {}
 
 pub fn thread_init_rt(relative_priority: c_int) {
-    thread_init_non_rt();
+    thread_init_nrt();
     thread_go_rt(relative_priority);
 }
 
