@@ -28,8 +28,8 @@ struct QueueLogMessage {
     time: crate::time::Duration,
     level: log::Level,
     thread_local_seq: u16,
-    conext_size: u16,
-    context: [u8; 100],
+    context_size: u16,
+    context: [u8; 64],
     data_size: u16,
     message: LogMessageData,
 }
@@ -40,8 +40,8 @@ impl Default for QueueLogMessage {
             time: crate::time::Duration::from_nanos(0),
             level: log::Level::Trace,
             thread_local_seq: 0,
-            conext_size: 0,
-            context: [0; 100],
+            context_size: 0,
+            context: [0; 64],
             data_size: 0,
             message: LogMessageData::Message([0; LOG_MSG_DATA_SIZE]),
         }
@@ -49,3 +49,49 @@ impl Default for QueueLogMessage {
 }
 
 impl crate::queue::QType for QueueLogMessage {}
+
+// Log messages can are free to use the log macros directly, but we must defined our own for struct logging
+macro_rules! log_struct {
+    (target: $target:expr, $lvl:expr, $($arg:tt)+) => ({
+        let lvl = $lvl;
+        if lvl <= log::STATIC_MAX_LEVEL && lvl <= log::max_level() {
+            $crate::logging::ert_do_struct_log(
+                format_args!($($arg)+),
+                lvl,
+                &($target, module_path!(), file!(), line!()),
+            );
+        }
+    });
+    ($lvl:expr, $($arg:tt)+) => (log!(target: module_path!(), $lvl, $($arg)+))
+}
+
+#[doc(hidden)]
+pub fn ert_do_struct_log<T: crate::queue::QType>(
+    args: std::fmt::Arguments,
+    level: log::Level,
+    &(target, module_path, file, line): &(&str, &'static str, &'static str, u32),
+    strct: T,
+) {
+    get_global_logger();
+    unimplemented!()
+}
+
+fn get_global_logger() -> ErtLogger {
+    unimplemented!()
+}
+
+pub struct ErtLogger {
+    q: crate::queue::QClient<QueueLogMessage>,
+}
+
+impl log::Log for ErtLogger {
+    fn enabled(&self, metadata: &log::Metadata) -> bool {
+        unimplemented!()
+    }
+    fn log(&self, record: &log::Record) {
+        unimplemented!()
+    }
+    fn flush(&self) {
+        unimplemented!()
+    }
+}
