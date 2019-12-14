@@ -22,6 +22,7 @@ aos_sync = { path = "../third-party/aos-sync" }
 lazy_static = "1"
 nix = "0.15.0"
 lock_api = "0.3.1"
+log = "0.4.8"
 libc = "0.2.66"
 
 [dev-dependencies]

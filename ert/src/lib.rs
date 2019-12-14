@@ -5,6 +5,7 @@
 #[macro_use]
 pub mod die;
 pub mod init;
+pub mod logging;
 pub mod queue;
 pub mod sync;
 pub mod thread;
@@ -16,5 +17,3 @@ pub mod util;
 mod test_prelude {
     pub use rusty_fork::{rusty_fork_id, rusty_fork_test, rusty_fork_test_name};
 }
-
-// TODO logging
