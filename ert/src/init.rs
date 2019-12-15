@@ -7,8 +7,6 @@ use std::thread;
 // And put it into the RT thread spawning routines
 // Maybe.
 
-// Only settable as root if we raise the hard limit
-// TODO investigate how aos runs as root
 fn set_soft_rlimit(resource: c_uint, soft: rlim64_t) {
     // TODO investigate why aos checks for root in their equivalent method
     let mut rlim = MaybeUninit::uninit();
