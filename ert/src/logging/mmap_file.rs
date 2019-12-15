@@ -227,9 +227,9 @@ mod test {
             let data: Vec<_> = (0..(1024*1024 + 7)).map(|b| b as u8).collect();
             wtr.write_all(data.as_slice()).unwrap();
             std::mem::drop(wtr);
-            let mut file = options.truncate(false).open(path).unwrap();
+            let file = options.truncate(false).open(path).unwrap();
             let mut read_back = Vec::new();
-            MMapedFile::reader(file).read_to_end(&mut read_back);
+            MMapedFile::reader(file).read_to_end(&mut read_back).unwrap();
             assert_eq!(data, read_back);
         }
     }

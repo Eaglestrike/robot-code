@@ -17,12 +17,28 @@ test = false
 # These are otherwise ignored by default
 privelaged_tests = []
 
+# log level control stuff
+log_max_level_off = ["log/max_level_off"]
+log_max_level_error = ["log/max_level_error"]
+log_max_level_warn = ["log/max_level_warn"]
+log_max_level_info = ["log/max_level_info"]
+log_max_level_debug = ["log/max_level_debug"]
+log_max_level_trace = ["log/max_level_trace"]
+log_release_max_level_off = ["log/release_max_level_off"]
+log_release_max_level_error = ["log/release_max_level_error"]
+log_release_max_level_warn = ["log/release_max_level_warn"]
+log_release_max_level_info = ["log/release_max_level_info"]
+log_release_max_level_debug = ["log/release_max_level_debug"]
+log_release_max_level_trace = ["log/release_max_level_trace"]
+
 [dependencies]
 aos_sync = { path = "../third-party/aos-sync" }
 lazy_static = "1"
 nix = "0.15.0"
 lock_api = "0.3.1"
-log = "0.4.8"
+log = { version = "0.4", features = ["std", "serde"] }
+serde = { version = "1.0", features = ["derive"] }
+serde-big-array = "0.2.0"
 libc = "0.2.66"
 
 [dev-dependencies]

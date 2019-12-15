@@ -33,12 +33,13 @@ fn set_soft_rlimit(resource: c_uint, soft: rlim64_t) {
 
 pub fn init() {
     init_common_idempotent();
+    // Touches the lazy static while bridging to the log crate
+    crate::logging::configure_log_crate_logger().expect_or_die("Failed to configure `log` crate logger. Either duplicate ert::init(), or someone messed with the log crate before us.");
 }
 
 /// Process-level common init
 fn init_common_idempotent() {
     write_core_dumps();
-    // TODO init logging here
 }
 
 fn write_core_dumps() {

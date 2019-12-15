@@ -34,6 +34,32 @@ macro_rules! die {
     };
 }
 
+pub trait DieOnResult<T> {
+    fn expect_or_die(self, msg: &'static str) -> T;
+    fn unwrap_or_die(self) -> T;
+}
+impl<T, E: std::fmt::Debug> DieOnResult<T> for Result<T, E> {
+    fn expect_or_die(self, msg: &'static str) -> T {
+        match self {
+            Ok(t) => t,
+            Err(e) => unwrap_die(msg, &e),
+        }
+    }
+    fn unwrap_or_die(self) -> T {
+        match self {
+            Ok(t) => t,
+            Err(e) => unwrap_die("called `Result::unwrap()` on an `Err` value", &e),
+        }
+    }
+}
+
+// This is a separate function to reduce the code size of the methods
+#[inline(never)]
+#[cold]
+fn unwrap_die(msg: &str, error: &dyn std::fmt::Debug) -> ! {
+    die!("{}: {:?}", msg, error);
+}
+
 /// Die and log the error without using logging facilities
 /// Takes the whole process with it. Destructors do not run.
 /// Grabs and logs errno automatically.
