@@ -221,7 +221,7 @@ mod test {
         fn mmap_file_prop() {
             let path = "/tmp/ert_mmap_prop_test";
             let mut options = std::fs::OpenOptions::new();
-            options.truncate(true).read(true).write(true);
+            options.create(true).truncate(true).read(true).write(true);
             let file = options.clone().open(path).unwrap();
             let mut wtr = MMapedFile::writer(file);
             let data: Vec<_> = (0..(1024*1024 + 7)).map(|b| b as u8).collect();
