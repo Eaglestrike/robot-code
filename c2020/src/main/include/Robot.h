@@ -10,15 +10,17 @@
 #include <frc/TimedRobot.h>
 
 class Robot : public frc::TimedRobot {
- public:
-  void RobotInit() override;
+   public:
+    void RobotInit() override;
 
-  void AutonomousInit() override;
-  void AutonomousPeriodic() override;
+    void AutonomousInit() override;
+    void AutonomousPeriodic() override;
 
-  void TeleopInit() override;
-  void TeleopPeriodic() override;
+    void TeleopInit() override;
+    void TeleopPeriodic() override;
 
-  void TestInit() override;
-  void TestPeriodic() override;
+    void TestInit() override;
+    void TestPeriodic() override;
+
+    std::string name;
 };

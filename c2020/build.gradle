@@ -38,10 +38,12 @@ deploy {
 // to the compiler. Some eclipse project imports depend on this behavior.
 // We recommend leaving this disabled if possible. Note for eclipse project
 // imports this is enabled by default. For new projects, its disabled
-def includeSrcInIncludeRoot = false
+def includeSrcInIncludeRoot = true
+// Enabled this to co-locate hpp and cc files, much more convenient for app code
 
 // Set this to true to enable desktop support.
-def includeDesktopSupport = true
+def includeDesktopSupport = false
+// Re-enable this once we have code that uses it. It doubles compilation time.
 
 // Enable simulation gui support. Must check the box in vscode to enable support
 // upon debugging
@@ -73,6 +75,12 @@ model {
             // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
             wpi.deps.wpilib(it)
             wpi.deps.vendor.cpp(it)
+
+            // Bare minimum warnings
+            binaries.all {
+                cppCompiler.args("-pedantic", "-Wall", "-Wextra", "-Werror")
+            }
+            // Would do more, but WPILib headers are only this pedantic.
         }
     }
     testSuites {
@@ -92,3 +100,15 @@ model {
         }
     }
 }
+
+// This looks a little brittle at the moment
+task clangTidy(type: Exec) {
+  description "Runs Clang Tidy"
+  commandLine('run-clang-tidy', 'src/main/cpp/', 'src/main/include/',
+   '-p=build/compile_commands/linuxathena/', '-extra-arg=-Wno-unknown-warning-option',
+   '-extra-arg=-Qunused-arguments')
+  dependsOn generateCompileCommands
+}
+// takes a while, but build includes tests. Use `assemble` task to just get executables
+// ^You'd think, but WPILib runner defaults to build over assemble. Don't want to delay that.
+// build.dependsOn clangTidy
