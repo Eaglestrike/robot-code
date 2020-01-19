@@ -7,18 +7,23 @@
 
 #pragma once
 
+#include "HeaderUtilMacros.h"
+
+SYSTEM_INCLUDE_END
 #include <frc/TimedRobot.h>
+SYSTEM_INCLUDE_END
 
-class Robot : public frc::TimedRobot {
- public:
-  void RobotInit() override;
+class Robot : public frc::TimedRobot
+{
+  public:
+    void RobotInit() override;
 
-  void AutonomousInit() override;
-  void AutonomousPeriodic() override;
+    void AutonomousInit() override;
+    void AutonomousPeriodic() override;
 
-  void TeleopInit() override;
-  void TeleopPeriodic() override;
+    void TeleopInit() override;
+    void TeleopPeriodic() override;
 
-  void TestInit() override;
-  void TestPeriodic() override;
+    void TestInit() override;
+    void TestPeriodic() override;
 };
