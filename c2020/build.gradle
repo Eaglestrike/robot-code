@@ -42,8 +42,8 @@ def includeSrcInIncludeRoot = true
 // Enabled this to co-locate hpp and cc files, much more convenient for app code
 
 // Set this to true to enable desktop support.
-def includeDesktopSupport = false
-// Re-enable this once we have code that uses it. It doubles compilation time.
+// Includes Gtest and simulation
+def includeDesktopSupport = true
 
 // Enable simulation gui support. Must check the box in vscode to enable support
 // upon debugging
