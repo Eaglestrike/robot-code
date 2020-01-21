@@ -3,7 +3,7 @@
 namespace team114 {
 namespace c2020 {
 
-Drive::Drive() : Drive(GetConfig().drive) {}
+Drive::Drive() : Drive{GetConfig().drive} {}
 
 Drive::Drive(const DriveConfig& cfg)
     : left_master_{cfg.left_master_id},

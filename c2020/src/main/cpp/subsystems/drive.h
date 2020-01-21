@@ -1,3 +1,5 @@
+#pragma once
+
 #include <ctre/Phoenix.h>
 
 #include "config.h"
@@ -7,8 +9,8 @@ namespace team114 {
 namespace c2020 {
 
 class Drive : public Subsystem {
+    SUBSYSTEM_PRELUDE(Drive)
    public:
-    Drive();
     Drive(const DriveConfig& cfg);
     void Periodic() override;
     void Stop() override;

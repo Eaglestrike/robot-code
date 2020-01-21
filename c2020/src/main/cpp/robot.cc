@@ -3,6 +3,8 @@
 namespace team114 {
 namespace c2020 {
 
+Robot::Robot() : drive_{Drive::GetInstance()} {}
+
 void Robot::RobotInit() {}
 
 void Robot::AutonomousInit() {}
