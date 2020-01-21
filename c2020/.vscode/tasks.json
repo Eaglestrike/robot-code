@@ -1,0 +1,18 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Linux Athena Debug Build",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": ["frcUserProgramLinuxathenaDebugExecutable"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always"
+      }
+    }
+  ]
+}
