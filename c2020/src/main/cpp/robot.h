@@ -2,6 +2,9 @@
 
 #include <frc/TimedRobot.h>
 
+namespace team114 {
+namespace c2020 {
+
 class Robot : public frc::TimedRobot {
    public:
     void RobotInit() override;
@@ -15,5 +18,8 @@ class Robot : public frc::TimedRobot {
     void TestInit() override;
     void TestPeriodic() override;
 
-    std::string name;
+   private:
 };
+
+}  // namespace c2020
+}  // namespace team114
