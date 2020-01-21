@@ -28,7 +28,7 @@ RobotConfig& GetConfig() {
     }
     // TODO(josh): log the chosen config
     std::ifstream ifs("/sys/class/net/eth0/address");
-    if (!ifs.fail() or !ifs.is_open()) {
+    if (!ifs.fail() || !ifs.is_open()) {
         CONFIG = MakeDefaultRobotConfig();
         return GetConfig();
     }
