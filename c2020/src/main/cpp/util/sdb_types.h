@@ -4,7 +4,6 @@
 #include <type_traits>
 
 #include <frc/smartdashboard/SmartDashboard.h>
-#include <wpi/StringRef.h>
 
 namespace team114 {
 namespace c2020 {
@@ -29,6 +28,11 @@ struct SdbNumeric {
         return val;
     }
     operator NumericTy() const { return value; }
+    NumericTy operator++(int) {
+        value++;
+        Update();
+        return value;
+    }
 
    private:
     NumericTy value;

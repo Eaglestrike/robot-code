@@ -1,5 +1,8 @@
 #include <string>
 
+#include <ctre/Phoenix.h>
+#include <units/units.h>
+
 namespace team114 {
 namespace c2020 {
 
@@ -8,6 +11,7 @@ struct DriveConfig {
     int left_slave_id;
     int right_master_id;
     int right_slave_id;
+    units::meter_t track_width;
 };
 
 struct RobotConfig {
@@ -16,6 +20,12 @@ struct RobotConfig {
 };
 
 RobotConfig& GetConfig();
+
+void DriveFalconCommonConfig(TalonFX& falcon);
+
+void SetDriveMasterFramePeriods(TalonFX& falcon);
+
+void SetDriveSlaveFramePeriods(TalonFX& falcon);
 
 }  // namespace c2020
 }  // namespace team114
