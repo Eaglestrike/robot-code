@@ -1,7 +1,8 @@
 ---
 Checks: >-
   clang-diagnostic-*,clang-analyzer-*,abseil-*,cppcoreguidelines-*,google-*,
-  hicpp-*,llvm-*,misc-*,modernize-*,performance-*,portability-*,readability-*
+  hicpp-*,llvm-*,misc-*,modernize-*,performance-*,portability-*,readability-*,
+  -google-runtime-references
 WarningsAsErrors: "*"
 HeaderFilterRegex: ""
 AnalyzeTemporaryDtors: true
