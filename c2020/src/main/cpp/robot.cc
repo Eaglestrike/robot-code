@@ -5,9 +5,11 @@
 namespace team114 {
 namespace c2020 {
 
-Robot::Robot() : frc::TimedRobot{10_ms}, drive_{Drive::GetInstance()} {}
+Robot::Robot()
+    : frc::TimedRobot{Robot::kPeriod}, drive_{Drive::GetInstance()} {}
 
 void Robot::RobotInit() {}
+void Robot::RobotPeriodic() { drive_.Periodic(); }
 
 void Robot::AutonomousInit() {}
 void Robot::AutonomousPeriodic() {}
@@ -17,6 +19,9 @@ void Robot::TeleopPeriodic() {}
 
 void Robot::TestInit() {}
 void Robot::TestPeriodic() {}
+
+void Robot::DisabledInit() {}
+void Robot::DisabledPeriodic() {}
 
 }  // namespace c2020
 }  // namespace team114
