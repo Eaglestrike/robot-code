@@ -144,29 +144,56 @@ void DriveFalconCommonConfig(TalonFX& falcon) {
 
 // CAN metrics docs
 // https://phoenix-documentation.readthedocs.io/en/latest/ch18_CommonAPI.html#can-bus-utilization-error-metrics
-inline static void SetDriveCommonFramePeriods(TalonFX& falcon) {
+inline static ErrorCode SetDriveCommonFramePeriods(TalonFX& falcon) {
     constexpr int lng = 200;
-    falcon.SetStatusFramePeriod(StatusFrameEnhanced::Status_3_Quadrature, lng);
-    falcon.SetStatusFramePeriod(StatusFrameEnhanced::Status_4_AinTempVbat, lng);
-    falcon.SetStatusFramePeriod(StatusFrameEnhanced::Status_8_PulseWidth, lng);
-    falcon.SetStatusFramePeriod(StatusFrameEnhanced::Status_10_MotionMagic,
-                                lng);
-    falcon.SetStatusFramePeriod(StatusFrameEnhanced::Status_12_Feedback1, lng);
-    falcon.SetStatusFramePeriod(StatusFrameEnhanced::Status_14_Turn_PIDF1, lng);
+    ErrorCollection err;
+    err.NewError(falcon.SetStatusFramePeriod(
+        StatusFrameEnhanced::Status_3_Quadrature, lng));
+    err.NewError(falcon.SetStatusFramePeriod(
+        StatusFrameEnhanced::Status_4_AinTempVbat, lng));
+    err.NewError(falcon.SetStatusFramePeriod(
+        StatusFrameEnhanced::Status_8_PulseWidth, lng));
+    err.NewError(falcon.SetStatusFramePeriod(
+        StatusFrameEnhanced::Status_10_MotionMagic, lng));
+    err.NewError(falcon.SetStatusFramePeriod(
+        StatusFrameEnhanced::Status_12_Feedback1, lng));
+    err.NewError(falcon.SetStatusFramePeriod(
+        StatusFrameEnhanced::Status_14_Turn_PIDF1, lng));
+    return err.GetFirstNonZeroError();
 }
+constexpr int kStatusFrameAttempts = 3;
 
+// TODO(josh) log here
 void SetDriveMasterFramePeriods(TalonFX& falcon) {
-    SetDriveCommonFramePeriods(falcon);
-    falcon.SetStatusFramePeriod(StatusFrameEnhanced::Status_1_General, 5);
-    falcon.SetStatusFramePeriod(StatusFrameEnhanced::Status_2_Feedback0, 5);
-    falcon.SetStatusFramePeriod(StatusFrameEnhanced::Status_13_Base_PIDF0, 50);
+    for (int i = 0; i < kStatusFrameAttempts; i++) {
+        ErrorCollection err;
+        err.NewError(SetDriveCommonFramePeriods(falcon));
+        err.NewError(falcon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_1_General, 5));
+        err.NewError(falcon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_2_Feedback0, 5));
+        err.NewError(falcon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_13_Base_PIDF0, 50));
+        if (err.GetFirstNonZeroError() == ErrorCode::OK) {
+            return;
+        }
+    }
 }
 
 void SetDriveSlaveFramePeriods(TalonFX& falcon) {
-    SetDriveCommonFramePeriods(falcon);
-    falcon.SetStatusFramePeriod(StatusFrameEnhanced::Status_1_General, 255);
-    falcon.SetStatusFramePeriod(StatusFrameEnhanced::Status_2_Feedback0, 255);
-    falcon.SetStatusFramePeriod(StatusFrameEnhanced::Status_13_Base_PIDF0, 200);
+    for (int i = 0; i < kStatusFrameAttempts; i++) {
+        ErrorCollection err;
+        err.NewError(SetDriveCommonFramePeriods(falcon));
+        err.NewError(falcon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_1_General, 255));
+        err.NewError(falcon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_2_Feedback0, 255));
+        err.NewError(falcon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_13_Base_PIDF0, 200));
+        if (err.GetFirstNonZeroError() == ErrorCode::OK) {
+            return;
+        }
+    }
 }
 
 }  // namespace c2020

@@ -31,7 +31,7 @@ Drive::Drive(const DriveConfig& cfg)
 // https://phoenix-documentation.readthedocs.io/en/latest/ch18_CommonAPI.html#can-bus-utilization-error-metrics
 void Drive::CheckFalconFramePeriods() {
     if (left_master_.HasResetOccurred()) {
-        SetDriveMasterFramePeriods(left_master);
+        SetDriveMasterFramePeriods(left_master_);
         falcon_reset_count_++;
     }
     if (right_master_.HasResetOccurred()) {
