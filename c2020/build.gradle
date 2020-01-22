@@ -78,7 +78,7 @@ model {
 
             // Bare minimum warnings
             binaries.all {
-                cppCompiler.args("-pedantic", "-Wall", "-Wextra", "-Werror")
+                cppCompiler.args("-pedantic", "-Wall", "-Wextra", "-Werror", "-fdiagnostics-color=always")
             }
             // Would do more, but WPILib headers are only this pedantic.
         }
