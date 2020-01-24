@@ -28,7 +28,10 @@ class Subsystem {
         }                                            \
         return *__singleton_instance_;               \
     }                                                \
-    static void DestroyInstance() { delete __singleton_instance_; }
+    static void DestroyInstance() {                  \
+        delete __singleton_instance_;                \
+        __singleton_instance_ = nullptr;             \
+    }
 
 #define SUBSYSTEM_PRELUDE(Classname)          \
    private:                                   \
