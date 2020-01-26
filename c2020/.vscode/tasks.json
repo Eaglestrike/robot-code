@@ -13,6 +13,19 @@
       "presentation": {
         "reveal": "always"
       }
+    },
+    {
+      "label": "Run x86_64 Debug Tests",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": ["checkFrcUserProgramTestLinuxx86-64DebugGoogleTestExe"],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always"
+      }
     }
   ]
 }
