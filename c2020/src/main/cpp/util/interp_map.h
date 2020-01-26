@@ -51,6 +51,15 @@ class InterpolatingMap {
         return ret;
     }
 
+    // naming assumes time-based and that comparator is less
+    typename InnerMap::value_type Latest() {
+        auto it = map_.rbegin();
+        if (it == map_.rend()) {
+            throw std::out_of_range{"interp_map is empty"};
+        }
+        return *it;
+    }
+
     // DOES NOT INTERPOLATE, for insertion only
     T& operator[](const Key&& key) {
         if (map_.size() >= max_size_) {
