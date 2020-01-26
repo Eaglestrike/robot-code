@@ -79,6 +79,12 @@ model {
             // Bare minimum warnings
             binaries.all {
                 cppCompiler.args("-pedantic", "-Wall", "-Wextra", "-Werror", "-fdiagnostics-color=always")
+                if (buildType == buildTypes.debug) {
+                    cppCompiler.args "-g"
+                } else {
+                    cppCompiler.args "-flto"
+                }
+
             }
             // Would do more, but WPILib headers are only this pedantic.
         }
