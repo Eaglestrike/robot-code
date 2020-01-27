@@ -11,6 +11,10 @@ std::pair<double, frc::Pose2d> RobotState::GetLatestFieldToRobot() {
     return field_to_robot_.Latest();
 }
 
+frc::Pose2d RobotState::GetFieldToRobot(double timestamp) {
+    return field_to_robot_.InterpAt(timestamp).second;
+}
+
 void RobotState::ObserveFieldToRobot(double timestamp,
                                      const frc::Pose2d& pose) {
     field_to_robot_[timestamp] = pose;

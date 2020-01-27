@@ -14,13 +14,15 @@ void Robot::RobotInit() {}
 void Robot::RobotPeriodic() { drive_.Periodic(); }
 
 void Robot::AutonomousInit() {}
-void Robot::AutonomousPeriodic() { drive_.Periodic(); }
+void Robot::AutonomousPeriodic() {}
 
 void Robot::TeleopInit() {}
-void Robot::TeleopPeriodic() { drive_.Periodic(); }
+void Robot::TeleopPeriodic() {}
 
 void Robot::TestInit() {}
-void Robot::TestPeriodic() {}
+void Robot::TestPeriodic() {
+    drive_.SetWantRawOpenLoop(Drive::Signal{0.1, 0.1});
+}
 
 void Robot::DisabledInit() {}
 void Robot::DisabledPeriodic() {}

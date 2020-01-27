@@ -14,10 +14,10 @@ namespace c2020 {
 const RobotConfig MakeDefaultRobotConfig() {
     RobotConfig c;
     c.mac_address = "aa:bb:cc:dd:ee:ff";
-    c.drive.left_master_id = 0;
-    c.drive.left_slave_id = 1;
-    c.drive.right_master_id = 2;
-    c.drive.right_slave_id = 3;
+    c.drive.left_master_id = 21;
+    c.drive.left_slave_id = 22;
+    c.drive.right_master_id = 23;
+    c.drive.right_slave_id = 24;
     c.drive.track_width = 0.661924_m;
     c.drive.meters_per_falcon_tick =
         1.0 / 2048.0 * 10.0 / 62.0 * 18.0 / 30.0 * 6 * M_PI * 0.0254_m;

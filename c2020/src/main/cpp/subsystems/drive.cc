@@ -17,6 +17,7 @@ Drive::Drive(const DriveConfig& cfg)
       left_slave_{cfg.left_slave_id},
       right_slave_{cfg.right_slave_id},
       navx_{SPI::Port::kMXP},
+      pout_{},
       config_{cfg},
       state_{DriveState::OPEN_LOOP},
       robot_state_{RobotState::GetInstance()},
@@ -74,6 +75,7 @@ void Drive::Periodic() {
             // TODO(josh) log here
             break;
     }
+    WriteOuts();
 }
 
 void Drive::Stop() {}
@@ -97,6 +99,18 @@ void Drive::UpdatePathController() {}
 bool Drive::FinishedTraj() {
     // TODO(josh)
     return false;
+}
+
+void Drive::SetWantRawOpenLoop(const Signal& sig) {
+    state_ = DriveState::OPEN_LOOP;
+    pout_.control_mode = ControlMode::PercentOutput;
+    pout_.left_demand = sig.left;
+    pout_.right_demand = sig.right;
+}
+
+void Drive::WriteOuts() {
+    left_master_.Set(pout_.control_mode, pout_.left_demand);
+    right_master_.Set(pout_.control_mode, pout_.right_demand);
 }
 
 constexpr auto RAD_PER_DEGREE = units::constants::pi * 1_rad / 180.0;

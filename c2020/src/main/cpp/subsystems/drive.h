@@ -29,10 +29,22 @@ class Drive : public Subsystem {
     void SetWantDriveTraj(frc::Trajectory traj);
     bool FinishedTraj();
 
+    struct Signal {
+        double left;
+        double right;
+    };
+
+    void SetWantRawOpenLoop(const Signal& openloop);
+
    private:
     enum class DriveState {
         OPEN_LOOP,
         FOLLOW_PATH,
+    };
+    struct PeriodicOut {
+        ControlMode control_mode;
+        double left_demand;
+        double right_demand;
     };
     void CheckFalconFramePeriods();
 
@@ -48,10 +60,11 @@ class Drive : public Subsystem {
     TalonFX left_slave_, right_slave_;
     AHRS navx_;
 
+    PeriodicOut pout_;
+    void WriteOuts();
+
     DriveConfig config_;
-
     DriveState state_;
-
     RobotState& robot_state_;
 
     frc::DifferentialDriveKinematics kinematics_;
