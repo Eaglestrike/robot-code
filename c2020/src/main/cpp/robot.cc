@@ -6,16 +6,18 @@ namespace team114 {
 namespace c2020 {
 
 Robot::Robot()
-    : frc::TimedRobot{Robot::kPeriod}, drive_{Drive::GetInstance()} {}
+    : frc::TimedRobot{Robot::kPeriod},
+      drive_{Drive::GetInstance()},
+      robot_state_{RobotState::GetInstance()} {}
 
 void Robot::RobotInit() {}
 void Robot::RobotPeriodic() { drive_.Periodic(); }
 
 void Robot::AutonomousInit() {}
-void Robot::AutonomousPeriodic() {}
+void Robot::AutonomousPeriodic() { drive_.Periodic(); }
 
 void Robot::TeleopInit() {}
-void Robot::TeleopPeriodic() {}
+void Robot::TeleopPeriodic() { drive_.Periodic(); }
 
 void Robot::TestInit() {}
 void Robot::TestPeriodic() {}

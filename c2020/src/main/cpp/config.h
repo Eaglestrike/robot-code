@@ -14,6 +14,7 @@ struct DriveConfig {
     int right_master_id;
     int right_slave_id;
     units::meter_t track_width;
+    units::meter_t meters_per_falcon_tick;
 };
 
 struct RobotConfig {

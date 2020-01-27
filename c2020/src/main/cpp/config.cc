@@ -1,5 +1,6 @@
 #include "config.h"
 
+#include <cmath>
 #include <fstream>
 #include <optional>
 #include <string>
@@ -18,6 +19,8 @@ const RobotConfig MakeDefaultRobotConfig() {
     c.drive.right_master_id = 2;
     c.drive.right_slave_id = 3;
     c.drive.track_width = 0.661924_m;
+    c.drive.meters_per_falcon_tick =
+        1.0 / 2048.0 * 10.0 / 62.0 * 18.0 / 30.0 * 6 * M_PI * 0.0254_m;
     return c;
 }
 

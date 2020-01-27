@@ -3,6 +3,7 @@
 #include <frc/TimedRobot.h>
 #include <units/units.h>
 
+#include "robot_state.h"
 #include "subsystems/drive.h"
 #include "util/constructor_macros.h"
 
@@ -31,6 +32,7 @@ class Robot : public frc::TimedRobot {
 
    private:
     Drive& drive_;
+    RobotState& robot_state_;
 };
 
 }  // namespace c2020
