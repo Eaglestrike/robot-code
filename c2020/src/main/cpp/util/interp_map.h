@@ -67,6 +67,12 @@ class InterpolatingMap {
         }
         return map_[key];
     }
+    T& operator[](const Key& key) {
+        if (map_.size() >= max_size_) {
+            map_.erase(map_.begin());
+        }
+        return map_[key];
+    }
 
     void CheckSize() {
         if (map_.size() > max_size_) {
