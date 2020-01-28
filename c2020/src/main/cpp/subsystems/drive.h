@@ -2,7 +2,6 @@
 
 #include <optional>
 
-#include <AHRS.h>
 #include <ctre/Phoenix.h>
 #include <frc/Timer.h>
 #include <frc/controller/RamseteController.h>
@@ -11,6 +10,7 @@
 
 #include "config.h"
 #include "robot_state.h"
+#include "shims/navx_ahrs.h"
 #include "subsystem.h"
 #include "util/sdb_types.h"
 
@@ -29,12 +29,9 @@ class Drive : public Subsystem {
     void SetWantDriveTraj(frc::Trajectory traj);
     bool FinishedTraj();
 
-    struct Signal {
-        double left;
-        double right;
-    };
-
-    void SetWantRawOpenLoop(const Signal& openloop);
+    // Assumes range of -1 to 1 mps max speed
+    void SetWantRawOpenLoop(const frc::DifferentialDriveWheelSpeeds& openloop);
+    void SetWantCheesyDrive(double throttle, double wheel, bool quick_turn);
 
    private:
     enum class DriveState {
@@ -54,7 +51,7 @@ class Drive : public Subsystem {
     frc::Rotation2d GetYaw();
     units::meter_t GetEncoder(TalonFX& master_talon);
 
-    SDB_NUMERIC(unsigned int, FalconResetCount) falcon_reset_count_;
+    SDB_NUMERIC(unsigned int, DriveFalconResetCount) falcon_reset_count_;
 
     TalonFX left_master_, right_master_;
     TalonFX left_slave_, right_slave_;

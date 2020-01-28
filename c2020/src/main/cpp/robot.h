@@ -1,5 +1,6 @@
 #pragma once
 
+#include <frc/Joystick.h>
 #include <frc/TimedRobot.h>
 #include <units/units.h>
 
@@ -33,6 +34,8 @@ class Robot : public frc::TimedRobot {
    private:
     Drive& drive_;
     RobotState& robot_state_;
+    frc::Joystick ljoy_;
+    frc::Joystick rjoy_;
 };
 
 }  // namespace c2020
