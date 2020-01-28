@@ -51,17 +51,17 @@ class Drive : public Subsystem {
     frc::Rotation2d GetYaw();
     units::meter_t GetEncoder(TalonFX& master_talon);
 
-    SDB_NUMERIC(unsigned int, DriveFalconResetCount) falcon_reset_count_;
+    SDB_NUMERIC(unsigned int, DriveFalconResetCount) falcon_reset_count_{0};
 
     TalonFX left_master_, right_master_;
     TalonFX left_slave_, right_slave_;
-    AHRS navx_;
+    AHRS navx_{frc::SPI::Port::kMXP};
 
-    PeriodicOut pout_;
+    PeriodicOut pout_{};
     void WriteOuts();
 
     DriveConfig config_;
-    DriveState state_;
+    DriveState state_{DriveState::OPEN_LOOP};
     RobotState& robot_state_;
 
     frc::DifferentialDriveKinematics kinematics_;

@@ -14,15 +14,11 @@ namespace c2020 {
 Drive::Drive() : Drive{GetConfig().drive} {}
 
 Drive::Drive(const DriveConfig& cfg)
-    : falcon_reset_count_{0},
-      left_master_{cfg.left_master_id},
+    : left_master_{cfg.left_master_id},
       right_master_{cfg.right_master_id},
       left_slave_{cfg.left_slave_id},
       right_slave_{cfg.right_slave_id},
-      navx_{frc::SPI::Port::kMXP},
-      pout_{},
       config_{cfg},
-      state_{DriveState::OPEN_LOOP},
       robot_state_{RobotState::GetInstance()},
       kinematics_{cfg.track_width},
       odometry_{{}},
