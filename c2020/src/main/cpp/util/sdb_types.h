@@ -58,7 +58,7 @@ struct SdbBool {
 
    private:
     bool value;
-    void Update() { frc::SmartDashboard::PutNumber(KeyTy::GetName(), value); }
+    void Update() { frc::SmartDashboard::PutBoolean(KeyTy::GetName(), value); }
 };
 
 }  // namespace c2020
