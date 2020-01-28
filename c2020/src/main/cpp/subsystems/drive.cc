@@ -120,7 +120,7 @@ void Drive::SetWantCheesyDrive(double throttle, double wheel, bool quick_turn) {
 
     constexpr double kWheelGain = 1.97;
     constexpr double kWheelNonlinearity = 0.05;
-    constexpr double denominator = std::sin(M_PI / 2.0 * kWheelNonlinearity);
+    const double denominator = std::sin(M_PI / 2.0 * kWheelNonlinearity);
     // Apply a sin function that's scaled to make it feel better.
     if (!quick_turn) {
         wheel = std::sin(M_PI / 2.0 * kWheelNonlinearity * wheel);
