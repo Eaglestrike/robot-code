@@ -50,6 +50,7 @@ class Drive : public Subsystem {
 
     frc::Rotation2d GetYaw();
     units::meter_t GetEncoder(TalonFX& master_talon);
+    void WaitForNavxCalibration(double timeout_sec);
 
     SDB_NUMERIC(unsigned int, DriveFalconResetCount) falcon_reset_count_{0};
 

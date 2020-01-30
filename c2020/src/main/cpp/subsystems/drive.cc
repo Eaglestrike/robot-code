@@ -1,5 +1,7 @@
 #include "drive.h"
 
+#include <thread>
+
 #include <frc/SPI.h>
 #include <frc/Timer.h>
 #include <frc/kinematics/DifferentialDriveWheelSpeeds.h>
@@ -86,10 +88,25 @@ void Drive::Stop() {}
 
 void Drive::ZeroSensors() {
     robot_state_.ResetFieldToRobot();
+    WaitForNavxCalibration(0.5);
     navx_.ZeroYaw();
     left_master_.SetSelectedSensorPosition(0);
     right_master_.SetSelectedSensorPosition(0);
     odometry_.ResetPosition({}, GetYaw());
+}
+
+void Drive::WaitForNavxCalibration(double timeout_sec) {
+    frc::Timer time;
+    time.Start();
+    while (navx_.IsCalibrating() && time.Get() < timeout_sec) {
+        // LOG calib retry
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
+    if (navx_.IsCalibrating()) {
+        // LOG failed to calibrate
+    } else {
+        // LOG success
+    }
 }
 
 void Drive::OutputTelemetry() {}
