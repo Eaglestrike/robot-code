@@ -22,6 +22,10 @@ const RobotConfig MakeDefaultRobotConfig() {
     c.drive.track_width = 0.661924_m;
     c.drive.meters_per_falcon_tick =
         1.0 / 2048.0 * 10.0 / 62.0 * 18.0 / 30.0 * 6 * M_PI * 0.0254_m;
+    c.drive.traj_max_vel = 2.5_mps;
+    c.drive.traj_max_accel = units::meters_per_second_squared_t{5.0};
+    // currently this is g with 2x FOS
+    c.drive.traj_max_centrip_accel = units::meters_per_second_squared_t{4.9};
     return c;
 }
 

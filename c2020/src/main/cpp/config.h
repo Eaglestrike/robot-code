@@ -16,6 +16,9 @@ struct DriveConfig {
     int right_slave_id;
     units::meter_t track_width;
     units::meter_t meters_per_falcon_tick;
+    units::meters_per_second_t traj_max_vel;
+    units::meters_per_second_squared_t traj_max_accel;
+    units::meters_per_second_squared_t traj_max_centrip_accel;
 };
 
 struct RobotConfig {
