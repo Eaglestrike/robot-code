@@ -1,0 +1,54 @@
+#pragma once
+
+#include <memory>
+
+#include "action.h"
+
+namespace team114 {
+namespace c2020 {
+namespace auton {
+
+class AutoExecutor {
+    AutoExecutor(std::unique_ptr<Action> &&action)
+        : action_{std::move(action)} {}
+
+    void Periodic() {
+        switch (state_) {
+            case RunState::UNINIT:
+                action_->Start();
+                state_ = RunState::RUNNING;
+                // fallthrough:
+            case RunState::RUNNING:
+                if (action_->Finished()) {
+                    action_->Stop();
+                    state_ = RunState::FINISHED;
+                } else {
+                    action_->Periodic();
+                }
+                break;
+            case RunState::FINISHED:
+                break;
+            default:
+                break;
+        }
+    }
+
+    bool Finished() { return state_ == RunState::FINISHED; }
+
+    void Stop() {
+        if (Finished()) {
+            return;
+        }
+        action_->Stop();
+        state_ = RunState::FINISHED;
+    }
+
+   private:
+    enum class RunState { UNINIT, RUNNING, FINISHED };
+    RunState state_{RunState::UNINIT};
+    std::unique_ptr<Action> action_;
+};
+
+}  // namespace auton
+}  // namespace c2020
+}  // namespace team114
