@@ -20,7 +20,7 @@ namespace c2020 {
 class Drive : public Subsystem {
     SUBSYSTEM_PRELUDE(Drive)
    public:
-    Drive(const DriveConfig& cfg);
+    Drive(const conf::DriveConfig& cfg);
     void Periodic() override;
     void Stop() override;
     void ZeroSensors() override;
@@ -61,7 +61,7 @@ class Drive : public Subsystem {
     PeriodicOut pout_{};
     void WriteOuts();
 
-    DriveConfig config_;
+    conf::DriveConfig config_;
     DriveState state_{DriveState::OPEN_LOOP};
     RobotState& robot_state_;
 

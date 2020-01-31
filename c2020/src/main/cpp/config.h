@@ -7,6 +7,7 @@
 
 namespace team114 {
 namespace c2020 {
+namespace conf {
 
 struct DriveConfig {
     int left_master_id;
@@ -30,5 +31,6 @@ void SetDriveMasterFramePeriods(TalonFX& falcon);
 
 void SetDriveSlaveFramePeriods(TalonFX& falcon);
 
+}  // namespace conf
 }  // namespace c2020
 }  // namespace team114

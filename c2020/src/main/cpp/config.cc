@@ -7,6 +7,7 @@
 
 namespace team114 {
 namespace c2020 {
+namespace conf {
 
 // WPILib chose GCC 7, so no C++20 designated initializers here
 
@@ -199,5 +200,6 @@ void SetDriveSlaveFramePeriods(TalonFX& falcon) {
     }
 }
 
+}  // namespace conf
 }  // namespace c2020
 }  // namespace team114

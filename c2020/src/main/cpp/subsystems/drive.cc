@@ -13,9 +13,9 @@
 namespace team114 {
 namespace c2020 {
 
-Drive::Drive() : Drive{GetConfig().drive} {}
+Drive::Drive() : Drive{conf::GetConfig().drive} {}
 
-Drive::Drive(const DriveConfig& cfg)
+Drive::Drive(const conf::DriveConfig& cfg)
     : left_master_{cfg.left_master_id},
       right_master_{cfg.right_master_id},
       left_slave_{cfg.left_slave_id},
@@ -25,10 +25,10 @@ Drive::Drive(const DriveConfig& cfg)
       kinematics_{cfg.track_width},
       odometry_{{}},
       ramsete_{} {
-    DriveFalconCommonConfig(left_master_);
-    DriveFalconCommonConfig(right_master_);
-    DriveFalconCommonConfig(left_slave_);
-    DriveFalconCommonConfig(right_slave_);
+    conf::DriveFalconCommonConfig(left_master_);
+    conf::DriveFalconCommonConfig(right_master_);
+    conf::DriveFalconCommonConfig(left_slave_);
+    conf::DriveFalconCommonConfig(right_slave_);
     left_master_.SetInverted(true);
     right_master_.SetInverted(false);
     left_slave_.Follow(left_master_);
@@ -36,30 +36,29 @@ Drive::Drive(const DriveConfig& cfg)
     left_slave_.SetInverted(InvertType::FollowMaster);
     right_slave_.SetInverted(InvertType::FollowMaster);
 
-    SetDriveMasterFramePeriods(left_master_);
-    SetDriveMasterFramePeriods(right_master_);
-    SetDriveSlaveFramePeriods(left_slave_);
-    SetDriveSlaveFramePeriods(right_slave_);
-    // TODO(josh) see if HasResetOccurred is always true on first call
+    conf::SetDriveMasterFramePeriods(left_master_);
+    conf::SetDriveMasterFramePeriods(right_master_);
+    conf::SetDriveSlaveFramePeriods(left_slave_);
+    conf::SetDriveSlaveFramePeriods(right_slave_);
     CheckFalconFramePeriods();
 }
 
 // https://phoenix-documentation.readthedocs.io/en/latest/ch18_CommonAPI.html#can-bus-utilization-error-metrics
 void Drive::CheckFalconFramePeriods() {
     if (left_master_.HasResetOccurred()) {
-        SetDriveMasterFramePeriods(left_master_);
+        conf::SetDriveMasterFramePeriods(left_master_);
         falcon_reset_count_++;
     }
     if (right_master_.HasResetOccurred()) {
-        SetDriveMasterFramePeriods(right_master_);
+        conf::SetDriveMasterFramePeriods(right_master_);
         falcon_reset_count_++;
     }
     if (left_slave_.HasResetOccurred()) {
-        SetDriveSlaveFramePeriods(left_slave_);
+        conf::SetDriveSlaveFramePeriods(left_slave_);
         falcon_reset_count_++;
     }
     if (right_slave_.HasResetOccurred()) {
-        SetDriveSlaveFramePeriods(right_slave_);
+        conf::SetDriveSlaveFramePeriods(right_slave_);
         falcon_reset_count_++;
     }
 }
