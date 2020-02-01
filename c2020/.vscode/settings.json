@@ -75,6 +75,7 @@
     "thread": "cpp",
     "cinttypes": "cpp",
     "typeinfo": "cpp",
-    "*.tcc": "cpp"
+    "*.tcc": "cpp",
+    "*.inc": "cpp"
   }
 }
