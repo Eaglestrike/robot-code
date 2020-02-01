@@ -17,7 +17,9 @@ frc::TrajectoryConfig MakeDefaultConfig() {
     frc::DifferentialDriveKinematics kinematics{drive_cfg.track_width};
     frc::TrajectoryConfig traj_cfg{drive_cfg.traj_max_vel,
                                    drive_cfg.traj_max_accel};
-    traj_cfg.SetKinematics(kinematics);
+    // traj_cfg.SetKinematics(kinematics);
+    traj_cfg.AddConstraint(
+        frc::DifferentialDriveKinematicsConstraint(kinematics, 3.0_mps));
     traj_cfg.AddConstraint(frc::CentripetalAccelerationConstraint(
         drive_cfg.traj_max_centrip_accel));
     return traj_cfg;
