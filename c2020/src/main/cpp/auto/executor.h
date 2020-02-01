@@ -9,6 +9,7 @@ namespace c2020 {
 namespace auton {
 
 class AutoExecutor {
+   public:
     AutoExecutor(std::unique_ptr<Action> &&action)
         : action_{std::move(action)} {}
 
@@ -17,7 +18,7 @@ class AutoExecutor {
             case RunState::UNINIT:
                 action_->Start();
                 state_ = RunState::RUNNING;
-                // fallthrough:
+                __attribute__((fallthrough));
             case RunState::RUNNING:
                 if (action_->Finished()) {
                     action_->Stop();

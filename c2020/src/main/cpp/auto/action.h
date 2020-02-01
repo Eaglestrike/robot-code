@@ -1,5 +1,8 @@
 #pragma once
 
+#include <memory>
+#include <vector>
+
 #include "../util/constructor_macros.h"
 
 namespace team114 {
@@ -21,13 +24,33 @@ class Action {
 
     // Informs the executor whether the action has completed.
     // The action will be unscheduled once this returns true.
-    virtual bool Finished() { return true; };
+    virtual bool Finished() { return true; }
 
     // Cleanup when action is un-scheduled, either due to completion or
     // termination. Other methods must not be invoked after Stop() is called.
     // Stop() is guaranteed to be invoked shortly after Finished() returns true.
     virtual void Stop() {}
 };
+
+using ActionList = std::vector<std::unique_ptr<Action>>;
+
+template <typename T>
+void __add_action_list(ActionList& v, T&& action) {
+    v.emplace_back(std::move(action));
+}
+
+template <typename T1, typename... T2>
+void __add_action_list(ActionList& v, T1&& action, T2&&... actions) {
+    v.emplace_back(std::move(action));
+    __add_action_list(v, actions...);
+}
+
+template <typename... T>
+ActionList MakeActionList(T&&... actions) {
+    ActionList v;
+    __add_action_list(v, std::move(actions)...);
+    return v;
+}
 
 }  // namespace auton
 }  // namespace c2020
