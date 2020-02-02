@@ -26,7 +26,7 @@ class Drive : public Subsystem {
     void ZeroSensors() override;
     void OutputTelemetry() override;
 
-    void SetWantDriveTraj(frc::Trajectory traj);
+    void SetWantDriveTraj(frc::Trajectory&& traj);
     bool FinishedTraj();
 
     // Assumes range of -1 to 1 mps max speed

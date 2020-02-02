@@ -107,7 +107,12 @@ void Drive::WaitForNavxCalibration(double timeout_sec) {
 
 void Drive::OutputTelemetry() {}
 
-void Drive::SetWantDriveTraj(frc::Trajectory traj) {}
+void Drive::SetWantDriveTraj(frc::Trajectory&& traj) {
+    curr_traj_.emplace(std::move(traj));
+    state_ = DriveState::FOLLOW_PATH;
+    traj_timer.Reset();
+    traj_timer.Start();
+}
 
 void Drive::UpdateRobotState() {
     odometry_.Update(GetYaw(), GetEncoder(left_master_),
@@ -116,11 +121,38 @@ void Drive::UpdateRobotState() {
                                      odometry_.GetPose());
 }
 
-void Drive::UpdatePathController() {}
+void Drive::UpdatePathController() {
+    if (!curr_traj_.has_value()) {
+        // LOG
+    }
+    if (FinishedTraj()) {
+        curr_traj_.reset();
+        SetWantRawOpenLoop({0.0_mps, 0.0_mps});
+    }
+    auto time_along = traj_timer.Get();
+    auto desired = curr_traj_.value().Sample(units::second_t{time_along});
+    auto chassis_v = ramsete_.Calculate(
+        robot_state_.GetLatestFieldToRobot().second, desired);
+    auto wheel_v = kinematics_.ToWheelSpeeds(chassis_v);
+    // convert into falcon 500 internal encoder ticks
+    auto MetersPerSecToTicksPerDecisec =
+        [this](units::meters_per_second_t meters_per_second) -> double {
+        return meters_per_second / config_.meters_per_falcon_tick * 1_s / 10.0;
+    };
+    // TODO(josh) consider using WPILib
+    // SimpleMotorFeedForward to add kA term
+    pout_.control_mode = ControlMode::Velocity;
+    pout_.left_demand = MetersPerSecToTicksPerDecisec(wheel_v.left);
+    pout_.right_demand = MetersPerSecToTicksPerDecisec(wheel_v.right);
+}
 
 bool Drive::FinishedTraj() {
-    // TODO(josh)
-    return false;
+    if (!curr_traj_.has_value()) {
+        // not running one at the moment
+        return true;
+    }
+    // TODO(josh) find a better way?
+    return traj_timer.Get() > curr_traj_.value().TotalTime();
 }
 
 void Drive::SetWantRawOpenLoop(
