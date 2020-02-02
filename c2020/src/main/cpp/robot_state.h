@@ -17,14 +17,15 @@ class RobotState {
     RobotState();
 
     // TODO(josh) add interpolating verison?
-    std::pair<double, frc::Pose2d> GetLatestFieldToRobot();
-    frc::Pose2d GetFieldToRobot(double timestamp);
-    void ObserveFieldToRobot(double timestamp, const frc::Pose2d& pose);
+    std::pair<units::second_t, frc::Pose2d> GetLatestFieldToRobot();
+    frc::Pose2d GetFieldToRobot(units::second_t);
+    void ObserveFieldToRobot(units::second_t timestamp,
+                             const frc::Pose2d& pose);
     void ResetFieldToRobot();
 
    private:
-    InterpolatingMap<double, frc::Pose2d, ArithmeticInverseInterp<double>,
-                     Pose2dInterp>
+    InterpolatingMap<units::second_t, frc::Pose2d,
+                     ArithmeticInverseInterp<units::second_t>, Pose2dInterp>
         field_to_robot_;
 };
 

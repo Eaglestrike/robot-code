@@ -3,8 +3,8 @@
 #include <thread>
 
 #include <frc/SPI.h>
-#include <frc/Timer.h>
 #include <frc/kinematics/DifferentialDriveWheelSpeeds.h>
+#include <frc2/Timer.h>
 
 #include <units/units.h>
 
@@ -65,10 +65,7 @@ void Drive::CheckFalconFramePeriods() {
 
 void Drive::Periodic() {
     CheckFalconFramePeriods();
-    odometry_.Update(GetYaw(), GetEncoder(left_master_),
-                     GetEncoder(right_master_));
-    robot_state_.ObserveFieldToRobot(frc::Timer::GetFPGATimestamp(),
-                                     odometry_.GetPose());
+    UpdateRobotState();
     switch (state_) {
         case (DriveState::OPEN_LOOP):
             // TODO(josh)
@@ -112,7 +109,12 @@ void Drive::OutputTelemetry() {}
 
 void Drive::SetWantDriveTraj(frc::Trajectory traj) {}
 
-void Drive::UpdateRobotState() {}
+void Drive::UpdateRobotState() {
+    odometry_.Update(GetYaw(), GetEncoder(left_master_),
+                     GetEncoder(right_master_));
+    robot_state_.ObserveFieldToRobot(frc2::Timer::GetFPGATimestamp(),
+                                     odometry_.GetPose());
+}
 
 void Drive::UpdatePathController() {}
 

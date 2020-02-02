@@ -69,7 +69,7 @@ class Drive : public Subsystem {
     frc::DifferentialDriveOdometry odometry_;
     frc::RamseteController ramsete_;
     std::optional<frc::Trajectory> curr_traj_;
-    double traj_start_time_ = 0.0;
+    frc2::Timer traj_timer{};
 };
 
 }  // namespace c2020
