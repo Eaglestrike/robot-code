@@ -32,6 +32,14 @@ class Action {
     virtual void Stop() {}
 };
 
+class EmptyAction : public Action {
+   public:
+    virtual void Start() override {}
+    virtual void Periodic() override {}
+    virtual bool Finished() override { return true; }
+    virtual void Stop() override {}
+};
+
 using ActionList = std::vector<std::unique_ptr<Action>>;
 
 template <typename T>

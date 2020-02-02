@@ -10,13 +10,18 @@ Robot::Robot()
       drive_{Drive::GetInstance()},
       robot_state_{RobotState::GetInstance()},
       ljoy_{0},
-      rjoy_{1} {}
+      rjoy_{1},
+      auto_selector_{auton::AutoModeSelector::GetInstance()},
+      auto_executor_{std::make_unique<auton::EmptyAction>()} {}
 
 void Robot::RobotInit() {}
 void Robot::RobotPeriodic() { drive_.Periodic(); }
 
-void Robot::AutonomousInit() {}
-void Robot::AutonomousPeriodic() {}
+void Robot::AutonomousInit() {
+    auto mode = auto_selector_.GetSelectedAction();  // heh
+    auto_executor_ = auton::AutoExecutor{std::move(mode)};
+}
+void Robot::AutonomousPeriodic() { auto_executor_.Periodic(); }
 
 void Robot::TeleopInit() {}
 void Robot::TeleopPeriodic() {
@@ -29,8 +34,8 @@ void Robot::TeleopPeriodic() {
 void Robot::TestInit() {}
 void Robot::TestPeriodic() {}
 
-void Robot::DisabledInit() {}
-void Robot::DisabledPeriodic() {}
+void Robot::DisabledInit() { auto_executor_.Stop(); }
+void Robot::DisabledPeriodic() { auto_selector_.UpdateSelection(); }
 
 }  // namespace c2020
 }  // namespace team114

@@ -4,6 +4,10 @@
 #include <frc/TimedRobot.h>
 #include <units/units.h>
 
+#include <optional>
+
+#include "auto/executor.h"
+#include "auto/selector.h"
 #include "robot_state.h"
 #include "subsystems/drive.h"
 #include "util/constructor_macros.h"
@@ -36,6 +40,8 @@ class Robot : public frc::TimedRobot {
     RobotState& robot_state_;
     frc::Joystick ljoy_;
     frc::Joystick rjoy_;
+    auton::AutoModeSelector& auto_selector_;
+    auton::AutoExecutor auto_executor_;
 };
 
 }  // namespace c2020
