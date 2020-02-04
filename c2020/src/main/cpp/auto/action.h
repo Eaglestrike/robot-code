@@ -15,6 +15,10 @@ class Action {
     Action(Action&&) = default;
     DISALLOW_COPY_ASSIGN(Action)
 
+    // Since we will be using Action* free-ing derived classes,
+    // we need this or UB https://stackoverflow.com/a/461224
+    virtual ~Action() {}
+
     // Run once when action first scheduled
     virtual void Start() {}
 
