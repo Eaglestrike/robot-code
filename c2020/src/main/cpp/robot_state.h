@@ -16,7 +16,6 @@ class RobotState {
    public:
     RobotState();
 
-    // TODO(josh) add interpolating verison?
     std::pair<units::second_t, frc::Pose2d> GetLatestFieldToRobot();
     frc::Pose2d GetFieldToRobot(units::second_t);
     void ObserveFieldToRobot(units::second_t timestamp,
