@@ -10,8 +10,12 @@ namespace auton {
 
 class AutoExecutor {
    public:
-    AutoExecutor(std::unique_ptr<Action> &&action)
+    AutoExecutor(std::unique_ptr<Action>&& action)
         : action_{std::move(action)} {}
+
+    ~AutoExecutor() { Stop(); }
+
+    AutoExecutor& operator=(AutoExecutor&&) = default;
 
     void Periodic() {
         switch (state_) {
