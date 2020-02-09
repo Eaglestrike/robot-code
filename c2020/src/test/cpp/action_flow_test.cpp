@@ -55,13 +55,10 @@ TEST(Actions, Executor) {
 }
 
 TEST(Actions, EarlyStop) {
+    // Tests that all started actions are stopped
     class TestAction : public Action {
        public:
-        ~TestAction() {
-            if (has_started_) {
-                EXPECT_TRUE(has_stopped_);
-            }
-        }
+        ~TestAction() { EXPECT_TRUE(has_started_ == has_stopped_); }
         TestAction(int runs) : runs_{runs} {}
         virtual void Start() override {
             state_ = 0;
@@ -82,8 +79,8 @@ TEST(Actions, EarlyStop) {
         exe.Periodic();
         ASSERT_FALSE(exe.Finished());
     }
-    {
-        AutoExecutor cexe{std::make_unique<SeriesAction>(MakeActionList(
+    auto make_complex_exec = []() -> AutoExecutor {
+        return AutoExecutor{std::make_unique<SeriesAction>(MakeActionList(
             std::make_unique<TestAction>(3), std::make_unique<TestAction>(4),
             std::make_unique<TestAction>(5),
             std::make_unique<ParallelAction>(
@@ -95,10 +92,18 @@ TEST(Actions, EarlyStop) {
                                    std::make_unique<TestAction>(5),
                                    std::make_unique<TestAction>(8),
                                    std::make_unique<TestAction>(3))))),
-
             std::make_unique<TestAction>(10)))};
-        for (int i = 0; i < 15; i++) {
-            cexe.Periodic();
-        }
+    };
+    // halt halfway
+    auto cexe1{make_complex_exec()};
+    for (int i = 0; i < 15; i++) {
+        cexe1.Periodic();
     }
+    // run fully
+    auto cexe2{make_complex_exec()};
+    while (!cexe2.Finished()) {
+        cexe2.Periodic();
+    }
+    // run nothing
+    auto cexe3{make_complex_exec()};
 }

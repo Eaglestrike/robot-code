@@ -41,8 +41,8 @@ class SeriesAction : public Action {
     }
     virtual bool Finished() override { return actions_.empty(); }
     virtual void Stop() override {
-        for (auto& action : actions_) {
-            action->Stop();
+        if (!actions_.empty()) {
+            actions_.back()->Stop();
         }
     }
 

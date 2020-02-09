@@ -41,7 +41,8 @@ class AutoExecutor {
     bool Finished() { return state_ == RunState::FINISHED; }
 
     void Stop() {
-        if (Finished()) {
+        // ensure we don't Stop() the action twice or if it hasn't started
+        if (state_ == RunState::FINISHED || state_ == RunState::UNINIT) {
             return;
         }
         action_->Stop();
