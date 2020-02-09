@@ -10,6 +10,8 @@
 namespace team114 {
 namespace c2020 {
 
+// Saying frame1_to_frame2 represents the transform applied to the frame1 origin
+// that will bring it to the frame2 origin.
 class RobotState {
     DISALLOW_COPY_ASSIGN(RobotState)
     CREATE_SINGLETON(RobotState)
