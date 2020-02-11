@@ -14,7 +14,8 @@ namespace conf {
 // sim / testing before we have a real robot
 const RobotConfig MakeDefaultRobotConfig() {
     RobotConfig c;
-    c.mac_address = "aa:bb:cc:dd:ee:ff";
+    // /sys/class/net/<if>/address is newline terminated, match here
+    c.mac_address = "aa:bb:cc:dd:ee:ff\n";
     c.drive.left_master_id = 21;
     c.drive.left_slave_id = 22;
     c.drive.right_master_id = 23;
@@ -29,22 +30,20 @@ const RobotConfig MakeDefaultRobotConfig() {
     return c;
 }
 
-static std::optional<RobotConfig> CONFIG;
-
 RobotConfig& GetConfig() {
+    static std::optional<RobotConfig> CONFIG;
     if (CONFIG.has_value()) {
         return CONFIG.value();
     }
     // TODO(josh): log the chosen config
     std::ifstream ifs("/sys/class/net/eth0/address");
-    if (!ifs.fail() || !ifs.is_open()) {
+    if (!ifs.good() || !ifs.is_open()) {
         CONFIG = MakeDefaultRobotConfig();
         return GetConfig();
     }
     std::string rio_mac((std::istreambuf_iterator<char>(ifs)),
                         (std::istreambuf_iterator<char>()));
     // TODO(josh) fill in with real RIOs
-    // TODO(josh) check for newline in file read
     RobotConfig config_a = MakeDefaultRobotConfig();
     RobotConfig config_b = MakeDefaultRobotConfig();
     if (config_a.mac_address == rio_mac) {
