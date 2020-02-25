@@ -61,7 +61,7 @@ class Drive : public Subsystem {
     PeriodicOut pout_{};
     void WriteOuts();
 
-    conf::DriveConfig config_;
+    const conf::DriveConfig config_;
     DriveState state_{DriveState::OPEN_LOOP};
     RobotState& robot_state_;
 

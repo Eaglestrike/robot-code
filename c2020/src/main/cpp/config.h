@@ -21,9 +21,23 @@ struct DriveConfig {
     units::meters_per_second_squared_t traj_max_centrip_accel;
 };
 
+struct HoodConfig {
+    int talon_id;
+    double ticks_per_degree;
+    double max_degrees;
+    double current_limit;
+    double zeroing_kp;
+    double zeroing_vel;
+    double kA;
+    double kV;
+    double kP;
+    double kD;
+};
+
 struct RobotConfig {
     std::string mac_address;
     DriveConfig drive;
+    HoodConfig hood;
 };
 
 RobotConfig& GetConfig();
