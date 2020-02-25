@@ -16,6 +16,7 @@ Robot::Robot()
       intake_{Intake::GetInstance()},
       ball_path_{BallPath::GetInstance()},
       control_panel_{ControlPanel::GetInstance()},
+      limelight_{Limelight::GetInstance()},
       robot_state_{RobotState::GetInstance()},
       ljoy_{0},
       rjoy_{1},
@@ -30,6 +31,7 @@ void Robot::RobotPeriodic() {
     ball_path_.Periodic();
     climber_.Periodic();
     control_panel_.Periodic();
+    limelight_.Periodic();
 }
 
 void Robot::AutonomousInit() {

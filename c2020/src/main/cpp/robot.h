@@ -16,6 +16,7 @@
 #include "subsystems/drive.h"
 #include "subsystems/hood.h"
 #include "subsystems/intake.h"
+#include "subsystems/limelight.h"
 #include "util/constructor_macros.h"
 
 namespace team114 {
@@ -49,6 +50,7 @@ class Robot : public frc::TimedRobot {
     Intake& intake_;
     BallPath& ball_path_;
     ControlPanel& control_panel_;
+    Limelight& limelight_;
     RobotState& robot_state_;
     frc::Joystick ljoy_;
     frc::Joystick rjoy_;

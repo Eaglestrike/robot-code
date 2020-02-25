@@ -118,6 +118,13 @@ struct ClimberConfig {
     double descend_command;
 };
 
+struct LimelightConfig {
+    std::string name;
+    std::string table_name;
+    units::meter_t diff_height;
+    units::radian_t angle_above_horizontal;
+};
+
 struct RobotConfig {
     std::string mac_address;
     DriveConfig drive;
@@ -127,6 +134,7 @@ struct RobotConfig {
     ShooterConifg shooter;
     BallChannelConfig ball_channel;
     ClimberConfig climber;
+    LimelightConfig limelight;
 };
 
 RobotConfig& GetConfig();

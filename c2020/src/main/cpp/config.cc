@@ -5,6 +5,8 @@
 #include <optional>
 #include <string>
 
+#include "util/number_util.h"
+
 namespace team114 {
 namespace c2020 {
 namespace conf {
@@ -115,6 +117,11 @@ const RobotConfig MakeDefaultRobotConfig() {
     c.climber.forward_soft_limit_ticks = 122000;
     c.climber.ascend_command = 1.00;
     c.climber.descend_command = -1.00;
+
+    c.limelight.name = "limelight";
+    c.limelight.table_name = "limelight";
+    c.limelight.diff_height = 2.496_m - 0.55_m;
+    c.limelight.angle_above_horizontal = DegToRad(8.0);
 
     return c;
 }
