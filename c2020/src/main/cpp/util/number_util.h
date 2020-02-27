@@ -20,5 +20,16 @@ constexpr T Deadband(T val, T deadband) noexcept {
     return val;
 }
 
+template <typename T>
+constexpr T Clamp(T val, T min, T max) noexcept {
+    if (val < min) {
+        return min;
+    } else if (val > max) {
+        return max;
+    } else {
+        return val;
+    }
+}
+
 }  // namespace c2020
 }  // namespace team114

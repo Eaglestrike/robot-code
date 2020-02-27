@@ -11,11 +11,11 @@ namespace conf {
 
 // WPILib chose GCC 7, so no C++20 designated initializers here
 
-// sim / testing before we have a real robot
 const RobotConfig MakeDefaultRobotConfig() {
     RobotConfig c;
     // /sys/class/net/<if>/address is newline terminated, match here
     c.mac_address = "aa:bb:cc:dd:ee:ff\n";
+
     c.drive.left_master_id = 21;
     c.drive.left_slave_id = 22;
     c.drive.right_master_id = 23;
@@ -27,6 +27,37 @@ const RobotConfig MakeDefaultRobotConfig() {
     c.drive.traj_max_accel = units::meters_per_second_squared_t{5.0};
     // currently this is g with 2x FOS
     c.drive.traj_max_centrip_accel = units::meters_per_second_squared_t{4.9};
+
+    c.ctrl_panel.talon_id = 31;
+    // TODO the rest
+
+    c.intake.rot_talon_id = 41;
+    c.intake.roller_talon_id = 42;
+
+    c.hood.talon_id = 52;
+    c.hood.ticks_per_degree = 4096.0 * 350.0 / 28.0 / 360.0;
+    c.hood.min_degrees = 20;          // TODO
+    c.hood.max_degrees = 60;          // TODO
+    c.hood.current_limit = 20;        // TODO
+    c.hood.zeroing_current = 15;      // TODO
+    c.hood.zeroing_kp = .00001;       // TODO
+    c.hood.zeroing_vel = 1;           // TODO
+    c.hood.profile_acc = 10;          // TODO
+    c.hood.profile_vel = 10;          // TODO
+    c.hood.kP = 0.0;                  // TODO
+    c.hood.kD = 0.0;                  // TODO
+    c.hood.ctre_curve_smoothing = 4;  // TODO
+
+    c.shooter.master_id = 53;
+    c.shooter.slave_id = 54;
+    c.shooter.kicker_id = 51;
+
+    c.ball_channel.serializer_id = 43;
+    c.ball_channel.channel_id = 44;
+
+    c.climber.master_id = 19;
+    c.climber.slave_id = 20;
+
     return c;
 }
 
@@ -152,7 +183,7 @@ void DriveFalconCommonConfig(TalonFX& falcon) {
 // CAN metrics docs
 // https://phoenix-documentation.readthedocs.io/en/latest/ch18_CommonAPI.html#can-bus-utilization-error-metrics
 inline static ErrorCode SetDriveCommonFramePeriods(TalonFX& falcon) {
-    constexpr int lng = 200;
+    constexpr int lng = 255;
     ErrorCollection err;
     err.NewError(falcon.SetStatusFramePeriod(
         StatusFrameEnhanced::Status_3_Quadrature, lng));
@@ -197,6 +228,80 @@ void SetDriveSlaveFramePeriods(TalonFX& falcon) {
             StatusFrameEnhanced::Status_2_Feedback0, 255));
         err.NewError(falcon.SetStatusFramePeriod(
             StatusFrameEnhanced::Status_13_Base_PIDF0, 200));
+        if (err.GetFirstNonZeroError() == ErrorCode::OK) {
+            return;
+        }
+    }
+}
+
+void SetFramePeriodsForPidTalon(TalonSRX& talon, FeedbackType feedback_type) {
+    constexpr int lng = 255;
+    constexpr int shrt = 10;
+    int quad = lng;
+    int pulsewidth = lng;
+    switch (feedback_type) {
+        case FeedbackType::Both:
+            quad = shrt;
+            pulsewidth = shrt;
+            break;
+        case FeedbackType::Quadrature:
+            quad = shrt;
+            break;
+        case FeedbackType::PulseWidth:
+            pulsewidth = shrt;
+            break;
+        case FeedbackType::None:
+            break;
+    }
+    for (int i = 0; i < kStatusFrameAttempts; i++) {
+        ErrorCollection err;
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_1_General, shrt));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_2_Feedback0, shrt));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_3_Quadrature, quad));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_4_AinTempVbat, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_8_PulseWidth, pulsewidth));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_10_MotionMagic, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_12_Feedback1, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_14_Turn_PIDF1, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_13_Base_PIDF0, 50));
+        if (err.GetFirstNonZeroError() == ErrorCode::OK) {
+            return;
+        }
+    }
+}
+
+void SetFramePeriodsForOpenLoopTalon(TalonSRX& talon) {
+    constexpr int lng = 255;
+    constexpr int shrt = 20;
+    for (int i = 0; i < kStatusFrameAttempts; i++) {
+        ErrorCollection err;
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_1_General, shrt));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_2_Feedback0, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_3_Quadrature, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_4_AinTempVbat, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_8_PulseWidth, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_10_MotionMagic, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_12_Feedback1, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_14_Turn_PIDF1, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_13_Base_PIDF0, 50));
         if (err.GetFirstNonZeroError() == ErrorCode::OK) {
             return;
         }

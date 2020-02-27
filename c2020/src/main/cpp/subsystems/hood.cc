@@ -1,6 +1,7 @@
 #include "hood.h"
 
 #include <cmath>
+#include "util/number_util.h"
 
 namespace team114 {
 namespace c2020 {
@@ -25,26 +26,25 @@ Hood::Hood(const conf::HoodConfig& cfg)
     c.nominalOutputForward = 0.0;
     c.nominalOutputReverse = 0.0;
     c.voltageCompSaturation = 12.0;
-    // TODO(josh) tune
-    // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#velocity-measurement-filter
-    c.velocityMeasurementPeriod = VelocityMeasPeriod::Period_10Ms;
-    c.velocityMeasurementWindow = 4;
-    // TODO(Josh) tune
     c.slot0.allowableClosedloopError = 0;
     c.slot0.closedLoopPeakOutput = 1.0;
     c.slot0.closedLoopPeriod = 1;
     // TODO(josh) tune
     c.slot0.integralZone = 0;
     c.slot0.maxIntegralAccumulator = 0;
-    // https://phoenix-documentation.readthedocs.io/en/latest/ch16_ClosedLoop.html#calculating-velocity-feed-forward-gain-kf
     c.slot0.kF = 0.0;
-    c.slot0.kP = 0.0;
+    c.slot0.kP = cfg_.kP;
     c.slot0.kI = 0.0;
-    c.slot0.kD = 0.0;
-    c.motionCruiseVelocity = 0;
-    c.motionAcceleration = 0;
-    c.motionCurveStrength = 0;
-    c.motionProfileTrajectoryPeriod = 0;
+    c.slot0.kD = cfg_.kD;
+    c.motionCruiseVelocity = cfg_.profile_vel;
+    c.motionAcceleration = cfg_.profile_acc;
+    c.motionCurveStrength = cfg_.ctre_curve_smoothing;
+    c.forwardSoftLimitEnable = true;
+    c.reverseSoftLimitEnable = true;
+    c.forwardSoftLimitThreshold = (cfg_.max_degrees - cfg.min_degrees + 0.25) *
+                                  cfg_.ticks_per_degree;  // TODO plus a bit
+    c.reverseSoftLimitThreshold =
+        -0.25 * cfg_.ticks_per_degree;  // TODO minus a bit
     // TODO(josh) logs everywhere
     for (int i = 0; i < 10; i++) {
         auto err = talon_.ConfigAllSettings(c, 100);
@@ -57,7 +57,7 @@ Hood::Hood(const conf::HoodConfig& cfg)
     talon_.SelectProfileSlot(0, 0);
     talon_.SetNeutralMode(NeutralMode::Brake);
 
-    // TODO(josh) set frame periods
+    conf::SetFramePeriodsForPidTalon(talon_);
 }
 
 void Hood::Periodic() {
@@ -65,6 +65,7 @@ void Hood::Periodic() {
         case LoopState::UNINITALIZED:
             talon_.Set(ControlMode::PercentOutput, 0.0);
             zeroing_position_ = talon_.GetSelectedSensorPosition();
+            talon_.ConfigReverseSoftLimitEnable(false);
             state_ = LoopState::ZEROING;
             break;
         case LoopState::ZEROING:
@@ -75,6 +76,7 @@ void Hood::Periodic() {
             if (talon_.GetSupplyCurrent() >= cfg_.current_limit) {
                 talon_.Set(ControlMode::PercentOutput, 0.0);
                 talon_.SetSelectedSensorPosition(0.0);
+                talon_.ConfigReverseSoftLimitEnable(true);
                 state_ = LoopState::RUNNING;
             }
             break;
@@ -88,8 +90,11 @@ void Hood::ZeroSensors() { state_ = LoopState::UNINITALIZED; }
 void Hood::OutputTelemetry() {}
 
 void Hood::SetWantPosition(double degrees) {
+    degrees = Clamp(degrees, cfg_.min_degrees, cfg_.max_degrees);
+    degrees = cfg_.max_degrees - degrees;
     setpoint_ticks_ = degrees * cfg_.ticks_per_degree;
 }
+
 bool Hood::IsAtPosition() {
     auto err = std::abs(talon_.GetSelectedSensorPosition() - setpoint_ticks_);
     auto max_err = 1.0 * cfg_.ticks_per_degree;

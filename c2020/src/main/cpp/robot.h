@@ -4,6 +4,10 @@
 #include <frc/TimedRobot.h>
 #include <units/units.h>
 
+// Testing
+#include <ctre/Phoenix.h>
+#include <frc/Solenoid.h>
+
 #include <optional>
 
 #include "auto/executor.h"
@@ -42,6 +46,23 @@ class Robot : public frc::TimedRobot {
     frc::Joystick rjoy_;
     auton::AutoModeSelector& auto_selector_;
     auton::AutoExecutor auto_executor_;
+
+    // Test stuff
+    conf::RobotConfig cfg;
+    TalonSRX intake_rot;
+    TalonSRX intake_roller;
+    TalonSRX channel_ser;
+    TalonSRX channel_chan;
+    TalonSRX shooter_1;
+    TalonSRX shooter_2;
+    TalonSRX shooter_kicker;
+    TalonSRX climber_1;
+    TalonSRX climber_2;
+
+    frc::Solenoid climber_brake;
+    frc::Solenoid climber_latch;
+    // TalonSRX hood;
+    // TalonSRX ctrl_panel;
 };
 
 }  // namespace c2020

@@ -61,5 +61,23 @@ struct SdbBool {
     void Update() { frc::SmartDashboard::PutBoolean(KeyTy::GetName(), value); }
 };
 
+#define READING_SDB_NUMERIC(type, key_ident)                       \
+    struct __SdbKey_##key_ident {                                  \
+        static const std::string GetName() { return #key_ident; }; \
+    };                                                             \
+    team114::c2020::ReadingSdbNumeric<type, __SdbKey_##key_ident>
+
+template <typename NumericTy, typename KeyTy>
+struct ReadingSdbNumeric {
+    ReadingSdbNumeric() {
+        if (!frc::SmartDashboard::GetEntry(KeyTy::GetName()).Exists()) {
+            frc::SmartDashboard::PutNumber(KeyTy::GetName(), NumericTy());
+        }
+    }
+    operator NumericTy() const {
+        return frc::SmartDashboard::GetNumber(KeyTy::GetName(), NumericTy());
+    }
+};
+
 }  // namespace c2020
 }  // namespace team114
