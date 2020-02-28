@@ -84,13 +84,14 @@ struct ClimberConfig {
     int master_id;
     int slave_id;
     double current_limit;
-    double kP;
-    double kD;
+    // spool winding makes this weird
+    double avg_ticks_per_inch;
     int release_solenoid_id;
     int brake_solenoid_id;
     int initial_step_ticks;
-    double windup_command;
-    double winddown_command;
+    int forward_soft_limit_ticks;
+    double ascend_command;
+    double descend_command;
 };
 
 struct RobotConfig {
@@ -123,6 +124,8 @@ void SetFramePeriodsForPidTalon(
     TalonSRX& talon, FeedbackType feedback_type = FeedbackType::None);
 
 void SetFramePeriodsForOpenLoopTalon(TalonSRX& talon);
+
+void SetFramePeriodsForSlaveTalon(TalonSRX& talon);
 
 }  // namespace conf
 }  // namespace c2020

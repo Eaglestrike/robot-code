@@ -57,6 +57,14 @@ const RobotConfig MakeDefaultRobotConfig() {
 
     c.climber.master_id = 19;
     c.climber.slave_id = 20;
+    c.climber.current_limit = 35;
+    c.climber.release_solenoid_id = 7;
+    c.climber.brake_solenoid_id = 6;
+    c.climber.avg_ticks_per_inch = 4096.0 * 9.0 / ((.969 + 1.25) * M_PI);
+    c.climber.initial_step_ticks = 20 * c.climber.avg_ticks_per_inch;
+    c.climber.forward_soft_limit_ticks = 55 * c.climber.avg_ticks_per_inch;
+    c.climber.ascend_command = 1.00;
+    c.climber.descend_command = -1.00;
 
     return c;
 }
@@ -102,17 +110,6 @@ void DriveFalconCommonConfig(TalonFX& falcon) {
     // ===== Base Talon CFG
     c.primaryPID.selectedFeedbackSensor = FeedbackDevice::IntegratedSensor;
     c.primaryPID.selectedFeedbackCoefficient = 1.0;
-    // BaseTalonPIDSetConfiguration auxiliaryPID
-    // LimitSwitchSource forwardLimitSwitchSource
-    // LimitSwitchSource reverseLimitSwitchSource
-    // int forwardLimitSwitchDeviceID
-    // int reverseLimitSwitchDeviceID
-    // LimitSwitchNormal forwardLimitSwitchNormal
-    // LimitSwitchNormal reverseLimitSwitchNormal
-    // FeedbackDevice sum0Term
-    // FeedbackDevice sum1Term
-    // FeedbackDevice diff0Term
-    // FeedbackDevice diff1Term
     // ======= BaseMotor Param cfg
     c.openloopRamp = 0.2;    // time from neutral to full
     c.closedloopRamp = 0.0;  // disable ramping, should be running a profile
@@ -227,7 +224,7 @@ void SetDriveSlaveFramePeriods(TalonFX& falcon) {
         err.NewError(falcon.SetStatusFramePeriod(
             StatusFrameEnhanced::Status_2_Feedback0, 255));
         err.NewError(falcon.SetStatusFramePeriod(
-            StatusFrameEnhanced::Status_13_Base_PIDF0, 200));
+            StatusFrameEnhanced::Status_13_Base_PIDF0, 255));
         if (err.GetFirstNonZeroError() == ErrorCode::OK) {
             return;
         }
@@ -301,7 +298,35 @@ void SetFramePeriodsForOpenLoopTalon(TalonSRX& talon) {
         err.NewError(talon.SetStatusFramePeriod(
             StatusFrameEnhanced::Status_14_Turn_PIDF1, lng));
         err.NewError(talon.SetStatusFramePeriod(
-            StatusFrameEnhanced::Status_13_Base_PIDF0, 50));
+            StatusFrameEnhanced::Status_13_Base_PIDF0, lng));
+        if (err.GetFirstNonZeroError() == ErrorCode::OK) {
+            return;
+        }
+    }
+}
+
+void SetFramePeriodsForSlaveTalon(TalonSRX& talon) {
+    constexpr int lng = 255;
+    for (int i = 0; i < kStatusFrameAttempts; i++) {
+        ErrorCollection err;
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_1_General, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_2_Feedback0, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_3_Quadrature, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_4_AinTempVbat, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_8_PulseWidth, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_10_MotionMagic, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_12_Feedback1, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_14_Turn_PIDF1, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_13_Base_PIDF0, lng));
         if (err.GetFirstNonZeroError() == ErrorCode::OK) {
             return;
         }

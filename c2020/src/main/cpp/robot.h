@@ -13,6 +13,7 @@
 #include "auto/executor.h"
 #include "auto/selector.h"
 #include "robot_state.h"
+#include "subsystems/climber.h"
 #include "subsystems/drive.h"
 #include "util/constructor_macros.h"
 
@@ -41,9 +42,11 @@ class Robot : public frc::TimedRobot {
 
    private:
     Drive& drive_;
+    Climber& climber_;
     RobotState& robot_state_;
     frc::Joystick ljoy_;
     frc::Joystick rjoy_;
+    frc::Joystick ojoy_;
     auton::AutoModeSelector& auto_selector_;
     auton::AutoExecutor auto_executor_;
 

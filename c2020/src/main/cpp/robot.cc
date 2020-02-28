@@ -8,9 +8,11 @@ namespace c2020 {
 Robot::Robot()
     : frc::TimedRobot{Robot::kPeriod},
       drive_{Drive::GetInstance()},
+      climber_{Climber::GetInstance()},
       robot_state_{RobotState::GetInstance()},
       ljoy_{0},
       rjoy_{1},
+      ojoy_{2},
       auto_selector_{auton::AutoModeSelector::GetInstance()},
       auto_executor_{std::make_unique<auton::EmptyAction>()},
       cfg{conf::GetConfig()},
@@ -27,7 +29,10 @@ Robot::Robot()
       climber_latch{7} {}
 
 void Robot::RobotInit() {}
-void Robot::RobotPeriodic() { drive_.Periodic(); }
+void Robot::RobotPeriodic() {
+    drive_.Periodic();
+    climber_.Periodic();
+}
 
 void Robot::AutonomousInit() {
     auto mode = auto_selector_.GetSelectedAction();  // heh
@@ -37,10 +42,19 @@ void Robot::AutonomousPeriodic() { auto_executor_.Periodic(); }
 
 void Robot::TeleopInit() {}
 void Robot::TeleopPeriodic() {
-    SDB_NUMERIC(double, JoystickThrottle) throttle = ljoy_.GetRawAxis(1);
-    SDB_NUMERIC(double, JoystickWheel) wheel = -rjoy_.GetRawAxis(0);
-    SDB_BOOL(JoystickQuickturn) quick_turn = rjoy_.GetRawButton(1);
+    double throttle = ljoy_.GetRawAxis(1);
+    double wheel = -rjoy_.GetRawAxis(0);
+    bool quick_turn = rjoy_.GetRawButton(1);
     drive_.SetWantCheesyDrive(throttle, wheel, quick_turn);
+
+    bool climb_up = ojoy_.GetRawButton(1);
+    bool climb_down = ojoy_.GetRawButton(2);
+    if (climb_up == climb_down) {
+        climber_.SetWantDirection(Climber::Direction::Neutral);
+    } else {
+        climber_.SetWantDirection(climb_up ? Climber::Direction::Up
+                                           : Climber::Direction::Down);
+    }
 }
 
 void Robot::TestInit() {
@@ -62,17 +76,20 @@ void Robot::TestPeriodic() {
     READING_SDB_NUMERIC(double, KickerCmd) kicker_cmd;
     shooter_kicker.Set(ControlMode::PercentOutput, kicker_cmd);
 
-    // CLIMBER
-    // READING_SDB_NUMERIC(double, ClimberCmd) climber_cmd;
-    // READING_SDB_NUMERIC(double, ClimberBrake) climber_brake_c;
-    // READING_SDB_NUMERIC(double, ClimberLatch) climber_latch_c;
-    // climber_1.Set(ControlMode::PercentOutput, climber_cmd);
-    // climber_2.Set(ControlMode::PercentOutput, climber_cmd);
-    // climber_brake.Set(climber_brake_c > 0);
-    // climber_latch.Set(climber_latch_c > 0);
+    bool climb_up = ojoy_.GetRawButton(1);
+    bool climb_down = ojoy_.GetRawButton(2);
+    if (climb_up == climb_down) {
+        climber_.SetZeroingWind(Climber::Direction::Neutral);
+    } else {
+        climber_.SetZeroingWind(climb_up ? Climber::Direction::Up
+                                         : Climber::Direction::Down);
+    }
 }
 
-void Robot::DisabledInit() { auto_executor_.Stop(); }
+void Robot::DisabledInit() {
+    auto_executor_.Stop();
+    climber_.SetWantDirection(Climber::Direction::Neutral);
+}
 void Robot::DisabledPeriodic() { auto_selector_.UpdateSelection(); }
 
 }  // namespace c2020

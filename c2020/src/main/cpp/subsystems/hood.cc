@@ -14,9 +14,9 @@ Hood::Hood(const conf::HoodConfig& cfg)
       talon_{cfg.talon_id},
       setpoint_ticks_{0} {
     TalonSRXConfiguration c;
-    c.peakCurrentLimit = cfg.current_limit;
+    c.peakCurrentLimit = cfg_.current_limit;
     c.peakCurrentDuration = 30;
-    c.continuousCurrentLimit = 0.8 * cfg.current_limit;
+    c.continuousCurrentLimit = 0.8 * cfg_.current_limit;
     c.primaryPID.selectedFeedbackSensor =
         FeedbackDevice::CTRE_MagEncoder_Relative;
     c.primaryPID.selectedFeedbackCoefficient = 1.0;
