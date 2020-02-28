@@ -28,22 +28,29 @@ struct ControlPanelConfig {
     double kP;
     double kI;
     double kD;
+    double ticks_per_color_slice;
+    std::string sdb_key;
 };
 
 struct IntakeConfig {
     int rot_talon_id;
     int roller_talon_id;
     double intake_cmd;
-    double current_limit;
-    double zeroing_kp;
-    double zeroing_vel;
+    double rot_current_limit;
+    double roller_current_limit;
+    // double zeroing_kp;
+    // double zeroing_vel;
+    double abs_enc_tick_offset;
+    double abs_ticks_per_rot;
+    double rel_ticks_per_abs_tick;
+    double rads_per_rel_tick;
+    double zeroed_rad_from_vertical;
     double SinekF;
     double kP;
     double kI;
     double kD;
     int stowed_pos_ticks;
-    int low_intaking_pos_ticks;
-    int high_intaking_pos_ticks;
+    int intaking_pos_ticks;
     int trench_driving_pos_ticks;
 };
 
@@ -78,6 +85,8 @@ struct ShooterConifg {
 struct BallChannelConfig {
     int serializer_id;
     int channel_id;
+    double serializer_cmd;
+    double channel_cmd;
 };
 
 struct ClimberConfig {

@@ -29,10 +29,31 @@ const RobotConfig MakeDefaultRobotConfig() {
     c.drive.traj_max_centrip_accel = units::meters_per_second_squared_t{4.9};
 
     c.ctrl_panel.talon_id = 31;
+    c.ctrl_panel.solenoid_channel = 8;
+    c.ctrl_panel.ticks_per_inch = 4096.0 / (4.0 * M_PI);
+    c.ctrl_panel.ticks_per_color_slice =
+        12.5 * 0.96 * c.ctrl_panel.ticks_per_inch;
+    c.ctrl_panel.sdb_key = "Target Color";
     // TODO the rest
 
     c.intake.rot_talon_id = 41;
     c.intake.roller_talon_id = 42;
+    c.intake.intake_cmd = 0.40;
+    c.intake.rot_current_limit = 10;
+    c.intake.roller_current_limit = 20;
+    c.intake.abs_enc_tick_offset = 0;  // TODO
+    c.intake.abs_ticks_per_rot = 4096.0;
+    c.intake.rel_ticks_per_abs_tick = 1.0;
+    c.intake.rads_per_rel_tick =
+        2 * M_PI / c.intake.abs_ticks_per_rot / c.intake.rel_ticks_per_abs_tick;
+    c.intake.zeroed_rad_from_vertical = 15.4 * M_PI / 180.0;
+    c.intake.SinekF = 0.1;
+    c.intake.kP = 0.3;
+    c.intake.kI = 0.001;
+    c.intake.kD = 3.0;
+    c.intake.stowed_pos_ticks = 10.0 / 360.0 * 4096.0;
+    c.intake.intaking_pos_ticks = 100.0 / 360.0 * 4096.0;
+    c.intake.trench_driving_pos_ticks = 20.0 / 36.0 * 4096.0;
 
     c.hood.talon_id = 52;
     c.hood.ticks_per_degree = 4096.0 * 350.0 / 28.0 / 360.0;

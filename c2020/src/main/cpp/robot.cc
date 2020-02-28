@@ -9,6 +9,8 @@ Robot::Robot()
     : frc::TimedRobot{Robot::kPeriod},
       drive_{Drive::GetInstance()},
       climber_{Climber::GetInstance()},
+      hood_{Hood::GetInstance()},
+      intake_{Intake::GetInstance()},
       robot_state_{RobotState::GetInstance()},
       ljoy_{0},
       rjoy_{1},
@@ -32,6 +34,8 @@ void Robot::RobotInit() {}
 void Robot::RobotPeriodic() {
     drive_.Periodic();
     climber_.Periodic();
+    hood_.Periodic();
+    intake_.Periodic();
 }
 
 void Robot::AutonomousInit() {

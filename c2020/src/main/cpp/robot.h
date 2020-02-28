@@ -15,6 +15,8 @@
 #include "robot_state.h"
 #include "subsystems/climber.h"
 #include "subsystems/drive.h"
+#include "subsystems/hood.h"
+#include "subsystems/intake.h"
 #include "util/constructor_macros.h"
 
 namespace team114 {
@@ -43,6 +45,8 @@ class Robot : public frc::TimedRobot {
    private:
     Drive& drive_;
     Climber& climber_;
+    Hood& hood_;
+    Intake& intake_;
     RobotState& robot_state_;
     frc::Joystick ljoy_;
     frc::Joystick rjoy_;
