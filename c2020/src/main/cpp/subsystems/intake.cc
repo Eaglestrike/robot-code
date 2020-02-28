@@ -33,7 +33,7 @@ Intake::Intake(const conf::IntakeConfig& cfg)
     // TODO(josh) tune
     rot.slot0.integralZone = 0;
     rot.slot0.maxIntegralAccumulator = 256;
-    rot.slot0.kF = 5.0 * M_PI / 180.0 / cfg_.rads_per_rel_tick;
+    rot.slot0.kF = 0.0;
     rot.slot0.kP = cfg_.kP;
     rot.slot0.kI = cfg_.kI;
     rot.slot0.kD = cfg_.kD;
@@ -124,9 +124,6 @@ void Intake::SetWantPosition(Intake::Position pos) {
             break;
         case Intake::Position::INTAKING:
             setpoint_ticks_ = cfg_.intaking_pos_ticks;
-            break;
-        case Intake::Position::TRENCH_DRIVING:
-            setpoint_ticks_ = cfg_.trench_driving_pos_ticks;
             break;
     }
 }

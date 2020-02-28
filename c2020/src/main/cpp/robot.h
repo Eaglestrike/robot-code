@@ -13,7 +13,9 @@
 #include "auto/executor.h"
 #include "auto/selector.h"
 #include "robot_state.h"
+#include "subsystems/ball_path.h"
 #include "subsystems/climber.h"
+#include "subsystems/control_panel.h"
 #include "subsystems/drive.h"
 #include "subsystems/hood.h"
 #include "subsystems/intake.h"
@@ -47,29 +49,15 @@ class Robot : public frc::TimedRobot {
     Climber& climber_;
     Hood& hood_;
     Intake& intake_;
+    BallPath& ball_path_;
+    ControlPanel& control_panel_;
     RobotState& robot_state_;
     frc::Joystick ljoy_;
     frc::Joystick rjoy_;
     frc::Joystick ojoy_;
     auton::AutoModeSelector& auto_selector_;
     auton::AutoExecutor auto_executor_;
-
-    // Test stuff
     conf::RobotConfig cfg;
-    TalonSRX intake_rot;
-    TalonSRX intake_roller;
-    TalonSRX channel_ser;
-    TalonSRX channel_chan;
-    TalonSRX shooter_1;
-    TalonSRX shooter_2;
-    TalonSRX shooter_kicker;
-    TalonSRX climber_1;
-    TalonSRX climber_2;
-
-    frc::Solenoid climber_brake;
-    frc::Solenoid climber_latch;
-    // TalonSRX hood;
-    // TalonSRX ctrl_panel;
 };
 
 }  // namespace c2020

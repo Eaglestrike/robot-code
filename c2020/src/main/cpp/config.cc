@@ -29,11 +29,19 @@ const RobotConfig MakeDefaultRobotConfig() {
     c.drive.traj_max_centrip_accel = units::meters_per_second_squared_t{4.9};
 
     c.ctrl_panel.talon_id = 31;
-    c.ctrl_panel.solenoid_channel = 8;
+    c.ctrl_panel.current_limit = 22;
+    c.ctrl_panel.kP = 3.2;
+    c.ctrl_panel.kI = 0.0;
+    c.ctrl_panel.kD = 0.5;
     c.ctrl_panel.ticks_per_inch = 4096.0 / (4.0 * M_PI);
     c.ctrl_panel.ticks_per_color_slice =
-        12.5 * 0.96 * c.ctrl_panel.ticks_per_inch;
+        12.56 * 0.96 * c.ctrl_panel.ticks_per_inch;
+    c.ctrl_panel.rot_control_ticks =
+        32 * M_PI * 3.5 * c.ctrl_panel.ticks_per_inch;
+    c.ctrl_panel.scoot_cmd = 0.5;
+    c.ctrl_panel.solenoid_channel = 8;
     c.ctrl_panel.sdb_key = "Target Color";
+
     // TODO the rest
 
     c.intake.rot_talon_id = 41;
@@ -53,7 +61,7 @@ const RobotConfig MakeDefaultRobotConfig() {
     c.intake.kD = 3.0;
     c.intake.stowed_pos_ticks = 10.0 / 360.0 * 4096.0;
     c.intake.intaking_pos_ticks = 100.0 / 360.0 * 4096.0;
-    c.intake.trench_driving_pos_ticks = 20.0 / 36.0 * 4096.0;
+    // c.intake.trench_driving_pos_ticks = 20.0 / 36.0 * 4096.0;
 
     c.hood.talon_id = 52;
     c.hood.ticks_per_degree = 4096.0 * 350.0 / 28.0 / 360.0;
@@ -71,10 +79,24 @@ const RobotConfig MakeDefaultRobotConfig() {
 
     c.shooter.master_id = 53;
     c.shooter.slave_id = 54;
+    c.shooter.shooter_current_limit = 40;
+    c.shooter.kF = 0.0160;
+    c.shooter.kP = 0.25;
+    c.shooter.kI = 0.0;
+    c.shooter.kD = 0.0;
+    c.shooter.meas_period = VelocityMeasPeriod::Period_2Ms;
+    c.shooter.meas_filter_width = 16;
+    c.shooter.shootable_err_pct = 0.03;
     c.shooter.kicker_id = 51;
+    c.shooter.kicker_current_limit = 20;
+    c.shooter.kicker_cmd = 0.5;
 
     c.ball_channel.serializer_id = 43;
     c.ball_channel.channel_id = 44;
+    c.ball_channel.current_limit = 25;
+    c.ball_channel.s1_port = 0;
+    c.ball_channel.s2_port = 1;
+    c.ball_channel.s3_port = 2;
 
     c.climber.master_id = 19;
     c.climber.slave_id = 20;

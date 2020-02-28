@@ -1,0 +1,74 @@
+#pragma once
+
+#include <ctre/Phoenix.h>
+#include <frc/DigitalInput.h>
+
+#include "config.h"
+#include "subsystem.h"
+#include "subsystems/hood.h"
+#include "subsystems/intake.h"
+#include "util/sdb_types.h"
+
+namespace team114 {
+namespace c2020 {
+
+class BallPath : public Subsystem {
+    SUBSYSTEM_PRELUDE(BallPath)
+   public:
+    BallPath(const conf::RobotConfig& cfg);
+
+    void Periodic() override;
+    void Stop() override;
+    void ZeroSensors() override;
+    void OutputTelemetry() override;
+
+    enum State {
+        Idle,
+        Intk,
+        Unjm,
+        Shoot,
+    };
+    void SetWantState(State state);
+    enum ShotType {
+        Short,
+        Med,
+        Long,
+    };
+    void SetWantShot(ShotType shot);
+
+   private:
+    enum class Direction {
+        Forward,
+        Reverse,
+        Neutral,
+    };
+    void SetChannelDirection(Direction dir);
+    void SetSerializerDirection(Direction dir);
+    struct Shot {
+        double hood_angle;
+        double flywheel_sp;
+    };
+    void SetWantShot(Shot shot);
+    void UpdateShotFromVision();
+    bool ReadyToShoot();
+
+    const conf::ShooterConifg shooter_cfg_;
+    const conf::BallChannelConfig channel_cfg_;
+    TalonSRX shooter_master_;
+    TalonSRX shooter_slave;
+    TalonSRX kicker_;
+    TalonSRX serializer_;
+    TalonSRX channel_;
+    frc::DigitalInput s1_;
+    frc::DigitalInput s2_;
+    frc::DigitalInput s3_;
+
+    State state_;
+    Shot current_shot_;
+
+    Intake& intake_;
+    Hood& hood_;
+};
+
+}  // namespace c2020
+}  // namespace team114

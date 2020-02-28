@@ -22,7 +22,6 @@ class Intake : public Subsystem {
         STARTING,
         STOWED,
         INTAKING,
-        TRENCH_DRIVING,
     };
     enum class RollerState {
         NEUTRAL,

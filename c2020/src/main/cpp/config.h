@@ -23,12 +23,15 @@ struct DriveConfig {
 
 struct ControlPanelConfig {
     int talon_id;
-    int solenoid_channel;
+    double current_limit;
     double ticks_per_inch;
     double kP;
     double kI;
     double kD;
     double ticks_per_color_slice;
+    double rot_control_ticks;
+    double scoot_cmd;
+    int solenoid_channel;
     std::string sdb_key;
 };
 
@@ -51,7 +54,7 @@ struct IntakeConfig {
     double kD;
     int stowed_pos_ticks;
     int intaking_pos_ticks;
-    int trench_driving_pos_ticks;
+    // int trench_driving_pos_ticks;
 };
 
 struct HoodConfig {
@@ -73,20 +76,28 @@ struct HoodConfig {
 struct ShooterConifg {
     int master_id;
     int slave_id;
-    double current_limit;
-    double kV;
+    double shooter_current_limit;
+    double kF;
     double kP;
     double kI;
     double kD;
-    // TODO vel parameters n stuff
+    VelocityMeasPeriod meas_period;
+    int meas_filter_width;
+    double shootable_err_pct;
     int kicker_id;
+    double kicker_current_limit;
+    double kicker_cmd;
 };
 
 struct BallChannelConfig {
     int serializer_id;
     int channel_id;
+    double current_limit;
     double serializer_cmd;
     double channel_cmd;
+    int s1_port;
+    int s2_port;
+    int s3_port;
 };
 
 struct ClimberConfig {

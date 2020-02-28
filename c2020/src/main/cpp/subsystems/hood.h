@@ -19,6 +19,7 @@ class Hood : public Subsystem {
     void OutputTelemetry() override;
 
     void SetWantPosition(double degrees);
+    void SetWantStow();
     bool IsAtPosition();
 
    private:

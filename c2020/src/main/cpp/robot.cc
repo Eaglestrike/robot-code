@@ -11,31 +11,24 @@ Robot::Robot()
       climber_{Climber::GetInstance()},
       hood_{Hood::GetInstance()},
       intake_{Intake::GetInstance()},
+      ball_path_{BallPath::GetInstance()},
+      control_panel_{ControlPanel::GetInstance()},
       robot_state_{RobotState::GetInstance()},
       ljoy_{0},
       rjoy_{1},
       ojoy_{2},
       auto_selector_{auton::AutoModeSelector::GetInstance()},
       auto_executor_{std::make_unique<auton::EmptyAction>()},
-      cfg{conf::GetConfig()},
-      intake_rot{cfg.intake.rot_talon_id},
-      intake_roller{cfg.intake.roller_talon_id},
-      channel_ser{cfg.ball_channel.serializer_id},
-      channel_chan{cfg.ball_channel.channel_id},
-      shooter_1{cfg.shooter.master_id},
-      shooter_2{cfg.shooter.slave_id},
-      shooter_kicker{cfg.shooter.kicker_id},
-      climber_1{cfg.climber.master_id},
-      climber_2{cfg.climber.slave_id},
-      climber_brake{6},
-      climber_latch{7} {}
+      cfg{conf::GetConfig()} {}
 
 void Robot::RobotInit() {}
 void Robot::RobotPeriodic() {
     drive_.Periodic();
-    climber_.Periodic();
+    ball_path_.Periodic();
     hood_.Periodic();
     intake_.Periodic();
+    climber_.Periodic();
+    control_panel_.Periodic();
 }
 
 void Robot::AutonomousInit() {
@@ -59,27 +52,60 @@ void Robot::TeleopPeriodic() {
         climber_.SetWantDirection(climb_up ? Climber::Direction::Up
                                            : Climber::Direction::Down);
     }
+
+    bool shot_short = ojoy_.GetRawButtonPressed(3);
+    bool shot_med = ojoy_.GetRawButtonPressed(4);
+    bool shot_long = ojoy_.GetRawButtonPressed(5);
+    if (shot_short) {
+        ball_path_.SetWantShot(BallPath::ShotType::Short);
+    } else if (shot_med) {
+        ball_path_.SetWantShot(BallPath::ShotType::Med);
+    } else if (shot_long) {
+        ball_path_.SetWantShot(BallPath::ShotType::Long);
+    }
+    bool shoot = ljoy_.GetRawButton(1);
+    bool unjam = ojoy_.GetRawButton(6);
+    bool intake = ojoy_.GetRawButton(7);
+    if (shoot) {
+        ball_path_.SetWantState(BallPath::State::Shoot);
+    } else if (unjam) {
+        ball_path_.SetWantState(BallPath::State::Unjm);
+    } else if (intake) {
+        ball_path_.SetWantState(BallPath::State::Intk);
+    } else {
+        ball_path_.SetWantState(BallPath::State::Idle);
+    }
+
+    bool deploy = ojoy_.GetRawButton(8);
+    bool scoot_f = ojoy_.GetRawButton(9);
+    bool scoot_r = ojoy_.GetRawButton(10);
+    bool rot_control = ojoy_.GetRawButtonPressed(11);
+    bool pos_control_r = ojoy_.GetRawButtonPressed(12);
+    bool pos_control_b = ojoy_.GetRawButtonPressed(13);
+    bool pos_control_g = ojoy_.GetRawButtonPressed(14);
+    bool pos_control_y = ojoy_.GetRawButtonPressed(15);
+    control_panel_.SetDeployed(deploy);
+    if (pos_control_r) {
+        control_panel_.DoPositionControl(ControlPanel::ObservedColor::Red);
+    } else if (pos_control_b) {
+        control_panel_.DoPositionControl(ControlPanel::ObservedColor::Blue);
+    } else if (pos_control_g) {
+        control_panel_.DoPositionControl(ControlPanel::ObservedColor::Green);
+    } else if (pos_control_y) {
+        control_panel_.DoPositionControl(ControlPanel::ObservedColor::Yellow);
+    } else if (rot_control) {
+        control_panel_.DoRotationControl();
+    } else if (scoot_f) {
+        control_panel_.Scoot(ControlPanel::ScootDir::Forward);
+    } else if (scoot_r) {
+        control_panel_.Scoot(ControlPanel::ScootDir::Reverse);
+    } else {
+        control_panel_.Scoot(ControlPanel::ScootDir::Neutral);
+    }
 }
 
-void Robot::TestInit() {
-    shooter_1.SetNeutralMode(NeutralMode::Coast);
-    shooter_2.SetNeutralMode(NeutralMode::Coast);
-}
+void Robot::TestInit() {}
 void Robot::TestPeriodic() {
-    READING_SDB_NUMERIC(double, IntakeRotCmd) intake_rot_cmd;
-    intake_rot.Set(ControlMode::PercentOutput, intake_rot_cmd);
-    READING_SDB_NUMERIC(double, IntakeRollCmd) intake_roller_cmd;
-    intake_roller.Set(ControlMode::PercentOutput, intake_roller_cmd);
-    READING_SDB_NUMERIC(double, ChannelSerCmd) channel_ser_cmd;
-    channel_ser.Set(ControlMode::PercentOutput, channel_ser_cmd);
-    READING_SDB_NUMERIC(double, ChannelChanCmd) channel_chan_cmd;
-    channel_chan.Set(ControlMode::PercentOutput, channel_chan_cmd);
-    READING_SDB_NUMERIC(double, ShooterCmd) shooter_cmd;
-    shooter_1.Set(ControlMode::PercentOutput, shooter_cmd);
-    shooter_2.Set(ControlMode::PercentOutput, shooter_cmd);
-    READING_SDB_NUMERIC(double, KickerCmd) kicker_cmd;
-    shooter_kicker.Set(ControlMode::PercentOutput, kicker_cmd);
-
     bool climb_up = ojoy_.GetRawButton(1);
     bool climb_down = ojoy_.GetRawButton(2);
     if (climb_up == climb_down) {
