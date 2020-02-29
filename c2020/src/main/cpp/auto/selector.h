@@ -9,6 +9,7 @@
 #include "actions/control_flow.h"
 #include "actions/drive_actions.h"
 
+#include "modes/open_loop_forward.h"
 #include "modes/test_mode.h"
 
 #include <subsystem.h>
@@ -21,9 +22,14 @@ namespace auton {
 class AutoModeSelector {
    private:
     AutoModeSelector() {
-        mode_chooser_.SetDefaultOption("TestMode", DesiredMode::TestMode);
+        mode_chooser_.SetDefaultOption("Null Mode", DesiredMode::NullMode);
+        mode_chooser_.AddOption("Test Mode", DesiredMode::TestMode);
+        mode_chooser_.AddOption("Open Loop Forward",
+                                DesiredMode::OpenLoopForward);
         start_chooser_.SetDefaultOption("Assume Origin",
                                         StartingPosition::Origin);
+        frc::SmartDashboard::PutData("Auto Mode", &mode_chooser_);
+        frc::SmartDashboard::PutData("Auto Starting Pos", &start_chooser_);
     }
 
    public:
@@ -32,7 +38,11 @@ class AutoModeSelector {
    public:
     enum class StartingPosition { Origin };
 
-    enum class DesiredMode { TestMode };
+    enum class DesiredMode {
+        NullMode,
+        TestMode,
+        OpenLoopForward,
+    };
 
     std::unique_ptr<Action> GetSelectedAction() {
         UpdateSelection();
@@ -59,6 +69,10 @@ class AutoModeSelector {
         switch (mode) {
             case DesiredMode::TestMode:
                 return MakeTestMode();
+            case DesiredMode::OpenLoopForward:
+                return MakeOpenLoopForward();
+            case DesiredMode::NullMode:
+                return std::make_unique<EmptyAction>();
             default:
                 // LOG
                 return std::make_unique<EmptyAction>();

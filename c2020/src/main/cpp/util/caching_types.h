@@ -2,6 +2,8 @@
 
 #include <frc/Solenoid.h>
 
+#include <iostream>
+
 namespace team114 {
 namespace c2020 {
 
@@ -12,11 +14,15 @@ class CachingSolenoid {
     }
 
     void Set(bool actuated) {
-        if (cache_ == actuated) {
-            return;
-        }
-        cache_ = actuated;
-        sol_.Set(cache_);
+        // For some reason actually caching breaks things
+        // TODO fix this
+        sol_.Set(actuated);
+        // if (cache_ != actuated) {
+        //     cache_ = actuated;
+        //     sol_.Set(actuated);
+        //     std::cout << "set solenoid " << sol_.GetName() << sol_.Get()
+        //               << std::endl;
+        // }
     }
 
    private:

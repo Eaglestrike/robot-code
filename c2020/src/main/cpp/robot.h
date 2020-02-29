@@ -4,14 +4,11 @@
 #include <frc/TimedRobot.h>
 #include <units/units.h>
 
-// Testing
-#include <ctre/Phoenix.h>
-#include <frc/Solenoid.h>
-
 #include <optional>
 
 #include "auto/executor.h"
 #include "auto/selector.h"
+#include "controls.h"
 #include "robot_state.h"
 #include "subsystems/ball_path.h"
 #include "subsystems/climber.h"
@@ -45,6 +42,7 @@ class Robot : public frc::TimedRobot {
     void DisabledPeriodic() override;
 
    private:
+    Controls controls_;
     Drive& drive_;
     Climber& climber_;
     Hood& hood_;
@@ -58,6 +56,8 @@ class Robot : public frc::TimedRobot {
     auton::AutoModeSelector& auto_selector_;
     auton::AutoExecutor auto_executor_;
     conf::RobotConfig cfg;
+
+    // CachingSolenoid brake_{frc::Solenoid{6}};
 };
 
 }  // namespace c2020

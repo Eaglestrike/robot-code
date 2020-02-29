@@ -30,11 +30,11 @@ Hood::Hood(const conf::HoodConfig& cfg)
     c.slot0.closedLoopPeakOutput = 1.0;
     c.slot0.closedLoopPeriod = 1;
     // TODO(josh) tune
-    c.slot0.integralZone = 0;
-    c.slot0.maxIntegralAccumulator = 0;
+    c.slot0.integralZone = 200;
+    c.slot0.maxIntegralAccumulator = 10000;
     c.slot0.kF = 0.0;
     c.slot0.kP = cfg_.kP;
-    c.slot0.kI = 0.0;
+    c.slot0.kI = cfg_.kI;
     c.slot0.kD = cfg_.kD;
     c.motionCruiseVelocity = cfg_.profile_vel;
     c.motionAcceleration = cfg_.profile_acc;
@@ -56,6 +56,8 @@ Hood::Hood(const conf::HoodConfig& cfg)
     talon_.EnableCurrentLimit(true);
     talon_.SelectProfileSlot(0, 0);
     talon_.SetNeutralMode(NeutralMode::Brake);
+    talon_.SetInverted(true);
+    talon_.SetSensorPhase(true);
 
     conf::SetFramePeriodsForPidTalon(talon_);
 }
@@ -73,7 +75,10 @@ void Hood::Periodic() {
             talon_.Set(ControlMode::PercentOutput,
                        cfg_.zeroing_kp * (zeroing_position_ -
                                           talon_.GetSelectedSensorPosition()));
-            if (talon_.GetSupplyCurrent() >= cfg_.current_limit) {
+            std::cout << "zero err"
+                      << zeroing_position_ - talon_.GetSelectedSensorPosition()
+                      << std::endl;
+            if (talon_.GetSupplyCurrent() >= cfg_.zeroing_current) {
                 talon_.Set(ControlMode::PercentOutput, 0.0);
                 talon_.SetSelectedSensorPosition(0.0);
                 talon_.ConfigReverseSoftLimitEnable(true);
@@ -82,6 +87,11 @@ void Hood::Periodic() {
             break;
         case LoopState::RUNNING:
             talon_.Set(ControlMode::MotionMagic, setpoint_ticks_);
+            // std::cout << talon_.GetSelectedSensorPosition() << "    "
+            //           << setpoint_ticks_ << "    "
+            //           << talon_.GetMotorOutputPercent() << "      "
+            //           << talon_.GetClosedLoopError() << "      "
+            //           << talon_.GetClosedLoopTarget() << std::endl;
             break;
     }
 }

@@ -30,52 +30,53 @@ const RobotConfig MakeDefaultRobotConfig() {
 
     c.ctrl_panel.talon_id = 31;
     c.ctrl_panel.current_limit = 22;
-    c.ctrl_panel.kP = 3.2;
+    c.ctrl_panel.kP = 1.5;
     c.ctrl_panel.kI = 0.0;
-    c.ctrl_panel.kD = 0.5;
-    c.ctrl_panel.ticks_per_inch = 4096.0 / (4.0 * M_PI);
+    c.ctrl_panel.kD = 5.0;
+    c.ctrl_panel.ticks_per_inch = 4096.0 / (3.5 * M_PI);
     c.ctrl_panel.ticks_per_color_slice =
         12.56 * 0.96 * c.ctrl_panel.ticks_per_inch;
     c.ctrl_panel.rot_control_ticks =
         32 * M_PI * 3.5 * c.ctrl_panel.ticks_per_inch;
     c.ctrl_panel.scoot_cmd = 0.5;
-    c.ctrl_panel.solenoid_channel = 8;
-    c.ctrl_panel.sdb_key = "Target Color";
+    c.ctrl_panel.solenoid_channel = 4;
 
     // TODO the rest
-
     c.intake.rot_talon_id = 41;
     c.intake.roller_talon_id = 42;
     c.intake.intake_cmd = 0.40;
     c.intake.rot_current_limit = 10;
+    c.intake.zeroing_kp = 0.001;
+    c.intake.zeroing_vel = 8;
     c.intake.roller_current_limit = 20;
-    c.intake.abs_enc_tick_offset = 0;  // TODO
-    c.intake.abs_ticks_per_rot = 4096.0;
+    c.intake.abs_enc_tick_offset = 2945;
+    c.intake.abs_ticks_per_rot = 4096.0 * 36.0 / 22.0;
     c.intake.rel_ticks_per_abs_tick = 1.0;
     c.intake.rads_per_rel_tick =
         2 * M_PI / c.intake.abs_ticks_per_rot / c.intake.rel_ticks_per_abs_tick;
     c.intake.zeroed_rad_from_vertical = 15.4 * M_PI / 180.0;
-    c.intake.SinekF = 0.1;
+    c.intake.SinekF = -0.063;
     c.intake.kP = 0.3;
-    c.intake.kI = 0.001;
-    c.intake.kD = 3.0;
-    c.intake.stowed_pos_ticks = 10.0 / 360.0 * 4096.0;
-    c.intake.intaking_pos_ticks = 100.0 / 360.0 * 4096.0;
+    c.intake.kI = 0.005;
+    c.intake.kD = 4.0;
+    c.intake.stowed_pos_ticks = 1222;
+    c.intake.intaking_pos_ticks = 2350;
     // c.intake.trench_driving_pos_ticks = 20.0 / 36.0 * 4096.0;
 
     c.hood.talon_id = 52;
     c.hood.ticks_per_degree = 4096.0 * 350.0 / 28.0 / 360.0;
-    c.hood.min_degrees = 20;          // TODO
-    c.hood.max_degrees = 60;          // TODO
-    c.hood.current_limit = 20;        // TODO
-    c.hood.zeroing_current = 15;      // TODO
-    c.hood.zeroing_kp = .00001;       // TODO
-    c.hood.zeroing_vel = 1;           // TODO
-    c.hood.profile_acc = 10;          // TODO
-    c.hood.profile_vel = 10;          // TODO
-    c.hood.kP = 0.0;                  // TODO
-    c.hood.kD = 0.0;                  // TODO
-    c.hood.ctre_curve_smoothing = 4;  // TODO
+    c.hood.min_degrees = 20;  // TODO
+    c.hood.max_degrees = 64;
+    c.hood.current_limit = 20;
+    c.hood.zeroing_current = 6;
+    c.hood.zeroing_kp = .001;
+    c.hood.zeroing_vel = 15;
+    c.hood.profile_acc = 20000;  // TODO
+    c.hood.profile_vel = 9000;   // TODO
+    c.hood.kP = 2.0;
+    c.hood.kI = 0.02;
+    c.hood.kD = 10.0;
+    c.hood.ctre_curve_smoothing = 2;
 
     c.shooter.master_id = 53;
     c.shooter.slave_id = 54;
@@ -95,8 +96,8 @@ const RobotConfig MakeDefaultRobotConfig() {
     c.ball_channel.channel_id = 44;
     c.ball_channel.current_limit = 25;
     c.ball_channel.s1_port = 0;
-    c.ball_channel.s2_port = 1;
-    c.ball_channel.s3_port = 2;
+    c.ball_channel.s2_port = 2;
+    c.ball_channel.s3_port = 1;
 
     c.climber.master_id = 19;
     c.climber.slave_id = 20;
@@ -104,8 +105,8 @@ const RobotConfig MakeDefaultRobotConfig() {
     c.climber.release_solenoid_id = 7;
     c.climber.brake_solenoid_id = 6;
     c.climber.avg_ticks_per_inch = 4096.0 * 9.0 / ((.969 + 1.25) * M_PI);
-    c.climber.initial_step_ticks = 20 * c.climber.avg_ticks_per_inch;
-    c.climber.forward_soft_limit_ticks = 55 * c.climber.avg_ticks_per_inch;
+    c.climber.initial_step_ticks = 10.0 * c.climber.avg_ticks_per_inch;
+    c.climber.forward_soft_limit_ticks = 122000;
     c.climber.ascend_command = 1.00;
     c.climber.descend_command = -1.00;
 
@@ -142,7 +143,7 @@ void DriveFalconCommonConfig(TalonFX& falcon) {
     TalonFXConfiguration c;
     // ====== Talon FX CFG
     c.supplyCurrLimit =
-        SupplyCurrentLimitConfiguration{true, 50.0, 55.0, 0.200};
+        SupplyCurrentLimitConfiguration{true, 50.0, 55.0, 0.100};
     // StatorCurrentLimitConfiguration statorCurrLimit
 
     // TODO(josh) enable FOC on arrival
@@ -154,7 +155,7 @@ void DriveFalconCommonConfig(TalonFX& falcon) {
     c.primaryPID.selectedFeedbackSensor = FeedbackDevice::IntegratedSensor;
     c.primaryPID.selectedFeedbackCoefficient = 1.0;
     // ======= BaseMotor Param cfg
-    c.openloopRamp = 0.2;    // time from neutral to full
+    c.openloopRamp = 0.25;   // time from neutral to full
     c.closedloopRamp = 0.0;  // disable ramping, should be running a profile
     c.peakOutputForward = 1.0;
     c.peakOutputReverse = -1.0;

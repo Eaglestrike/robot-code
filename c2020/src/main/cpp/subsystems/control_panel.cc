@@ -2,6 +2,8 @@
 
 #include <frc/DriverStation.h>
 
+#include <iostream>
+
 namespace team114 {
 namespace c2020 {
 
@@ -45,6 +47,7 @@ ControlPanel::ControlPanel(const conf::ControlPanelConfig& cfg)
     talon_.EnableCurrentLimit(true);
     talon_.SelectProfileSlot(0, 0);
     talon_.SetNeutralMode(NeutralMode::Brake);
+    talon_.SetSensorPhase(true);
     conf::SetFramePeriodsForPidTalon(talon_);
 }
 

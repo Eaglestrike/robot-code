@@ -134,9 +134,10 @@ void BallPath::Periodic() {
     intake_.SetWantPosition(state_ == State::Intk ? Intake::Position::INTAKING
                                                   : Intake::Position::STOWED);
     // process ball movement with sensors:
-    bool s1 = s1_.Get();
-    bool s2 = s2_.Get();
-    bool s3 = s3_.Get();
+    bool s1 = !s1_.Get();
+    bool s2 = !s2_.Get();
+    bool s3 = !s3_.Get();
+    std::cout << s1 << s2 << s3 << std::endl;
     if (s3) {
         SetSerializerDirection(Direction::Neutral);
         SetChannelDirection(Direction::Neutral);

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ctre/Phoenix.h>
 #include <frc/DigitalInput.h>
+#include "shims/minimal_phoenix.h"
 
 #include "config.h"
 #include "subsystem.h"

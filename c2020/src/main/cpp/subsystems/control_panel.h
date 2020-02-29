@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ctre/Phoenix.h>
+#include "shims/minimal_phoenix.h"
 
 #include "config.h"
 #include "subsystem.h"

@@ -2,8 +2,8 @@
 
 #include <string>
 
-#include <ctre/Phoenix.h>
 #include <units/units.h>
+#include "shims/minimal_phoenix.h"
 
 namespace team114 {
 namespace c2020 {
@@ -41,8 +41,8 @@ struct IntakeConfig {
     double intake_cmd;
     double rot_current_limit;
     double roller_current_limit;
-    // double zeroing_kp;
-    // double zeroing_vel;
+    double zeroing_kp;
+    double zeroing_vel;
     double abs_enc_tick_offset;
     double abs_ticks_per_rot;
     double rel_ticks_per_abs_tick;
@@ -69,6 +69,7 @@ struct HoodConfig {
     double profile_acc;
     double profile_vel;
     double kP;
+    double kI;
     double kD;
     int ctre_curve_smoothing;
 };

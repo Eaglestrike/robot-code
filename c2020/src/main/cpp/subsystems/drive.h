@@ -2,7 +2,8 @@
 
 #include <optional>
 
-#include <ctre/Phoenix.h>
+#include "shims/minimal_phoenix.h"
+
 #include <frc/Timer.h>
 #include <frc/controller/RamseteController.h>
 #include <frc/kinematics/DifferentialDriveKinematics.h>

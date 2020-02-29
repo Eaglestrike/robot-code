@@ -1,5 +1,7 @@
 #include "climber.h"
 
+#include <iostream>
+
 namespace team114 {
 namespace c2020 {
 
@@ -36,17 +38,28 @@ Climber::Climber(const conf::ClimberConfig& cfg)
             break;
         }
     }
+    for (int i = 0; i < 10; i++) {
+        auto err = slave_talon_.ConfigAllSettings(c, 100);
+        if (err == ErrorCode::OKAY) {
+            break;
+        }
+    }
+
     master_talon_.EnableVoltageCompensation(true);
     master_talon_.EnableCurrentLimit(true);
+    master_talon_.SetSensorPhase(true);
     master_talon_.SelectProfileSlot(0, 0);
     master_talon_.SetNeutralMode(NeutralMode::Brake);
 
-    conf::SetFramePeriodsForOpenLoopTalon(master_talon_);
+    conf::SetFramePeriodsForPidTalon(master_talon_);
     conf::SetFramePeriodsForSlaveTalon(slave_talon_);
     slave_talon_.Follow(master_talon_);
 }
 void Climber::Periodic() {
     if (action_ == Climber::CurrentAction::Climbing) {
+        SDB_NUMERIC(double, CimberPosTicks)
+        climb_pos = master_talon_.GetSelectedSensorPosition();
+        climb_pos++;
         latch_.Set(master_talon_.GetSelectedSensorPosition() >
                    cfg_.initial_step_ticks);
     } else if (action_ == Climber::CurrentAction::Resetting) {
@@ -64,7 +77,7 @@ void Climber::OutputTelemetry() {}
 // TODO in disabledinit, setwantdirection(neutral)
 void Climber::SetWantDirection(Climber::Direction direction) {
     if (action_ != CurrentAction::Climbing) {
-        master_talon_.ConfigReverseSoftLimitEnable(true);
+        master_talon_.OverrideSoftLimitsEnable(true);
         master_talon_.SetSelectedSensorPosition(0);
     }
     action_ = CurrentAction::Climbing;
@@ -86,10 +99,9 @@ void Climber::SetWantDirection(Climber::Direction direction) {
 
 void Climber::SetZeroingWind(Climber::Direction direction) {
     if (action_ != CurrentAction::Resetting) {
-        master_talon_.ConfigReverseSoftLimitEnable(false);
+        master_talon_.OverrideSoftLimitsEnable(false);
     }
     action_ = CurrentAction::Resetting;
-    master_talon_.ConfigReverseSoftLimitEnable(false);
     switch (direction) {
         case Climber::Direction::Up:
             brake_.Set(true);

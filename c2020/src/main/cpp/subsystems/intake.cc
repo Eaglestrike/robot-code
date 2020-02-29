@@ -3,6 +3,8 @@
 #include <cmath>
 #include "util/number_util.h"
 
+#include <iostream>
+
 namespace team114 {
 namespace c2020 {
 
@@ -12,7 +14,7 @@ Intake::Intake(const conf::IntakeConfig& cfg)
     : cfg_{cfg},
       state_{LoopState::UNINITALIZED},
       rot_talon_{cfg_.rot_talon_id},
-      roller_talon_{cfg_.rot_talon_id},
+      roller_talon_{cfg_.roller_talon_id},
       setpoint_ticks_{0} {
     TalonSRXConfiguration rot;
     rot.peakCurrentLimit = cfg_.rot_current_limit;
@@ -31,16 +33,19 @@ Intake::Intake(const conf::IntakeConfig& cfg)
     rot.slot0.closedLoopPeakOutput = 1.0;
     rot.slot0.closedLoopPeriod = 1;
     // TODO(josh) tune
-    rot.slot0.integralZone = 0;
-    rot.slot0.maxIntegralAccumulator = 256;
+    rot.slot0.integralZone = 300;
+    rot.slot0.maxIntegralAccumulator = 1000;
     rot.slot0.kF = 0.0;
     rot.slot0.kP = cfg_.kP;
     rot.slot0.kI = cfg_.kI;
     rot.slot0.kD = cfg_.kD;
+    rot.motionCruiseVelocity = 1000;
+    rot.motionAcceleration = 1000;
+    rot.motionCurveStrength = 3;
     rot.forwardSoftLimitEnable = false;
-    rot.reverseSoftLimitEnable = true;
+    rot.reverseSoftLimitEnable = false;
     rot.forwardSoftLimitThreshold = 0.0;
-    rot.reverseSoftLimitThreshold = -10;
+    rot.reverseSoftLimitThreshold = -2;
     // TODO(josh) logs everywhere
     for (int i = 0; i < 10; i++) {
         auto err = rot_talon_.ConfigAllSettings(rot, 100);
@@ -80,20 +85,22 @@ void Intake::Periodic() {
     switch (state_) {
         case LoopState::UNINITALIZED:
             rot_talon_.Set(ControlMode::PercentOutput, 0.0);
+            zeroing_position_ = rot_talon_.GetSelectedSensorPosition();
+            rot_talon_.ConfigReverseSoftLimitEnable(false);
             state_ = LoopState::ZEROING;
             break;
         case LoopState::ZEROING: {
-            // seed relative with absolute
-            int abs_pos =
-                rot_talon_.GetSensorCollection().GetPulseWidthPosition();
-            abs_pos -= cfg_.abs_enc_tick_offset;
-            // deal with discontinuities; we know zero is our hard stop
-            while (abs_pos < 0) {
-                abs_pos += cfg_.abs_ticks_per_rot;
+            zeroing_position_ -= cfg_.zeroing_vel;
+            rot_talon_.Set(
+                ControlMode::PercentOutput,
+                cfg_.zeroing_kp * (zeroing_position_ -
+                                   rot_talon_.GetSelectedSensorPosition()));
+            if (rot_talon_.GetSupplyCurrent() >= cfg_.rot_current_limit) {
+                rot_talon_.Set(ControlMode::PercentOutput, 0.0);
+                rot_talon_.SetSelectedSensorPosition(0.0);
+                rot_talon_.ConfigReverseSoftLimitEnable(true);
+                state_ = LoopState::RUNNING;
             }
-            rot_talon_.SetSelectedSensorPosition(abs_pos *
-                                                 cfg_.rel_ticks_per_abs_tick);
-            state_ = LoopState::RUNNING;
             break;
         }
         case LoopState::RUNNING: {
@@ -101,8 +108,14 @@ void Intake::Periodic() {
             double rads_from_vertical =
                 cfg_.zeroed_rad_from_vertical + pos * cfg_.rads_per_rel_tick;
             double ff = cfg_.SinekF * std::sin(rads_from_vertical);
-            rot_talon_.Set(ControlMode::Position, setpoint_ticks_,
+            // double p = 0.00015 * (setpoint_ticks_ - pos);
+            rot_talon_.Set(ControlMode::MotionMagic, setpoint_ticks_,
                            DemandType::DemandType_ArbitraryFeedForward, ff);
+            std::cout << rot_talon_.GetSelectedSensorPosition() << "    "
+                      << setpoint_ticks_ << "    "
+                      << rot_talon_.GetMotorOutputPercent() << "      "
+                      << rot_talon_.GetClosedLoopError() << "      "
+                      << rot_talon_.GetClosedLoopTarget() << std::endl;
             break;
         }
     }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ctre/Phoenix.h>
+#include "shims/minimal_phoenix.h"
 
 #include "config.h"
 #include "subsystem.h"
@@ -42,8 +42,8 @@ class Intake : public Subsystem {
     LoopState state_;
     TalonSRX rot_talon_;
     TalonSRX roller_talon_;
-    // int zeroing_position_;
     int setpoint_ticks_;
+    int zeroing_position_;
 };
 
 }  // namespace c2020

@@ -29,8 +29,8 @@ Drive::Drive(const conf::DriveConfig& cfg)
     conf::DriveFalconCommonConfig(right_master_);
     conf::DriveFalconCommonConfig(left_slave_);
     conf::DriveFalconCommonConfig(right_slave_);
-    left_master_.SetInverted(true);
-    right_master_.SetInverted(false);
+    left_master_.SetInverted(false);
+    right_master_.SetInverted(true);
     left_slave_.Follow(left_master_);
     right_slave_.Follow(right_master_);
     left_slave_.SetInverted(InvertType::FollowMaster);
