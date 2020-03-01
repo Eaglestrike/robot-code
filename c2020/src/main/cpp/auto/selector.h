@@ -26,6 +26,8 @@ class AutoModeSelector {
         mode_chooser_.AddOption("Test Mode", DesiredMode::TestMode);
         mode_chooser_.AddOption("Open Loop Forward",
                                 DesiredMode::OpenLoopForward);
+        mode_chooser_.AddOption("Shoot and OL Reverse",
+                                DesiredMode::ShootAndOLReverse);
         start_chooser_.SetDefaultOption("Assume Origin",
                                         StartingPosition::Origin);
         frc::SmartDashboard::PutData("Auto Mode", &mode_chooser_);
@@ -42,6 +44,7 @@ class AutoModeSelector {
         NullMode,
         TestMode,
         OpenLoopForward,
+        ShootAndOLReverse,
     };
 
     std::unique_ptr<Action> GetSelectedAction() {
@@ -73,6 +76,8 @@ class AutoModeSelector {
                 return MakeOpenLoopForward();
             case DesiredMode::NullMode:
                 return std::make_unique<EmptyAction>();
+            case DesiredMode::ShootAndOLReverse:
+                return MakeShootAndOLReverse();
             default:
                 // LOG
                 return std::make_unique<EmptyAction>();

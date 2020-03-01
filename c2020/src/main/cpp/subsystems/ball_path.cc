@@ -109,6 +109,9 @@ BallPath::BallPath(const conf::RobotConfig& cfg)
 }
 
 void BallPath::Periodic() {
+    bool s1 = !s1_.Get();
+    bool s2 = !s2_.Get();
+    bool s3 = !s3_.Get();
     if (state_ == State::Unjm) {
         intake_.SetWantPosition(Intake::Position::INTAKING);
         SetChannelDirection(Direction::Reverse);
@@ -123,7 +126,7 @@ void BallPath::Periodic() {
         hood_.SetWantPosition(current_shot_.hood_angle);
         shooter_master_.Set(ControlMode::Velocity, current_shot_.flywheel_sp);
         SetSerializerDirection(Direction::Neutral);
-        if (!s3_.Get() || ReadyToShoot()) {
+        if (!s3 || ReadyToShoot()) {
             SetChannelDirection(Direction::Forward);
         } else {
             SetChannelDirection(Direction::Neutral);
@@ -137,9 +140,6 @@ void BallPath::Periodic() {
     intake_.SetWantPosition(state_ == State::Intk ? Intake::Position::INTAKING
                                                   : Intake::Position::STOWED);
     // process ball movement with sensors:
-    bool s1 = !s1_.Get();
-    bool s2 = !s2_.Get();
-    bool s3 = !s3_.Get();
     std::cout << s1 << s2 << s3 << std::endl;
     if (s3) {
         SetSerializerDirection(Direction::Neutral);
@@ -170,7 +170,7 @@ void BallPath::SetWantShot(BallPath::ShotType shot) {
     switch (shot) {
         case BallPath::ShotType::Short:
             current_shot_.flywheel_sp = 20000;
-            current_shot_.hood_angle = 60;
+            current_shot_.hood_angle = 40;
             break;
         case BallPath::ShotType::Med:
             current_shot_.flywheel_sp = 32000;
@@ -200,14 +200,17 @@ bool BallPath::ReadyToShoot() {
 void BallPath::SetChannelDirection(BallPath::Direction dir) {
     switch (dir) {
         case BallPath::Direction::Forward:
+            std::cout << "set chnl fwd" << std::endl;
             channel_.Set(ControlMode::PercentOutput, channel_cfg_.channel_cmd);
             kicker_.Set(ControlMode::PercentOutput, shooter_cfg_.kicker_cmd);
             break;
         case BallPath::Direction::Reverse:
+            std::cout << "set chnl rev" << std::endl;
             channel_.Set(ControlMode::PercentOutput, -channel_cfg_.channel_cmd);
             kicker_.Set(ControlMode::PercentOutput, -shooter_cfg_.kicker_cmd);
             break;
         case BallPath::Direction::Neutral:
+            std::cout << "set chnl neu" << std::endl;
             channel_.Set(ControlMode::PercentOutput, 0.0);
             kicker_.Set(ControlMode::PercentOutput, 0.0);
             break;

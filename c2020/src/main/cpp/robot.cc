@@ -27,7 +27,7 @@ Robot::Robot()
 void Robot::RobotInit() {}
 void Robot::RobotPeriodic() {
     drive_.Periodic();
-    // ball_path_.Periodic();
+    ball_path_.Periodic();
     climber_.Periodic();
     control_panel_.Periodic();
 }
