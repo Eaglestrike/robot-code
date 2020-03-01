@@ -22,11 +22,11 @@ BallPath::BallPath(const conf::RobotConfig& cfg)
     TalonSRXConfiguration s;
     s.peakCurrentLimit = shooter_cfg_.shooter_current_limit;
     s.peakCurrentDuration = 30;
-    s.continuousCurrentLimit = 0.8 * shooter_cfg_.shooter_current_limit;
+    s.continuousCurrentLimit = 0.9 * shooter_cfg_.shooter_current_limit;
     s.primaryPID.selectedFeedbackSensor =
         FeedbackDevice::CTRE_MagEncoder_Relative;
     s.primaryPID.selectedFeedbackCoefficient = 1.0;
-    s.closedloopRamp = 0.010;
+    s.closedloopRamp = 1.000;
     s.peakOutputForward = 1.0;
     s.peakOutputReverse = -1.0;
     s.nominalOutputForward = 0.0;
@@ -55,9 +55,12 @@ BallPath::BallPath(const conf::RobotConfig& cfg)
     shooter_master_.EnableCurrentLimit(true);
     shooter_master_.SelectProfileSlot(0, 0);
     shooter_master_.SetNeutralMode(NeutralMode::Coast);
+    shooter_master_.SetInverted(true);
+    shooter_master_.SetSensorPhase(true);
     conf::SetFramePeriodsForPidTalon(shooter_master_);
     shooter_slave.SetNeutralMode(NeutralMode::Coast);
     shooter_slave.Follow(shooter_master_);
+    shooter_slave.SetInverted(InvertType::FollowMaster);
     conf::SetFramePeriodsForSlaveTalon(shooter_slave);
 
     TalonSRXConfiguration r;

@@ -35,18 +35,20 @@ void Robot::RobotPeriodic() {
 void Robot::AutonomousInit() {
     auto mode = auto_selector_.GetSelectedAction();  // heh
     auto_executor_ = auton::AutoExecutor{std::move(mode)};
+    hood_.SetWantPosition(40);
 }
 void Robot::AutonomousPeriodic() {
     auto_executor_.Periodic();
-    // hood_.Periodic();
+    hood_.Periodic();
     // intake_.Periodic();
 }
 
 void Robot::TeleopInit() {
+    hood_.SetWantStow();
     // intake_.SetWantPosition(Intake::Position::INTAKING);
 }
 void Robot::TeleopPeriodic() {
-    // hood_.Periodic();
+    hood_.Periodic();
     // intake_.Periodic();
 
     drive_.SetWantCheesyDrive(controls_.Throttle(), controls_.Wheel(),

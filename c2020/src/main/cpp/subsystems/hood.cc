@@ -105,7 +105,7 @@ void Hood::SetWantPosition(double degrees) {
     setpoint_ticks_ = degrees * cfg_.ticks_per_degree;
 }
 
-void Hood::SetWantStow() { SetWantPosition(cfg_.max_degrees); }
+void Hood::SetWantStow() { SetWantPosition(cfg_.max_degrees - 1); }
 
 bool Hood::IsAtPosition() {
     auto err = std::abs(talon_.GetSelectedSensorPosition() - setpoint_ticks_);

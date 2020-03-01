@@ -83,11 +83,12 @@ const RobotConfig MakeDefaultRobotConfig() {
     c.shooter.shooter_current_limit = 40;
     c.shooter.kF = 0.0160;
     c.shooter.kP = 0.25;
+    c.shooter.kP = 0.0;
     c.shooter.kI = 0.0;
     c.shooter.kD = 0.0;
     c.shooter.meas_period = VelocityMeasPeriod::Period_2Ms;
-    c.shooter.meas_filter_width = 16;
-    c.shooter.shootable_err_pct = 0.03;
+    c.shooter.meas_filter_width = 32;
+    c.shooter.shootable_err_pct = 0.08;
     c.shooter.kicker_id = 51;
     c.shooter.kicker_current_limit = 20;
     c.shooter.kicker_cmd = 0.5;
