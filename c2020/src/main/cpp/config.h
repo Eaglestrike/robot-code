@@ -52,6 +52,8 @@ struct IntakeConfig {
     double kP;
     double kI;
     double kD;
+    double profile_vel;
+    double profile_acc;
     int stowed_pos_ticks;
     int intaking_pos_ticks;
     // int trench_driving_pos_ticks;
@@ -96,6 +98,7 @@ struct BallChannelConfig {
     double current_limit;
     double serializer_cmd;
     double channel_cmd;
+    int s0_port;
     int s1_port;
     int s2_port;
     int s3_port;

@@ -13,6 +13,7 @@ BallPath::BallPath(const conf::RobotConfig& cfg)
       kicker_{shooter_cfg_.kicker_id},
       serializer_{channel_cfg_.serializer_id},
       channel_{channel_cfg_.channel_id},
+      s0_{channel_cfg_.s0_port},
       s1_{channel_cfg_.s1_port},
       s2_{channel_cfg_.s2_port},
       s3_{channel_cfg_.s3_port},
@@ -82,6 +83,7 @@ BallPath::BallPath(const conf::RobotConfig& cfg)
     }
     serializer_.EnableVoltageCompensation(true);
     serializer_.EnableCurrentLimit(true);
+    serializer_.SetInverted(true);
     serializer_.SetNeutralMode(NeutralMode::Brake);
     conf::SetFramePeriodsForOpenLoopTalon(serializer_);
 
@@ -109,6 +111,7 @@ BallPath::BallPath(const conf::RobotConfig& cfg)
 }
 
 void BallPath::Periodic() {
+    bool s0 = !s0_.Get();
     bool s1 = !s1_.Get();
     bool s2 = !s2_.Get();
     bool s3 = !s3_.Get();
@@ -128,8 +131,10 @@ void BallPath::Periodic() {
         SetSerializerDirection(Direction::Neutral);
         if (!s3 || ReadyToShoot()) {
             SetChannelDirection(Direction::Forward);
+            SetSerializerDirection(Direction::Forward);
         } else {
             SetChannelDirection(Direction::Neutral);
+            SetSerializerDirection(Direction::Neutral);
         }
         return;
     }
@@ -137,25 +142,39 @@ void BallPath::Periodic() {
     shooter_master_.NeutralOutput();
 
     // the only remaining state diff is the position of the intake
-    intake_.SetWantPosition(state_ == State::Intk ? Intake::Position::INTAKING
-                                                  : Intake::Position::STOWED);
+    Intake::Position commanded_pos = state_ == State::Intk
+                                         ? Intake::Position::INTAKING
+                                         : Intake::Position::STOWED;
     // process ball movement with sensors:
-    std::cout << s1 << s2 << s3 << std::endl;
+    // std::cout << s1 << s2 << s3 << std::endl;
     if (s3) {
-        SetSerializerDirection(Direction::Neutral);
         SetChannelDirection(Direction::Neutral);
+        if (state_ == State::Intk && !s0) {
+            SetSerializerDirection(Direction::Forward);
+        } else {
+            SetSerializerDirection(Direction::Neutral);
+        }
+        if (s0) {
+            intake_.SetWantPosition(Intake::Position::STOWED);
+        } else {
+            intake_.SetWantPosition(commanded_pos);
+        }
     } else if (!s1 && !s2) {
         SetSerializerDirection(Direction::Forward);
         SetChannelDirection(Direction::Neutral);
+        intake_.SetWantPosition(commanded_pos);
     } else if (s1 && !s2) {
         SetSerializerDirection(Direction::Forward);
         SetChannelDirection(Direction::Forward);
+        intake_.SetWantPosition(commanded_pos);
     } else if (s1 && s2) {
         SetSerializerDirection(Direction::Neutral);
         SetChannelDirection(Direction::Forward);
+        intake_.SetWantPosition(commanded_pos);
     } else if (!s1 && s2) {
         SetSerializerDirection(Direction::Forward);
         SetChannelDirection(Direction::Forward);
+        intake_.SetWantPosition(commanded_pos);
     } else {
         // LOG uh oh
     }
@@ -177,8 +196,8 @@ void BallPath::SetWantShot(BallPath::ShotType shot) {
             current_shot_.hood_angle = 40;
             break;
         case BallPath::ShotType::Long:
-            current_shot_.flywheel_sp = 20;
-            current_shot_.hood_angle = 48000;
+            current_shot_.flywheel_sp = 40000;
+            current_shot_.hood_angle = 20;
             break;
     }
 }
@@ -200,17 +219,14 @@ bool BallPath::ReadyToShoot() {
 void BallPath::SetChannelDirection(BallPath::Direction dir) {
     switch (dir) {
         case BallPath::Direction::Forward:
-            std::cout << "set chnl fwd" << std::endl;
             channel_.Set(ControlMode::PercentOutput, channel_cfg_.channel_cmd);
             kicker_.Set(ControlMode::PercentOutput, shooter_cfg_.kicker_cmd);
             break;
         case BallPath::Direction::Reverse:
-            std::cout << "set chnl rev" << std::endl;
             channel_.Set(ControlMode::PercentOutput, -channel_cfg_.channel_cmd);
             kicker_.Set(ControlMode::PercentOutput, -shooter_cfg_.kicker_cmd);
             break;
         case BallPath::Direction::Neutral:
-            std::cout << "set chnl neu" << std::endl;
             channel_.Set(ControlMode::PercentOutput, 0.0);
             kicker_.Set(ControlMode::PercentOutput, 0.0);
             break;

@@ -59,6 +59,7 @@ class BallPath : public Subsystem {
     TalonSRX kicker_;
     TalonSRX serializer_;
     TalonSRX channel_;
+    frc::DigitalInput s0_;
     frc::DigitalInput s1_;
     frc::DigitalInput s2_;
     frc::DigitalInput s3_;

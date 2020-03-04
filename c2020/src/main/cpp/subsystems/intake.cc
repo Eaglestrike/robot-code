@@ -39,8 +39,8 @@ Intake::Intake(const conf::IntakeConfig& cfg)
     rot.slot0.kP = cfg_.kP;
     rot.slot0.kI = cfg_.kI;
     rot.slot0.kD = cfg_.kD;
-    rot.motionCruiseVelocity = 1000;
-    rot.motionAcceleration = 1000;
+    rot.motionCruiseVelocity = cfg_.profile_vel;
+    rot.motionAcceleration = cfg_.profile_acc;
     rot.motionCurveStrength = 3;
     rot.forwardSoftLimitEnable = false;
     rot.reverseSoftLimitEnable = false;
@@ -77,6 +77,7 @@ Intake::Intake(const conf::IntakeConfig& cfg)
     }
     roller_talon_.EnableVoltageCompensation(true);
     roller_talon_.EnableCurrentLimit(true);
+    roller_talon_.SetInverted(true);
     roller_talon_.SetNeutralMode(NeutralMode::Brake);
     conf::SetFramePeriodsForOpenLoopTalon(roller_talon_);
 }

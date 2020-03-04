@@ -40,16 +40,13 @@ void Robot::AutonomousInit() {
 void Robot::AutonomousPeriodic() {
     auto_executor_.Periodic();
     hood_.Periodic();
-    // intake_.Periodic();
+    intake_.Periodic();
 }
 
-void Robot::TeleopInit() {
-    hood_.SetWantStow();
-    // intake_.SetWantPosition(Intake::Position::INTAKING);
-}
+void Robot::TeleopInit() { hood_.SetWantStow(); }
 void Robot::TeleopPeriodic() {
     hood_.Periodic();
-    // intake_.Periodic();
+    intake_.Periodic();
 
     drive_.SetWantCheesyDrive(controls_.Throttle(), controls_.Wheel(),
                               controls_.QuickTurn());
@@ -76,15 +73,16 @@ void Robot::TeleopPeriodic() {
     //     ball_path_.SetWantShot(BallPath::ShotType::Long);
     // }
 
-    // if (controls_.Shoot()) {
-    //     ball_path_.SetWantState(BallPath::State::Shoot);
-    // } else if (controls_.Unjam()) {
-    //     ball_path_.SetWantState(BallPath::State::Unjm);
-    // } else if (controls_.Intake()) {
-    //     ball_path_.SetWantState(BallPath::State::Intk);
-    // } else {
-    //     ball_path_.SetWantState(BallPath::State::Idle);
-    // }
+    if (controls_.Shoot()) {
+        ball_path_.SetWantShot(BallPath::ShotType::Long);
+        ball_path_.SetWantState(BallPath::State::Shoot);
+    } else if (controls_.Unjam()) {
+        ball_path_.SetWantState(BallPath::State::Unjm);
+    } else if (controls_.Intake()) {
+        ball_path_.SetWantState(BallPath::State::Intk);
+    } else {
+        ball_path_.SetWantState(BallPath::State::Idle);
+    }
 
     control_panel_.SetDeployed(controls_.PanelDeploy());
     if (controls_.PosControlRedPressed()) {
@@ -120,6 +118,7 @@ void Robot::TestPeriodic() {
 
 void Robot::DisabledInit() {
     auto_executor_.Stop();
+    drive_.SetWantRawOpenLoop({0.0_mps, 0.0_mps});
     climber_.SetWantDirection(Climber::Direction::Neutral);
 }
 void Robot::DisabledPeriodic() { auto_selector_.UpdateSelection(); }

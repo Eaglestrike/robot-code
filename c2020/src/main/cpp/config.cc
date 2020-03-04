@@ -44,7 +44,7 @@ const RobotConfig MakeDefaultRobotConfig() {
     // TODO the rest
     c.intake.rot_talon_id = 41;
     c.intake.roller_talon_id = 42;
-    c.intake.intake_cmd = 0.40;
+    c.intake.intake_cmd = 0.60;
     c.intake.rot_current_limit = 10;
     c.intake.zeroing_kp = 0.001;
     c.intake.zeroing_vel = 8;
@@ -56,9 +56,11 @@ const RobotConfig MakeDefaultRobotConfig() {
         2 * M_PI / c.intake.abs_ticks_per_rot / c.intake.rel_ticks_per_abs_tick;
     c.intake.zeroed_rad_from_vertical = 15.4 * M_PI / 180.0;
     c.intake.SinekF = -0.063;
-    c.intake.kP = 0.3;
+    c.intake.kP = 1.0;
     c.intake.kI = 0.005;
-    c.intake.kD = 4.0;
+    c.intake.kD = 0.0;
+    c.intake.profile_acc = 3000;
+    c.intake.profile_vel = 2000;
     c.intake.stowed_pos_ticks = 1222;
     c.intake.intaking_pos_ticks = 2350;
     // c.intake.trench_driving_pos_ticks = 20.0 / 36.0 * 4096.0;
@@ -88,14 +90,17 @@ const RobotConfig MakeDefaultRobotConfig() {
     c.shooter.kD = 0.0;
     c.shooter.meas_period = VelocityMeasPeriod::Period_2Ms;
     c.shooter.meas_filter_width = 32;
-    c.shooter.shootable_err_pct = 0.08;
+    c.shooter.shootable_err_pct = 0.04;
     c.shooter.kicker_id = 51;
     c.shooter.kicker_current_limit = 20;
-    c.shooter.kicker_cmd = 0.5;
+    c.shooter.kicker_cmd = 0.45;
 
     c.ball_channel.serializer_id = 43;
     c.ball_channel.channel_id = 44;
     c.ball_channel.current_limit = 25;
+    c.ball_channel.serializer_cmd = 1.00;
+    c.ball_channel.channel_cmd = 0.75;
+    c.ball_channel.s0_port = 3;
     c.ball_channel.s1_port = 0;
     c.ball_channel.s2_port = 2;
     c.ball_channel.s3_port = 1;
