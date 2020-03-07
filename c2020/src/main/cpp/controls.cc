@@ -25,7 +25,10 @@ bool Controls::ShotLongPressed() {
 }
 bool Controls::Intake() { return ojoy_.GetRawAxis(3) > kTriggerThreshold; }
 bool Controls::Unjam() { return ojoy_.GetRawButton(7); }
-bool Controls::Shoot() { return ljoy_.GetRawButton(1); }
+bool Controls::Shoot() {
+    // return ljoy_.GetRawButton(1);
+    return ojoy_.GetRawButton(5);
+}
 bool Controls::PanelDeploy() { return ojoy_.GetRawAxis(2) > kTriggerThreshold; }
 bool Controls::ScootLeftPressed() {
     return scoot_left_.Pressed(scoot_tracker_.PassThroughFeed(

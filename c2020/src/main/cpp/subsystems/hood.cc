@@ -110,7 +110,7 @@ void Hood::SetWantStow() { SetWantPosition(cfg_.max_degrees - 1); }
 bool Hood::IsAtPosition() {
     auto err = std::abs(talon_.GetSelectedSensorPosition() - setpoint_ticks_);
     auto max_err = 1.0 * cfg_.ticks_per_degree;
-    return state_ == LoopState::RUNNING && err < max_err;
+    return (state_ == LoopState::RUNNING) && err < max_err;
 }
 
 }  // namespace c2020

@@ -1,5 +1,7 @@
 #include "ball_path.h"
 
+#include <iostream>
+
 namespace team114 {
 namespace c2020 {
 
@@ -21,13 +23,13 @@ BallPath::BallPath(const conf::RobotConfig& cfg)
       intake_{Intake::GetInstance()},
       hood_{Hood::GetInstance()} {
     TalonSRXConfiguration s;
-    s.peakCurrentLimit = shooter_cfg_.shooter_current_limit;
+    s.peakCurrentLimit = 45;
     s.peakCurrentDuration = 30;
-    s.continuousCurrentLimit = 0.9 * shooter_cfg_.shooter_current_limit;
+    s.continuousCurrentLimit = 38;
     s.primaryPID.selectedFeedbackSensor =
         FeedbackDevice::CTRE_MagEncoder_Relative;
     s.primaryPID.selectedFeedbackCoefficient = 1.0;
-    s.closedloopRamp = 1.000;
+    s.closedloopRamp = 0.300;
     s.peakOutputForward = 1.0;
     s.peakOutputReverse = -1.0;
     s.nominalOutputForward = 0.0;
@@ -130,6 +132,11 @@ void BallPath::Periodic() {
         shooter_master_.Set(ControlMode::Velocity, current_shot_.flywheel_sp);
         SetSerializerDirection(Direction::Neutral);
         if (!s3 || ReadyToShoot()) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+            SDB_NUMERIC(double, ReadShooterSpeed)
+            _shooter_speed = shooter_master_.GetSelectedSensorVelocity();
+#pragma GCC diagnostic pop
             SetChannelDirection(Direction::Forward);
             SetSerializerDirection(Direction::Forward);
         } else {
@@ -186,20 +193,24 @@ void BallPath::OutputTelemetry() {}
 void BallPath::SetWantState(BallPath::State s) { state_ = s; }
 
 void BallPath::SetWantShot(BallPath::ShotType shot) {
-    switch (shot) {
-        case BallPath::ShotType::Short:
-            current_shot_.flywheel_sp = 20000;
-            current_shot_.hood_angle = 40;
-            break;
-        case BallPath::ShotType::Med:
-            current_shot_.flywheel_sp = 32000;
-            current_shot_.hood_angle = 40;
-            break;
-        case BallPath::ShotType::Long:
-            current_shot_.flywheel_sp = 40000;
-            current_shot_.hood_angle = 20;
-            break;
-    }
+    READING_SDB_NUMERIC(double, FlyWheelSpeed) flywheel_speed;
+    READING_SDB_NUMERIC(double, HoodAngle) hood_angle;
+    current_shot_.flywheel_sp = flywheel_speed;
+    current_shot_.hood_angle = hood_angle;
+    // switch (shot) {
+    //     case BallPath::ShotType::Short:
+    //         current_shot_.flywheel_sp = 20000;
+    //         current_shot_.hood_angle = 40;
+    //         break;
+    //     case BallPath::ShotType::Med:
+    //         current_shot_.flywheel_sp = 32000;
+    //         current_shot_.hood_angle = 40;
+    //         break;
+    //     case BallPath::ShotType::Long:
+    //         current_shot_.flywheel_sp = 40000;
+    //         current_shot_.hood_angle = 20;
+    //         break;
+    // }
 }
 
 void BallPath::UpdateShotFromVision() {
@@ -208,10 +219,14 @@ void BallPath::UpdateShotFromVision() {
 
 bool BallPath::ReadyToShoot() {
     bool hood = hood_.IsAtPosition();
-    auto shooter_err = std::abs(shooter_master_.GetSelectedSensorVelocity() -
-                                current_shot_.flywheel_sp);
+    SDB_NUMERIC(double, ShooterError)
+    shooter_err = std::abs(shooter_master_.GetSelectedSensorVelocity() -
+                           current_shot_.flywheel_sp);
     bool flywheel = shooter_err <
                     current_shot_.flywheel_sp * shooter_cfg_.shootable_err_pct;
+    std::cout << "fly_sp, accept_err, err" << current_shot_.flywheel_sp << " "
+              << (current_shot_.flywheel_sp * shooter_cfg_.shootable_err_pct)
+              << " " << shooter_err << std::endl;
     // when we have vision, check the drivetrain is oriented
     return hood && flywheel;
 }
