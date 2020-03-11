@@ -48,7 +48,25 @@ class Limelight : public Subsystem {
 
     void Periodic() final override;
 
+    void SetLedMode(LedMode mode);
+
+    void SetPipeline(int pipeline);
+
+    int GetPipeline();
+
+    void ForceFlushOuts();
+
+    bool SeesTarget();
+
+    units::second_t GetLatency();
+
+    std::optional<TargetInfo> GetTarget();
+
    private:
+    void ReadPeriodicIn();
+
+    void WritePeriodicOut();
+
     std::shared_ptr<nt::NetworkTable> network_table_;
 
     struct PeriodicIn {
@@ -70,24 +88,6 @@ class Limelight : public Subsystem {
     PeriodicOut per_out_;
     bool per_out_dirty_ = true;
     bool sees_target_ = false;
-
-    void ReadPeriodicIn();
-
-    void WritePeriodicOut();
-
-    void SetLedMode(LedMode mode);
-
-    void SetPipeline(int pipeline);
-
-    int GetPipeline();
-
-    void ForceFlushOuts();
-
-    bool SeesTarget();
-
-    units::second_t GetLatency();
-
-    std::optional<TargetInfo> GetTarget();
 };
 
 }  // namespace c2020

@@ -32,9 +32,21 @@ void Robot::RobotPeriodic() {
     climber_.Periodic();
     control_panel_.Periodic();
     limelight_.Periodic();
+
+    limelight_.SetLedMode(Limelight::LedMode::PIPELINE);
+    // auto dist = robot_state_.GetLatestDistanceToOuterPort();
+    // auto ang = robot_state_.GetLatestAngleToOuterPort();
+
+    // if (dist.has_value() && ang.has_value()) {
+    //     std::cout << "dist, ang " << dist->second << " " << ang->second
+    //               << std::endl;
+    // } else {
+    //     std::cout << "no target" << std::endl;
+    // }
 }
 
 void Robot::AutonomousInit() {
+    drive_.ZeroSensors();
     auto mode = auto_selector_.GetSelectedAction();  // heh
     auto_executor_ = auton::AutoExecutor{std::move(mode)};
     hood_.SetWantPosition(40);
@@ -50,8 +62,10 @@ void Robot::TeleopPeriodic() {
     hood_.Periodic();
     intake_.Periodic();
 
-    drive_.SetWantCheesyDrive(controls_.Throttle(), controls_.Wheel(),
-                              controls_.QuickTurn());
+    if (!controls_.Shoot()) {
+        drive_.SetWantCheesyDrive(controls_.Throttle(), controls_.Wheel(),
+                                  controls_.QuickTurn());
+    }
 
     bool climb_up = controls_.ClimbUp();
     bool climb_down = controls_.ClimbDown();
@@ -78,6 +92,7 @@ void Robot::TeleopPeriodic() {
     if (controls_.Shoot()) {
         ball_path_.SetWantShot(BallPath::ShotType::Long);
         ball_path_.SetWantState(BallPath::State::Shoot);
+        drive_.SetWantOrientForShot();
     } else if (controls_.Unjam()) {
         ball_path_.SetWantState(BallPath::State::Unjm);
     } else if (controls_.Intake()) {

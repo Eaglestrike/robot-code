@@ -1,5 +1,7 @@
 #include "ball_path.h"
 
+#include "subsystems/drive.h"
+
 #include <iostream>
 
 namespace team114 {
@@ -224,11 +226,13 @@ bool BallPath::ReadyToShoot() {
                            current_shot_.flywheel_sp);
     bool flywheel = shooter_err <
                     current_shot_.flywheel_sp * shooter_cfg_.shootable_err_pct;
-    std::cout << "fly_sp, accept_err, err" << current_shot_.flywheel_sp << " "
-              << (current_shot_.flywheel_sp * shooter_cfg_.shootable_err_pct)
-              << " " << shooter_err << std::endl;
-    // when we have vision, check the drivetrain is oriented
-    return hood && flywheel;
+    // std::cout << "fly_sp, accept_err, err" << current_shot_.flywheel_sp << "
+    // "
+    //           << (current_shot_.flywheel_sp * shooter_cfg_.shootable_err_pct)
+    //           << " " << shooter_err << std::endl;
+    bool drive = Drive::GetInstance().OrientedForShot();
+    std::cout << "shot rdy status " << hood << flywheel << drive << std::endl;
+    return hood && flywheel && drive;
 }
 
 void BallPath::SetChannelDirection(BallPath::Direction dir) {

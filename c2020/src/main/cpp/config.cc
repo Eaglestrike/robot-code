@@ -29,6 +29,11 @@ const RobotConfig MakeDefaultRobotConfig() {
     c.drive.traj_max_accel = units::meters_per_second_squared_t{5.0};
     // currently this is g with 2x FOS
     c.drive.traj_max_centrip_accel = units::meters_per_second_squared_t{4.9};
+    c.drive.orient_kp = 0.45;
+    c.drive.orient_ki = 0.0;
+    c.drive.orient_kd = 0.0;
+    c.drive.orient_vel = 0.0;
+    c.drive.orient_acc = 0.0;
 
     c.ctrl_panel.talon_id = 31;
     c.ctrl_panel.current_limit = 22;

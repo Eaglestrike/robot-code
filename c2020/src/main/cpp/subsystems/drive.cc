@@ -20,11 +20,17 @@ Drive::Drive(const conf::DriveConfig& cfg)
       right_master_{cfg.right_master_id},
       left_slave_{cfg.left_slave_id},
       right_slave_{cfg.right_slave_id},
-      config_{cfg},
+      cfg_{cfg},
       robot_state_{RobotState::GetInstance()},
       kinematics_{cfg.track_width},
       odometry_{{}},
-      ramsete_{} {
+      ramsete_{},
+      vision_rot_{cfg_.orient_kp,
+                  cfg_.orient_ki,
+                  cfg_.orient_kd,
+                  {2.0_rad / 1_s, 6.0_rad / 1.0_s / 1.0_s},
+                  10_ms},
+      has_vision_target_{false} {
     conf::DriveFalconCommonConfig(left_master_);
     conf::DriveFalconCommonConfig(right_master_);
     conf::DriveFalconCommonConfig(left_slave_);
@@ -41,6 +47,9 @@ Drive::Drive(const conf::DriveConfig& cfg)
     conf::SetDriveSlaveFramePeriods(left_slave_);
     conf::SetDriveSlaveFramePeriods(right_slave_);
     CheckFalconFramePeriods();
+
+    vision_rot_.SetIntegratorRange(-0.05, 0.05);
+    vision_rot_.SetTolerance(0.02_rad, 0.2_rad / 1.0_s);
 }
 
 // https://phoenix-documentation.readthedocs.io/en/latest/ch18_CommonAPI.html#can-bus-utilization-error-metrics
@@ -67,12 +76,14 @@ void Drive::Periodic() {
     CheckFalconFramePeriods();
     UpdateRobotState();
     switch (state_) {
-        case (DriveState::OPEN_LOOP):
+        case DriveState::OPEN_LOOP:
             // TODO(josh)
             break;
-        case (DriveState::FOLLOW_PATH):
+        case DriveState::FOLLOW_PATH:
             UpdatePathController();
             break;
+        case DriveState::SHOOT_ORIENT:
+            UpdateOrientController();
         default:
             // TODO(josh) log here
             break;
@@ -137,13 +148,47 @@ void Drive::UpdatePathController() {
     // convert into falcon 500 internal encoder ticks
     auto MetersPerSecToTicksPerDecisec =
         [this](units::meters_per_second_t meters_per_second) -> double {
-        return meters_per_second / config_.meters_per_falcon_tick * 1_s / 10.0;
+        return meters_per_second / cfg_.meters_per_falcon_tick * 1_s / 10.0;
     };
     // TODO(josh) consider using WPILib
     // SimpleMotorFeedForward to add kA term
     pout_.control_mode = ControlMode::Velocity;
     pout_.left_demand = MetersPerSecToTicksPerDecisec(wheel_v.left);
     pout_.right_demand = MetersPerSecToTicksPerDecisec(wheel_v.right);
+}
+
+void Drive::SetWantOrientForShot() {
+    state_ = DriveState::SHOOT_ORIENT;
+    vision_rot_.SetGoal(0.0_rad);
+}
+
+bool Drive::OrientedForShot() {
+    return state_ == DriveState::SHOOT_ORIENT && has_vision_target_ &&
+           vision_rot_.AtGoal();
+}
+
+void Drive::UpdateOrientController() {
+    auto latest = robot_state_.GetLatestAngleToOuterPort();
+    if (!latest.has_value()) {
+        return;
+        has_vision_target_ = false;
+    }
+    READING_SDB_NUMERIC(double, RotKp) kp;
+    READING_SDB_NUMERIC(double, RotKi) ki;
+    READING_SDB_NUMERIC(double, RotKd) kd;
+    vision_rot_.SetPID(kp, ki, kd);
+    READING_SDB_NUMERIC(double, RotVel) vel;
+    READING_SDB_NUMERIC(double, RotAcc) acc;
+    vision_rot_.SetConstraints({static_cast<double>(vel) * 1_rad / 1_s,
+                                static_cast<double>(acc) * 1_rad / 1_s / 1_s});
+    std::cout << "read gains " << kp << " " << ki << " " << kd << " " << vel << " " << acc << std::endl;
+    has_vision_target_ = true;
+    auto err = latest.value().second;
+    double demand = vision_rot_.Calculate(err);
+    pout_.control_mode = ControlMode::PercentOutput;
+    pout_.left_demand = -demand;
+    pout_.right_demand = demand;
+    std::cout << "orient w/ tgt, dmd " << err << " " << demand << std::endl;
 }
 
 bool Drive::FinishedTraj() {
@@ -199,7 +244,7 @@ frc::Rotation2d Drive::GetYaw() {
 
 units::meter_t Drive::GetEncoder(TalonFX& master_talon) {
     return (static_cast<double>(master_talon.GetSelectedSensorPosition())) *
-           config_.meters_per_falcon_tick;
+           cfg_.meters_per_falcon_tick;
 }
 
 }  // namespace c2020

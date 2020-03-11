@@ -75,9 +75,10 @@ void Hood::Periodic() {
             talon_.Set(ControlMode::PercentOutput,
                        cfg_.zeroing_kp * (zeroing_position_ -
                                           talon_.GetSelectedSensorPosition()));
-            std::cout << "zero err"
-                      << zeroing_position_ - talon_.GetSelectedSensorPosition()
-                      << std::endl;
+            // std::cout << "zero err"
+            //           << zeroing_position_ -
+            //           talon_.GetSelectedSensorPosition()
+            //           << std::endl;
             if (talon_.GetSupplyCurrent() >= cfg_.zeroing_current) {
                 talon_.Set(ControlMode::PercentOutput, 0.0);
                 talon_.SetSelectedSensorPosition(0.0);

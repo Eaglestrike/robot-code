@@ -5,9 +5,12 @@
 #include "shims/minimal_phoenix.h"
 
 #include <frc/Timer.h>
+#include <frc/controller/ProfiledPIDController.h>
 #include <frc/controller/RamseteController.h>
 #include <frc/kinematics/DifferentialDriveKinematics.h>
 #include <frc/kinematics/DifferentialDriveOdometry.h>
+
+#include <units/units.h>
 
 #include "config.h"
 #include "robot_state.h"
@@ -34,10 +37,14 @@ class Drive : public Subsystem {
     void SetWantRawOpenLoop(const frc::DifferentialDriveWheelSpeeds& openloop);
     void SetWantCheesyDrive(double throttle, double wheel, bool quick_turn);
 
+    void SetWantOrientForShot();
+    bool OrientedForShot();
+
    private:
     enum class DriveState {
         OPEN_LOOP,
         FOLLOW_PATH,
+        SHOOT_ORIENT,
     };
     struct PeriodicOut {
         ControlMode control_mode;
@@ -48,6 +55,7 @@ class Drive : public Subsystem {
 
     void UpdateRobotState();
     void UpdatePathController();
+    void UpdateOrientController();
 
     frc::Rotation2d GetYaw();
     units::meter_t GetEncoder(TalonFX& master_talon);
@@ -62,7 +70,7 @@ class Drive : public Subsystem {
     PeriodicOut pout_{};
     void WriteOuts();
 
-    const conf::DriveConfig config_;
+    const conf::DriveConfig cfg_;
     DriveState state_{DriveState::OPEN_LOOP};
     RobotState& robot_state_;
 
@@ -71,6 +79,9 @@ class Drive : public Subsystem {
     frc::RamseteController ramsete_;
     std::optional<frc::Trajectory> curr_traj_;
     frc2::Timer traj_timer{};
+
+    frc::ProfiledPIDController<units::radian> vision_rot_;
+    bool has_vision_target_;
 };
 
 }  // namespace c2020

@@ -19,6 +19,11 @@ struct DriveConfig {
     units::meters_per_second_t traj_max_vel;
     units::meters_per_second_squared_t traj_max_accel;
     units::meters_per_second_squared_t traj_max_centrip_accel;
+    double orient_kp;
+    double orient_ki;
+    double orient_kd;
+    double orient_vel;
+    double orient_acc;
 };
 
 struct ControlPanelConfig {

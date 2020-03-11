@@ -112,11 +112,11 @@ void Intake::Periodic() {
             // double p = 0.00015 * (setpoint_ticks_ - pos);
             rot_talon_.Set(ControlMode::MotionMagic, setpoint_ticks_,
                            DemandType::DemandType_ArbitraryFeedForward, ff);
-            std::cout << rot_talon_.GetSelectedSensorPosition() << "    "
-                      << setpoint_ticks_ << "    "
-                      << rot_talon_.GetMotorOutputPercent() << "      "
-                      << rot_talon_.GetClosedLoopError() << "      "
-                      << rot_talon_.GetClosedLoopTarget() << std::endl;
+            // std::cout << rot_talon_.GetSelectedSensorPosition() << "    "
+            //           << setpoint_ticks_ << "    "
+            //           << rot_talon_.GetMotorOutputPercent() << "      "
+            //           << rot_talon_.GetClosedLoopError() << "      "
+            //           << rot_talon_.GetClosedLoopTarget() << std::endl;
             break;
         }
     }

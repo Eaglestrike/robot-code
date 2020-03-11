@@ -77,7 +77,7 @@ units::second_t Limelight::GetLatency() { return per_in_.latency; }
 std::optional<Limelight::TargetInfo> Limelight::GetTarget() {
     if (SeesTarget()) {
         TargetInfo t;
-        t.horizontal = DegToRad(per_in_.x_off);
+        t.horizontal = DegToRad(-per_in_.x_off);
         t.vertical = DegToRad(per_in_.y_off);
         return t;
     }
