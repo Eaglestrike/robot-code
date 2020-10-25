@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <algorithm>
 
 #include "../action.h"
 
