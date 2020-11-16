@@ -7,6 +7,9 @@
 namespace team114 {
 namespace c2020 {
 
+/**
+ * Instentiates structs for future use.
+**/
 Robot::Robot()
     : frc::TimedRobot{Robot::kPeriod},
       controls_{},
@@ -25,7 +28,15 @@ Robot::Robot()
       auto_executor_{std::make_unique<auton::EmptyAction>()},
       cfg{conf::GetConfig()} {}
 
+/**
+ * Nothing.
+**/
 void Robot::RobotInit() {}
+
+
+/**
+ * Calls period function of select classes. Possibly unfinished?
+**/
 void Robot::RobotPeriodic() {
     drive_.Periodic();
     ball_path_.Periodic();
@@ -45,19 +56,33 @@ void Robot::RobotPeriodic() {
     // }
 }
 
+/**
+ * Zeroing sensors, selecting auto mode.
+**/
 void Robot::AutonomousInit() {
     drive_.ZeroSensors();
     auto mode = auto_selector_.GetSelectedAction();  // heh
     auto_executor_ = auton::AutoExecutor{std::move(mode)};
     hood_.SetWantPosition(40);
 }
+
+/**
+ * Calls periodic function of select structs.
+**/
 void Robot::AutonomousPeriodic() {
     auto_executor_.Periodic();
     hood_.Periodic();
     intake_.Periodic();
 }
 
+/**
+ * Finishes initialition (stows hood?).
+**/
 void Robot::TeleopInit() { hood_.SetWantStow(); }
+
+/**
+ * Calls remaining periodic funtions. Checks if robot is shooting, climbing or doing the control panel and calls functions accordingly.
+**/
 void Robot::TeleopPeriodic() {
     hood_.Periodic();
     intake_.Periodic();
@@ -121,7 +146,14 @@ void Robot::TeleopPeriodic() {
     }
 }
 
+/**
+ * Nothing.
+**/
 void Robot::TestInit() {}
+
+/**
+ * Simulates the climbing portion of periodic action. 
+**/
 void Robot::TestPeriodic() {
     bool climb_up = controls_.ClimbUp();
     bool climb_down = controls_.ClimbDown();
@@ -133,11 +165,18 @@ void Robot::TestPeriodic() {
     }
 }
 
+/**
+ * Resets a couple things (most zeroing happens in AutonomousInit()). 
+**/
 void Robot::DisabledInit() {
     auto_executor_.Stop();
     drive_.SetWantRawOpenLoop({0.0_mps, 0.0_mps});
     climber_.SetWantDirection(Climber::Direction::Neutral);
 }
+
+/**
+ * Updates auto selector.
+**/
 void Robot::DisabledPeriodic() { auto_selector_.UpdateSelection(); }
 
 }  // namespace c2020
