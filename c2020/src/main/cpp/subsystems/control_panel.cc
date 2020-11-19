@@ -6,7 +6,9 @@
 
 namespace team114 {
 namespace c2020 {
-
+/**
+*   Constructor for 
+*/
 ControlPanel::ControlPanel() : ControlPanel{conf::GetConfig().ctrl_panel} {}
 
 ControlPanel::ControlPanel(const conf::ControlPanelConfig& cfg)
