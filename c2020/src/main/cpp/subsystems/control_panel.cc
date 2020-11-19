@@ -7,7 +7,7 @@
 namespace team114 {
 namespace c2020 {
 /**
-*   Constructor for control panel gets config from 
+*   Constructor for control panel gets config from config.cc
 */
 ControlPanel::ControlPanel() : ControlPanel{conf::GetConfig().ctrl_panel} {}
 /**
