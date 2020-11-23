@@ -6,9 +6,13 @@
 
 namespace team114 {
 namespace c2020 {
-
+/**
+*   Constructor for control panel gets config from config.cc
+*/
 ControlPanel::ControlPanel() : ControlPanel{conf::GetConfig().ctrl_panel} {}
-
+/**
+*   Constructor for Control panel, takes a control panel config and sets up the control panel
+*/
 ControlPanel::ControlPanel(const conf::ControlPanelConfig& cfg)
     : cfg_{cfg},
       talon_{cfg.talon_id},
@@ -50,16 +54,33 @@ ControlPanel::ControlPanel(const conf::ControlPanelConfig& cfg)
     talon_.SetSensorPhase(true);
     conf::SetFramePeriodsForPidTalon(talon_);
 }
-
+/**
+*   Nothing
+*/
 void ControlPanel::Periodic() {}
+/**
+*   It sets control panel talon to 0 percent output
+*/
 void ControlPanel::Stop() { talon_.Set(ControlMode::PercentOutput, 0.0); }
+/**
+*   Nothing
+*/
 void ControlPanel::ZeroSensors() {}
+/**
+*   Nothing
+*/
 void ControlPanel::OutputTelemetry() {}
-
+/**
+*   Sets deployed to deployed. 
+*/
 void ControlPanel::SetDeployed(bool deployed) { deploy_.Set(deployed); }
-
+/**
+*    It tells the tallon to move a number of ticks that were input. 
+*/
 void ControlPanel::DoRotationControl() { MoveTicks(cfg_.rot_control_ticks); }
-
+/**
+*   It takes the current color input then rotates the wheel until it is the correct color.   
+*/
 void ControlPanel::DoPositionControl(ObservedColor current) {
     std::string gameData;
     gameData = frc::DriverStation::GetInstance().GetGameSpecificMessage();
@@ -115,7 +136,9 @@ void ControlPanel::DoPositionControl(ObservedColor current) {
     }
     MoveTicks(steps * cfg_.ticks_per_color_slice);
 }
-
+/**
+*   It moves the control panel talon forwards or backwards by the scood amount.
+*/
 void ControlPanel::Scoot(ScootDir dir) {
     switch (dir) {
         case ControlPanel::ScootDir::Forward:
@@ -129,7 +152,9 @@ void ControlPanel::Scoot(ScootDir dir) {
             break;
     }
 }
-
+/**
+*     Tells the tallon to move the inputed number of ticks
+*/
 void ControlPanel::MoveTicks(int ticks) {
     talon_.Set(ControlMode::Position,
                talon_.GetSelectedSensorPosition() + ticks);
