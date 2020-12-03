@@ -13,10 +13,8 @@ namespace conf {
 
 // WPILib chose GCC 7, so no C++20 designated initializers here
 
-/**
-* This function is declaring all the constants that will be needed for the robot through obj c
-* Includes PID constants, ticks, etc
-**/
+//This function is declaring all the constants that will be needed for the robot through obj c
+//Includes PID constants, ticks, etc
 const RobotConfig MakeDefaultRobotConfig() {
     RobotConfig c;
     // /sys/class/net/<if>/address is newline terminated, match here
@@ -135,9 +133,7 @@ const RobotConfig MakeDefaultRobotConfig() {
     return c;
 }
 
-/**
-* Basic getter, returning the configuration to uphold encapsulation in oop
-**/
+//Basic getter, returning the configuration to uphold encapsulation in oop
 RobotConfig& GetConfig() {
     static std::optional<RobotConfig> CONFIG;
     if (CONFIG.has_value()) {
@@ -164,10 +160,8 @@ RobotConfig& GetConfig() {
     return GetConfig();
 }
 
-/**
-* Defining constants for Talon configurations
-* This includes current limit, nominal outputs, etc regarding talon motors
-*/
+//defining constants for Talon configurations
+//This includes current limit, nominal outputs, etc regarding talon motors
 void DriveFalconCommonConfig(TalonFX& falcon) {
     TalonFXConfiguration c;
     // ====== Talon FX CFG
@@ -255,7 +249,7 @@ void DriveFalconCommonConfig(TalonFX& falcon) {
 
 //Basically finding and storing multiple error codes for Talonfx
 //Explains why you need error handling
-//https:github.com/CrossTheRoadElec/Phoenix-Documentation/blob/master/Legacy/README.md#error-handling
+https://github.com/CrossTheRoadElec/Phoenix-Documentation/blob/master/Legacy/README.md#error-handling
 inline static ErrorCode SetDriveCommonFramePeriods(TalonFX& falcon) {
     constexpr int lng = 255;
     ErrorCollection err;
@@ -294,9 +288,7 @@ void SetDriveMasterFramePeriods(TalonFX& falcon) {
     }
 }
 
-/** 
-* Collects error codes, however master controls 
-**/ 
+//Collects error codes, however master controls 
 void SetDriveSlaveFramePeriods(TalonFX& falcon) {
     for (int i = 0; i < kStatusFrameAttempts; i++) {
         ErrorCollection err;
@@ -313,10 +305,8 @@ void SetDriveSlaveFramePeriods(TalonFX& falcon) {
     }
 }
 
-/**
-* Setting values and configurations for Talons
-* Also collecting error from functions
-**/ 
+//Setting values and configurations for Talons
+//Also collecting error from functions
 void SetFramePeriodsForPidTalon(TalonSRX& talon, FeedbackType feedback_type) {
     constexpr int lng = 255;
     constexpr int shrt = 10;
@@ -362,9 +352,7 @@ void SetFramePeriodsForPidTalon(TalonSRX& talon, FeedbackType feedback_type) {
     }
 }
 
-/**
-* Error collecting for  Open loop TalonSRX's
-**/ 
+//Error collecting for  Open loop TalonSRX's
 void SetFramePeriodsForOpenLoopTalon(TalonSRX& talon) {
     constexpr int lng = 255;
     constexpr int shrt = 20;
@@ -394,10 +382,8 @@ void SetFramePeriodsForOpenLoopTalon(TalonSRX& talon) {
     }
 }
 
-/**
-* Another Slave function which means controlled by master
-* collect error
-**/ 
+//Another Slave function which means controlled by master
+//collect error
 void SetFramePeriodsForSlaveTalon(TalonSRX& talon) {
     constexpr int lng = 255;
     for (int i = 0; i < kStatusFrameAttempts; i++) {
