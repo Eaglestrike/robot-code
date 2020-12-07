@@ -13,8 +13,16 @@
 namespace team114 {
 namespace c2020 {
 
+/**
+ * The constructor called if no config is passed in, 
+ * in which case it calls the second constructor anyways by explicitly getting the drive config and passing it in
+**/
 Drive::Drive() : Drive{conf::GetConfig().drive} {}
 
+/**
+ * The constructor that takes in a driveconfig to initialize all the drive's members,
+ * and the values of the members' variables
+**/
 Drive::Drive(const conf::DriveConfig& cfg)
     : left_master_{cfg.left_master_id},
       right_master_{cfg.right_master_id},
@@ -52,7 +60,13 @@ Drive::Drive(const conf::DriveConfig& cfg)
     vision_rot_.SetTolerance(0.02_rad, 0.2_rad / 1.0_s);
 }
 
-// https://phoenix-documentation.readthedocs.io/en/latest/ch18_CommonAPI.html#can-bus-utilization-error-metrics
+/**
+ * The first method called in Periodic(), in which the slaves are checked whether a reset has occured
+ * If a slave was reset, its frame period will once again be set to the correct value like in the constructor
+ * A counter will also be ticked to show how many times the falcons have been reset 
+ * 
+ * https://phoenix-documentation.readthedocs.io/en/latest/ch18_CommonAPI.html#can-bus-utilization-error-metrics
+**/
 void Drive::CheckFalconFramePeriods() {
     if (left_master_.HasResetOccurred()) {
         conf::SetDriveMasterFramePeriods(left_master_);
@@ -72,6 +86,13 @@ void Drive::CheckFalconFramePeriods() {
     }
 }
 
+/**
+ * This method is the most important as it is periodically called, and is what allows the robot to move
+ * After checking for motor resets, the current state will be updated
+ * Depending on the state, different cotnrollers will be updated such that the robot can perform the movement necessary
+ * to follow a path or orient the shooter.
+ * Outputs will also be written for analysis 
+**/
 void Drive::Periodic() {
     CheckFalconFramePeriods();
     UpdateRobotState();
@@ -91,8 +112,14 @@ void Drive::Periodic() {
     WriteOuts();
 }
 
+/**
+ * Empty method, presumably was supposed to be used to stop the drive
+**/
 void Drive::Stop() {}
 
+/**
+ * Resets the position of sensors on the drive
+**/
 void Drive::ZeroSensors() {
     robot_state_.ResetFieldToRobot();
     WaitForNavxCalibration(0.5);
@@ -102,6 +129,10 @@ void Drive::ZeroSensors() {
     odometry_.ResetPosition({}, GetYaw());
 }
 
+/**
+ * Gives the NavX (navigation sensor for field oriented, auto balancing, collision detection, etc...) a time interval to calibrate
+ * Calibration retries, failures, and successes are supposed to be log, but atm nothing has been written to log it
+**/
 void Drive::WaitForNavxCalibration(double timeout_sec) {
     frc::Timer time;
     time.Start();
@@ -116,8 +147,14 @@ void Drive::WaitForNavxCalibration(double timeout_sec) {
     }
 }
 
+/**
+ * Empty method, presumably to ... output telemetry
+**/
 void Drive::OutputTelemetry() {}
 
+/**
+ * Adds the drive trajectory it wants to move at, and changes the current state to follow that path
+**/
 void Drive::SetWantDriveTraj(frc::Trajectory&& traj) {
     curr_traj_.emplace(std::move(traj));
     state_ = DriveState::FOLLOW_PATH;
@@ -125,6 +162,9 @@ void Drive::SetWantDriveTraj(frc::Trajectory&& traj) {
     traj_timer.Start();
 }
 
+/**
+ * Updates the odometry of the drive, such that the robot's relative position and pose can be predicted
+**/
 void Drive::UpdateRobotState() {
     odometry_.Update(GetYaw(), GetEncoder(left_master_),
                      GetEncoder(right_master_));
@@ -132,6 +172,9 @@ void Drive::UpdateRobotState() {
                                      odometry_.GetPose());
 }
 
+/**
+ * Updates the path controller such that it'll correctly follow the trajectory the driver has set for it
+**/
 void Drive::UpdatePathController() {
     if (!curr_traj_.has_value()) {
         // LOG
@@ -157,16 +200,26 @@ void Drive::UpdatePathController() {
     pout_.right_demand = MetersPerSecToTicksPerDecisec(wheel_v.right);
 }
 
+/**
+ * Changes the current state of the robot to orient its vision sensor for a shot, and sets the angle at which the sensor should be rotated to
+**/
 void Drive::SetWantOrientForShot() {
     state_ = DriveState::SHOOT_ORIENT;
     vision_rot_.SetGoal(0.0_rad);
 }
 
+/**
+ * Returns true if the vision sensor has correctly rotated to the position set
+**/
 bool Drive::OrientedForShot() {
     return state_ == DriveState::SHOOT_ORIENT && has_vision_target_ &&
            vision_rot_.AtGoal();
 }
 
+/**
+ * Called if the current drive state is to orient for a shot
+ * It updates the vision controller, which determines the movement the vision sensor takes towards the goal
+**/
 void Drive::UpdateOrientController() {
     auto latest = robot_state_.GetLatestAngleToOuterPort();
     if (!latest.has_value()) {
@@ -191,6 +244,9 @@ void Drive::UpdateOrientController() {
     std::cout << "orient w/ tgt, dmd " << err << " " << demand << std::endl;
 }
 
+/**
+ * Returns true if the current trajectory variable does not have a value, meaning it is not currently moving
+**/
 bool Drive::FinishedTraj() {
     if (!curr_traj_.has_value()) {
         // not running one at the moment
@@ -200,6 +256,9 @@ bool Drive::FinishedTraj() {
     return traj_timer.Get() > curr_traj_.value().TotalTime();
 }
 
+/**
+ * Sets the drive's state to an open loop, meaning nothing gets updated everytime Periodic() is called
+**/
 void Drive::SetWantRawOpenLoop(
     const frc::DifferentialDriveWheelSpeeds& openloop) {
     state_ = DriveState::OPEN_LOOP;
@@ -208,7 +267,10 @@ void Drive::SetWantRawOpenLoop(
     pout_.right_demand = openloop.right.to<double>();
 }
 
-// stolen from 254
+/**
+ * Taken from 254, it changes the controls and feel of manipulating the drive to that of a curvature drive
+ * https://www.reddit.com/r/FRC/comments/80679m/what_is_curvature_drive_cheesy_drive/  
+**/
 void Drive::SetWantCheesyDrive(double throttle, double wheel, bool quick_turn) {
     throttle = Deadband(throttle, 0.05);
     wheel = Deadband(wheel, 0.035);
@@ -230,6 +292,9 @@ void Drive::SetWantCheesyDrive(double throttle, double wheel, bool quick_turn) {
     SetWantRawOpenLoop(signal);
 }
 
+/**
+ * Writes the relevant outputs  
+**/
 void Drive::WriteOuts() {
     SDB_NUMERIC(double, LeftDriveTalonDemand){pout_.left_demand};
     SDB_NUMERIC(double, RightDriveTalonDemand){pout_.right_demand};
@@ -237,11 +302,17 @@ void Drive::WriteOuts() {
     right_master_.Set(pout_.control_mode, pout_.right_demand);
 }
 
+/**
+ * Gets the rotation of the drive in terms of radians
+**/
 constexpr auto RAD_PER_DEGREE = units::constants::pi * 1_rad / 180.0;
 frc::Rotation2d Drive::GetYaw() {
     return frc::Rotation2d(navx_.GetYaw() * RAD_PER_DEGREE);
 }
 
+/**
+ * Simple getter method to get the encoder object of the Talon motor controller
+**/
 units::meter_t Drive::GetEncoder(TalonFX& master_talon) {
     return (static_cast<double>(master_talon.GetSelectedSensorPosition())) *
            cfg_.meters_per_falcon_tick;
