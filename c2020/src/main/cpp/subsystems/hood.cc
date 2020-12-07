@@ -6,8 +6,16 @@
 namespace team114 {
 namespace c2020 {
 
+/**
+ * Default constructor of hood, gets configuration
+ */
 Hood::Hood() : Hood{conf::GetConfig().hood} {}
 
+/**
+ * Constructor for hood, takes the config for hood and sets up the object
+ * occordingly Seems unfinished, "TODO" comments left everyhere
+ * @param conf::HoodConfig& cfg
+ */
 Hood::Hood(const conf::HoodConfig& cfg)
     : cfg_{cfg},
       state_{LoopState::UNINITALIZED},
@@ -62,6 +70,10 @@ Hood::Hood(const conf::HoodConfig& cfg)
     conf::SetFramePeriodsForPidTalon(talon_);
 }
 
+/**
+ * Hood's periodic function, checks the state of the hood and performs an action
+ * accordingly
+ */
 void Hood::Periodic() {
     switch (state_) {
         case LoopState::UNINITALIZED:
@@ -96,18 +108,42 @@ void Hood::Periodic() {
             break;
     }
 }
+
+/**
+ * Stops the output/sets it to 0%
+ */
 void Hood::Stop() { talon_.Set(ControlMode::PercentOutput, 0.0); }
+/**
+ * Changes the hood state to uninitialzed, zeroes sensors
+ */
 void Hood::ZeroSensors() { state_ = LoopState::UNINITALIZED; }
+/**
+ * Does nothing
+ */
 void Hood::OutputTelemetry() {}
 
+/**
+ * Sets the wanted position in degrees and calculates the number of ticks to get
+ * to that degree
+ * @param degrees
+ */
 void Hood::SetWantPosition(double degrees) {
     degrees = Clamp(degrees, cfg_.min_degrees, cfg_.max_degrees);
     degrees = cfg_.max_degrees - degrees;
     setpoint_ticks_ = degrees * cfg_.ticks_per_degree;
 }
 
+/**
+ * Sets the wanted position to the maximum it can go minus 1, signals the hood
+ * wants to stow
+ */
 void Hood::SetWantStow() { SetWantPosition(cfg_.max_degrees - 1); }
 
+/**
+ * Checks if the hood is at the position it is set to be at yet/withing an
+ * acceptable range of it
+ * @returns true if at position
+ */
 bool Hood::IsAtPosition() {
     auto err = std::abs(talon_.GetSelectedSensorPosition() - setpoint_ticks_);
     auto max_err = 1.0 * cfg_.ticks_per_degree;
