@@ -7,11 +7,26 @@ namespace c2020 {
 
 class Subsystem {
    public:
+   /**
+    * Subsystem is an abstract class (and all following functions are abstract as well). An empty constructor. 
+    **/
     virtual ~Subsystem() = default;
 
+    /**
+    * Called in Robot::TeleopPeriodic() if it makes sense (hood and intake yes, control panel(unfinished?) and climber no)
+    **/
     virtual void Periodic(){};
+    /**
+    * Resets things (like setting motors back to initial position)
+    **/
     virtual void Stop(){};
+    /**
+    * Presumably to reset sensors, although it currently isn't used for much in the subclasses.
+    **/
     virtual void ZeroSensors(){};
+    /**
+    * Currently undefined in subclasses, but it could presumably be used to output general positional or sensory data.
+    **/
     virtual void OutputTelemetry(){};
 };
 
