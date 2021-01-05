@@ -11,7 +11,9 @@ namespace paths {
 
 using frc::Pose2d;
 using frc::Translation2d;
-
+/**
+ * Generating, setting up Drive Kinematic commands
+**/
 frc::TrajectoryConfig MakeDefaultConfig() {
     conf::DriveConfig& drive_cfg = conf::GetConfig().drive;
     frc::DifferentialDriveKinematics kinematics{drive_cfg.track_width};
@@ -24,7 +26,9 @@ frc::TrajectoryConfig MakeDefaultConfig() {
         drive_cfg.traj_max_centrip_accel));
     return traj_cfg;
 }
-
+/**
+ * Calling MakeDefualtConfig, generating default configure
+**/
 frc::Trajectory TestPath() {
     auto cfg = MakeDefaultConfig();
     return frc::TrajectoryGenerator::GenerateTrajectory(
