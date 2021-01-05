@@ -6,13 +6,13 @@
 
 namespace team114 {
 namespace c2020 {
-/*
-* gets config for ball path and calls the constructor for it
-*/
+/**
+* Calls other constructor
+**/
 BallPath::BallPath() : BallPath(conf::GetConfig()) {}
-/*
-* construcsts a ball path using a config
-*/
+/**
+* Makes a ball path config, defines member variables
+**/
 BallPath::BallPath(const conf::RobotConfig& cfg)
     : shooter_cfg_{cfg.shooter},
       channel_cfg_{cfg.ball_channel},
@@ -118,9 +118,9 @@ BallPath::BallPath(const conf::RobotConfig& cfg)
     conf::SetFramePeriodsForOpenLoopTalon(kicker_);
 }
 
-/*
-* periodic function for the ball path
-*/
+/**
+* periodic function for the ball path. Depends on state, can unjam balls, shoot a ball, and position the serializer and intake.
+**/
 void BallPath::Periodic() {
     bool s0 = !s0_.Get();
     bool s1 = !s1_.Get();
@@ -195,25 +195,25 @@ void BallPath::Periodic() {
         // LOG uh oh
     }
 }
-/*
-* does nothing
-*/
+/**
+* does nothing, presumable purpose to stop action and reset things
+*/*
 void BallPath::Stop() {}
-/*
-* does nothing
-*/
+/**
+* does nothing, presumable purpose to reset sensors
+**/
 void BallPath::ZeroSensors() {}
-/*
-* does nothing
-*/
+/**
+* does nothing, presumable purpose to output relevant data
+**/
 void BallPath::OutputTelemetry() {}
-/*
+/**
 * sets ballpath state to the inputed state
-*/
+**/
 void BallPath::SetWantState(BallPath::State s) { state_ = s; }
-/*
-* sets the current shot's flywheel speed and hood angle atributes to the current angles they are at 
-*/
+/**
+* sets the current shot's flywheel speed and hood angle atributes to the appropriate angles 
+**/
 void BallPath::SetWantShot(BallPath::ShotType shot) {
     READING_SDB_NUMERIC(double, FlyWheelSpeed) flywheel_speed;
     READING_SDB_NUMERIC(double, HoodAngle) hood_angle;
@@ -234,15 +234,15 @@ void BallPath::SetWantShot(BallPath::ShotType shot) {
     //         break;
     // }
 }
-/*
-* does nothing
-*/
+/**
+* does nothing, presumable purpose to use camera info to update shot type
+**/
 void BallPath::UpdateShotFromVision() {
     // find distance to goal and look up pre-computer shot
 }
-/*
+/**
 * returns true if the hood, flywheel, and drive systems are ready to shoot
-*/
+**/
 bool BallPath::ReadyToShoot() {
     bool hood = hood_.IsAtPosition();
     SDB_NUMERIC(double, ShooterError)
@@ -258,9 +258,9 @@ bool BallPath::ReadyToShoot() {
     std::cout << "shot rdy status " << hood << flywheel << drive << std::endl;
     return hood && flywheel && drive;
 }
-/*
+/**
 * Sets the channel to forward, backward, or neutral
-*/
+**/
 void BallPath::SetChannelDirection(BallPath::Direction dir) {
     switch (dir) {
         case BallPath::Direction::Forward:
@@ -279,9 +279,9 @@ void BallPath::SetChannelDirection(BallPath::Direction dir) {
 }
 
 // TODO unify enum variant naming across the codebase
-/*
+/**
 *  sets the serilaizer's direction to forward, backwards or neutral 
-*/
+**/
 void BallPath::SetSerializerDirection(BallPath::Direction dir) {
     switch (dir) {
         case BallPath::Direction::Forward:
