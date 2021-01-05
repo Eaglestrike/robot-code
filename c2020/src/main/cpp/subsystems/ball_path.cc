@@ -197,7 +197,7 @@ void BallPath::Periodic() {
 }
 /**
 * does nothing, presumable purpose to stop action and reset things
-*/*
+**/
 void BallPath::Stop() {}
 /**
 * does nothing, presumable purpose to reset sensors
