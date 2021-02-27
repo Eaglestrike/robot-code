@@ -137,7 +137,7 @@ void Hood::SetWantPosition(double degrees) {
  * Sets the wanted position to the maximum it can go minus 1, signals the hood
  * wants to stow
  */
-void Hood::SetWantStow() { SetWantPosition(cfg_.max_degrees - 1); }
+void Hood::SetWantStow() { SetWantPosition(cfg_.max_degrees - 10); }
 
 /**
  * Checks if the hood is at the position it is set to be at yet/withing an
