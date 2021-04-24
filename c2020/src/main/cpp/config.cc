@@ -91,8 +91,8 @@ const RobotConfig MakeDefaultRobotConfig() {
     c.hood.kD = 10.0;
     c.hood.ctre_curve_smoothing = 2;
 
-    c.shooter.master_id = 53;
-    c.shooter.slave_id = 54;
+    c.shooter.master_id = 25; //left side of shooter
+    c.shooter.slave_id = 26; //right side of shooter
     c.shooter.shooter_current_limit = 40;
     c.shooter.kF = 0.0160;
     c.shooter.kP = 0.25;
@@ -362,6 +362,52 @@ void SetFramePeriodsForPidTalon(TalonSRX& talon, FeedbackType feedback_type) {
     }
 }
 
+void SetFramePeriodsForPidTalonFX(TalonFX& talon, FeedbackType feedback_type) {
+    constexpr int lng = 255;
+    constexpr int shrt = 10;
+    int quad = lng;
+    int pulsewidth = lng;
+    switch (feedback_type) {
+        case FeedbackType::Both:
+            quad = shrt;
+            pulsewidth = shrt;
+            break;
+        case FeedbackType::Quadrature:
+            quad = shrt;
+            break;
+        case FeedbackType::PulseWidth:
+            pulsewidth = shrt;
+            break;
+        case FeedbackType::None:
+            break;
+    }
+    for (int i = 0; i < kStatusFrameAttempts; i++) {
+        ErrorCollection err;
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_1_General, shrt));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_2_Feedback0, shrt));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_3_Quadrature, quad));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_4_AinTempVbat, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_8_PulseWidth, pulsewidth));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_10_MotionMagic, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_12_Feedback1, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_14_Turn_PIDF1, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_13_Base_PIDF0, 50));
+        if (err.GetFirstNonZeroError() == ErrorCode::OK) {
+            return;
+        }
+    }
+}
+
+
 /**
 * Error collecting for  Open loop TalonSRX's
 **/ 
@@ -399,6 +445,34 @@ void SetFramePeriodsForOpenLoopTalon(TalonSRX& talon) {
 * collect error
 **/ 
 void SetFramePeriodsForSlaveTalon(TalonSRX& talon) {
+    constexpr int lng = 255;
+    for (int i = 0; i < kStatusFrameAttempts; i++) {
+        ErrorCollection err;
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_1_General, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_2_Feedback0, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_3_Quadrature, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_4_AinTempVbat, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_8_PulseWidth, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_10_MotionMagic, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_12_Feedback1, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_14_Turn_PIDF1, lng));
+        err.NewError(talon.SetStatusFramePeriod(
+            StatusFrameEnhanced::Status_13_Base_PIDF0, lng));
+        if (err.GetFirstNonZeroError() == ErrorCode::OK) {
+            return;
+        }
+    }
+}
+
+void SetFramePeriodsForSlaveTalonFX(TalonFX& talon) {
     constexpr int lng = 255;
     for (int i = 0; i < kStatusFrameAttempts; i++) {
         ErrorCollection err;
