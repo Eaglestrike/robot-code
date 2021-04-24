@@ -74,6 +74,8 @@ bool Limelight::SeesTarget() { return sees_target_; }
 
 units::second_t Limelight::GetLatency() { return per_in_.latency; }
 
+std::shared_ptr<nt::NetworkTable> Limelight::GetNetworkTable() { return network_table_; }
+
 std::optional<Limelight::TargetInfo> Limelight::GetTarget() {
     if (SeesTarget()) {
         TargetInfo t;
