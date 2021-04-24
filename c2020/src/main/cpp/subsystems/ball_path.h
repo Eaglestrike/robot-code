@@ -7,6 +7,8 @@
 #include "subsystem.h"
 #include "subsystems/hood.h"
 #include "subsystems/intake.h"
+#include "subsystems/limelight.h"
+#include "subsystems/auto_shoot.h"
 #include "util/sdb_types.h"
 
 namespace team114 {
@@ -54,8 +56,8 @@ class BallPath : public Subsystem {
 
     const conf::ShooterConifg shooter_cfg_;
     const conf::BallChannelConfig channel_cfg_;
-    TalonSRX shooter_master_;
-    TalonSRX shooter_slave;
+    TalonFX shooter_master_;
+    TalonFX shooter_slave;
     TalonSRX kicker_;
     TalonSRX serializer_;
     TalonSRX channel_;
@@ -68,7 +70,10 @@ class BallPath : public Subsystem {
     Shot current_shot_;
 
     Intake& intake_;
+    Limelight& limelight_;
     Hood& hood_;
+
+    
 };
 
 }  // namespace c2020
