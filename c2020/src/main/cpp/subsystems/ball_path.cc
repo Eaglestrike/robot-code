@@ -10,6 +10,9 @@ namespace c2020 {
 * Calls other constructor
 **/
 BallPath::BallPath() : BallPath(conf::GetConfig()) {}
+
+TalonFXConfiguration s;
+
 /**
 * Makes a ball path config, defines member variables
 **/
@@ -27,11 +30,12 @@ BallPath::BallPath(const conf::RobotConfig& cfg)
       s3_{channel_cfg_.s3_port},
       state_{State::Idle},
       intake_{Intake::GetInstance()},
+      limelight_{Limelight::GetInstance()}, 
       hood_{Hood::GetInstance()} {
-    TalonSRXConfiguration s;
+ /*   TalonSRXConfiguration s;
     s.peakCurrentLimit = 45;
     s.peakCurrentDuration = 30;
-    s.continuousCurrentLimit = 38;
+    s.continuousCurrentLimit = 38; */
     s.primaryPID.selectedFeedbackSensor =
         FeedbackDevice::CTRE_MagEncoder_Relative;
     s.primaryPID.selectedFeedbackCoefficient = 1.0;
@@ -61,22 +65,22 @@ BallPath::BallPath(const conf::RobotConfig& cfg)
         }
     }
     shooter_master_.EnableVoltageCompensation(true);
-    shooter_master_.EnableCurrentLimit(true);
+   // shooter_master_.EnableCurrentLimit(true);
     shooter_master_.SelectProfileSlot(0, 0);
     shooter_master_.SetNeutralMode(NeutralMode::Coast);
     shooter_master_.SetInverted(true);
     shooter_master_.SetSensorPhase(true);
-    conf::SetFramePeriodsForPidTalon(shooter_master_);
+    conf::SetFramePeriodsForPidTalonFX(shooter_master_);
     shooter_slave.SetNeutralMode(NeutralMode::Coast);
     shooter_slave.Follow(shooter_master_);
-    shooter_slave.SetInverted(InvertType::FollowMaster);
-    conf::SetFramePeriodsForSlaveTalon(shooter_slave);
+    shooter_slave.SetInverted(InvertType::OpposeMaster);
+    conf::SetFramePeriodsForSlaveTalonFX(shooter_slave);
 
     TalonSRXConfiguration r;
     r.peakCurrentLimit = channel_cfg_.current_limit;
     r.peakCurrentDuration = 30;
     r.continuousCurrentLimit = 0.8 * channel_cfg_.current_limit;
-    r.peakOutputForward = 1.0;
+    r.peakOutputForward = 1.0; 
     r.peakOutputReverse = -1.0;
     r.nominalOutputForward = 0.0;
     r.nominalOutputReverse = 0.0;
@@ -121,7 +125,19 @@ BallPath::BallPath(const conf::RobotConfig& cfg)
 /**
 * periodic function for the ball path. Depends on state, can unjam balls, shoot a ball, and position the serializer and intake.
 **/
+
 void BallPath::Periodic() {
+    READING_SDB_NUMERIC(double, shooter_P)  shooter_P;
+    READING_SDB_NUMERIC(double, shooter_I)  shooter_I;
+    READING_SDB_NUMERIC(double, shooter_D)  shooter_D;
+
+
+  // std::cout << shooter_master_.GetClosedLoopError() << std::endl;
+
+    s.slot0.kP = shooter_P;
+    s.slot0.kI = shooter_I;
+    s.slot0.kD = shooter_D;
+
     bool s0 = !s0_.Get();
     bool s1 = !s1_.Get();
     bool s2 = !s2_.Get();
@@ -138,6 +154,7 @@ void BallPath::Periodic() {
         intake_.SetWantPosition(Intake::Position::STOWED);
         // UpdateShotFromVision();
         hood_.SetWantPosition(current_shot_.hood_angle);
+        std::cout << "degrees: " << current_shot_.hood_angle << std::endl;
         shooter_master_.Set(ControlMode::Velocity, current_shot_.flywheel_sp);
         SetSerializerDirection(Direction::Neutral);
         if (!s3 || ReadyToShoot()) {
@@ -215,10 +232,25 @@ void BallPath::SetWantState(BallPath::State s) { state_ = s; }
 * sets the current shot's flywheel speed and hood angle atributes to the appropriate angles 
 **/
 void BallPath::SetWantShot(BallPath::ShotType shot) {
-    READING_SDB_NUMERIC(double, FlyWheelSpeed) flywheel_speed;
-    READING_SDB_NUMERIC(double, HoodAngle) hood_angle;
+    kicker_.Set(ControlMode::PercentOutput, shooter_cfg_.kicker_cmd);
+   // READING_SDB_NUMERIC(double, FlyWheelSpeed) flywheel_speed;
+   // READING_SDB_NUMERIC(double, HoodAngle) hood_angle;
+   double flywheel_speed = -69.0; double hood_angle = -420.0;
+   SmartDashboard::PutNumber("FlywheelSpeed", flywheel_speed);
+   SmartDashboard::PutNumber("HoodAngle", hood_angle);
+    
     current_shot_.flywheel_sp = flywheel_speed;
     current_shot_.hood_angle = hood_angle;
+
+    
+    //auto shoot stuff
+  /*  std::pair<double, double> temp = auto_shoot_calc(limelight_.GetNetworkTable()); 
+    current_shot_.flywheel_sp = temp.first;
+    current_shot_.hood_angle = temp.second; */
+
+
+    //edit shot type to have a flywheel speed & hood angle
+    //get rid of switch, just set flywheel sp and 
     // switch (shot) {
     //     case BallPath::ShotType::Short:
     //         current_shot_.flywheel_sp = 20000;
@@ -255,7 +287,7 @@ bool BallPath::ReadyToShoot() {
     //           << (current_shot_.flywheel_sp * shooter_cfg_.shootable_err_pct)
     //           << " " << shooter_err << std::endl;
     bool drive = Drive::GetInstance().OrientedForShot();
-    std::cout << "shot rdy status " << hood << flywheel << drive << std::endl;
+  //  std::cout << "shot rdy status " << hood << flywheel << drive << std::endl;
     return hood && flywheel && drive;
 }
 /**
