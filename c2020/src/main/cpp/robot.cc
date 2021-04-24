@@ -38,13 +38,93 @@ void Robot::RobotInit() {}
  * Calls period function of select classes. Possibly unfinished?
 **/
 void Robot::RobotPeriodic() {
+
+    // c.shooter.slave_id = 26;
+  /*  READING_SDB_NUMERIC(double, slave_shooter) slave_shooter;
+    can::TalonFX* sst = new TalonFX(26); 
+    sst->Set(ControlMode::Velocity, slave_shooter);
+    std::cout << "slave set velocity: " << slave_shooter << std::endl;
+    std::cout<< "slave velocity: " << sst->GetSelectedSensorVelocity() << std::endl;
+
+     // c.shooter.master_id = 25;
+    READING_SDB_NUMERIC(double, master_shooter)  master_shooter;
+    can::TalonFX* mst = new TalonFX(25); 
+    mst->Set(ControlMode::Velocity, master_shooter);
+    std::cout << "master set velocity: " << master_shooter << std::endl;
+    std::cout<< "master velocity: " << mst->GetSelectedSensorVelocity() << std::endl;
+    std::cout << "" << std::endl;*/
+
+
+    //*****TEMPORARY FOR TESTING MOTORS**********************************************/
+  /*  // c.ctrl_panel.talon_id = 31;
+    READING_SDB_NUMERIC(double, control_panel)  control_panel;
+    can::TalonSRX* cpt = new TalonSRX(31);   
+    cpt->Set(ControlMode::PercentOutput, control_panel); */
+
+     // c.intake.rot_talon_id = 41;
+  //  READING_SDB_NUMERIC(double, intake_rot) intake_rot;
+  //  can::TalonSRX* irt = new TalonSRX(41); 
+  //  irt->Set(ControlMode::PercentOutput, 30);
+   // std::cout << intake_rot << std::endl;
+
+    //c.intake.roller_talon_id = 42;
+   // READING_SDB_NUMERIC(double, roller)  roller;
+   // can::TalonSRX* rt = new TalonSRX(42);
+  //  rt->Set(ControlMode::PercentOutput, 30); 
+
+  /*   //c.hood.talon_id = 52;
+    READING_SDB_NUMERIC(double, hood)  hood;
+    can::TalonSRX* ht = new TalonSRX(52); 
+    ht->Set(ControlMode::PercentOutput, hood);
+
+    // c.shooter.master_id = 53;
+    READING_SDB_NUMERIC(double, master_shooter)  master_shooter;
+    can::TalonSRX* mst = new TalonSRX(53); 
+    mst->Set(ControlMode::PercentOutput, master_shooter);
+
+    // c.shooter.slave_id = 54;
+    READING_SDB_NUMERIC(double, slave_shooter) slave_shooter;
+    can::TalonSRX* sst = new TalonSRX(54); 
+    sst->Set(ControlMode::PercentOutput, slave_shooter);
+
+     //c.shooter.kicker_id = 51;
+    READING_SDB_NUMERIC(double, kicker)  kicker;
+    can::TalonSRX* kt = new TalonSRX(51); 
+    kt->Set(ControlMode::PercentOutput, kicker);
+
+    // c.ball_channel.serializer_id = 43;
+    READING_SDB_NUMERIC(double, serializer)  serializer;
+    can::TalonSRX* st = new TalonSRX(43); 
+    st->Set(ControlMode::PercentOutput, serializer);
+
+    //c.ball_channel.channel_id = 44;
+    READING_SDB_NUMERIC(double, channel)  channel;
+    can::TalonSRX* ct = new TalonSRX(44); 
+    ct->Set(ControlMode::PercentOutput, channel);
+
+     //c.climber.master_id = 19;
+    READING_SDB_NUMERIC(double, master_climber) master_climber;
+    can::TalonSRX* cmt = new TalonSRX(19); 
+    cmt->Set(ControlMode::PercentOutput, master_climber);
+
+    // c.climber.slave_id = 20;
+    READING_SDB_NUMERIC(double, slave_climber)  slave_climber;
+    can::TalonSRX* cst = new TalonSRX(20); 
+    cst->Set(ControlMode::PercentOutput, slave_climber);
+
+
+    //END OF MOTOR TESTs
+    ///////////
+    */
+
+
     drive_.Periodic();
     ball_path_.Periodic();
     climber_.Periodic();
     control_panel_.Periodic();
     limelight_.Periodic();
 
-    limelight_.SetLedMode(Limelight::LedMode::PIPELINE);
+    limelight_.SetLedMode(Limelight::LedMode::OFF);
     // auto dist = robot_state_.GetLatestDistanceToOuterPort();
     // auto ang = robot_state_.GetLatestAngleToOuterPort();
 
