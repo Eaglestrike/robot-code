@@ -60,6 +60,8 @@ class Limelight : public Subsystem {
 
     units::second_t GetLatency();
 
+    std::shared_ptr<nt::NetworkTable> GetNetworkTable();
+
     std::optional<TargetInfo> GetTarget();
 
    private:
