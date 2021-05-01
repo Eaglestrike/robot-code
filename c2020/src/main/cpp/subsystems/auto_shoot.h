@@ -1,6 +1,7 @@
 #include <math.h>
 #include <map>
 #include <memory>
+#include <iostream>
 
 #include "networktables/NetworkTable.h"
 #include "networktables/NetworkTableInstance.h"
