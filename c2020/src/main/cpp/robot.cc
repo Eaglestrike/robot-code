@@ -126,7 +126,7 @@ void Robot::RobotPeriodic() {
     control_panel_.Periodic();
     limelight_.Periodic();
 
-    limelight_.SetLedMode(Limelight::LedMode::OFF);
+    limelight_.SetLedMode(Limelight::LedMode::ON);
     // auto dist = robot_state_.GetLatestDistanceToOuterPort();
     // auto ang = robot_state_.GetLatestAngleToOuterPort();
 
