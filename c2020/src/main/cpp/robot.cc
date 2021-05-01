@@ -31,7 +31,9 @@ Robot::Robot()
 /**
  * Nothing.
 **/
-void Robot::RobotInit() {}
+void Robot::RobotInit() {
+    auto_shoot_init(); //set up the data in a map
+}
 
 
 /**
