@@ -23,7 +23,7 @@ std::pair<double, double> distance_to_settings(double dist) {
 	std::pair<double, double> best_combo;
 	double best_dist = 0;
 	for (auto const& x : distance_to_settings_map) {
-		if (x.first <= best_dist) {
+		if (abs(x.first-dist) <= abs(best_dist-dist)) {
 			best_combo = x.second;
 			best_dist = x.first;
 		}
@@ -46,6 +46,8 @@ double distance(double y_off) {// x (horizontal) distance to goal
 //.first is hood angle, .second is flywheel speed
 std::pair<double, double> auto_shoot_calc(std::shared_ptr<nt::NetworkTable> network_table) {
     double y_off = network_table->GetNumber("ty", 0.0);
+	std::cout << "distance (in meters): " << distance(y_off) << std::endl;
+	std::cout << "flywhel speed: " << distance_to_settings(distance(y_off)).first << " hood angle: " << distance_to_settings(distance(y_off)).second << std::endl;
 	return distance_to_settings(distance(y_off));
 }
 
