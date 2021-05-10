@@ -167,7 +167,12 @@ void BallPath::Periodic() {
         // UpdateShotFromVision();
         hood_.SetWantPosition(current_shot_.hood_angle);
         shooter_master_.Set(ControlMode::Velocity, current_shot_.flywheel_sp);
-        if (shooter_master_.GetClosedLoopError() < 5000) SetChannelDirection(Direction::Forward); //intake and kicker
+        if (shooter_master_.GetClosedLoopError() < 5000) {
+            //check with prints
+            cout << "minimal shooter error reached" << endl;
+            SetSerializerDirection(Direction::Forward);
+            SetChannelDirection(Direction::Forward);
+        } //intake and kicker
         return; 
     } 
     hood_.SetWantStow();
@@ -180,12 +185,21 @@ void BallPath::Periodic() {
     if (state_ == State::Intk) {
         intake_.SetIntaking(Intake::RollerState::INTAKING);
         intake_.SetWantPosition(Intake::Position::INTAKING);
+        //Have the serializer run 
+        SetSerializerDirection(Direction::Forward);
         if (s2) {
             SetChannelDirection(Direction::Neutral);
+            SetSerializerDirection(Direction::Neutral);
             return;
         }
-        if (s0) SetChannelDirection(Direction::Forward);
-        else SetChannelDirection(Direction::Neutral);
+        if (s0) {
+            SetChannelDirection(Direction::Forward);
+            SetSerializerDirection(Direction::Neutral);
+        }
+        else {
+            SetChannelDirection(Direction::Neutral);
+            SetSerializerDirection(Direction::Neutral);
+        }
     }
     
 }
