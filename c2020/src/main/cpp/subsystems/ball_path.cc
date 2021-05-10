@@ -131,17 +131,29 @@ void BallPath::Periodic() {
     READING_SDB_NUMERIC(double, shooter_I)  shooter_I;
     READING_SDB_NUMERIC(double, shooter_D)  shooter_D;
 
-
-  // std::cout << shooter_master_.GetClosedLoopError() << std::endl;
-
     s.slot0.kP = shooter_P;
     s.slot0.kI = shooter_I;
     s.slot0.kD = shooter_D;
 
+   //s0_ dafuq
     bool s0 = !s0_.Get();
-    bool s1 = !s1_.Get();
+ //   bool s1 = !s0_.Get();
+   // bool s2 = !s2_.Get();
     bool s2 = !s2_.Get();
-    bool s3 = !s3_.Get();
+
+    std::cout << "s0: " << s0 << std::endl;
+    std::cout<< "s2: " << s2 << std::endl;
+    std::cout <<" " << std::endl;
+   
+
+    if (state_ == State::Idle) {
+        SetChannelDirection(Direction::Neutral);
+        SetSerializerDirection(Direction::Neutral);
+        intake_.SetIntaking(Intake::RollerState::NEUTRAL);
+        intake_.SetWantPosition(Intake::Position::STOWED);
+        //other stuff can be added to make everything stop
+    }
+
     if (state_ == State::Unjm) {
         intake_.SetWantPosition(Intake::Position::INTAKING);
         SetChannelDirection(Direction::Reverse);
@@ -154,63 +166,28 @@ void BallPath::Periodic() {
         intake_.SetWantPosition(Intake::Position::STOWED);
         // UpdateShotFromVision();
         hood_.SetWantPosition(current_shot_.hood_angle);
-        std::cout << "degrees: " << current_shot_.hood_angle << std::endl;
         shooter_master_.Set(ControlMode::Velocity, current_shot_.flywheel_sp);
-        SetSerializerDirection(Direction::Neutral);
-        if (!s3 || ReadyToShoot()) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-            SDB_NUMERIC(double, ReadShooterSpeed)
-            _shooter_speed = shooter_master_.GetSelectedSensorVelocity();
-#pragma GCC diagnostic pop
-            SetChannelDirection(Direction::Forward);
-            SetSerializerDirection(Direction::Forward);
-        } else {
-            SetChannelDirection(Direction::Neutral);
-            SetSerializerDirection(Direction::Neutral);
-        }
-        return;
-    }
+        if (shooter_master_.GetClosedLoopError() < 5000) SetChannelDirection(Direction::Forward); //intake and kicker
+        return; 
+    } 
     hood_.SetWantStow();
     shooter_master_.NeutralOutput();
 
     // the only remaining state diff is the position of the intake
-    Intake::Position commanded_pos = state_ == State::Intk
-                                         ? Intake::Position::INTAKING
-                                         : Intake::Position::STOWED;
-    // process ball movement with sensors:
-    // std::cout << s1 << s2 << s3 << std::endl;
-    if (s3) {
-        SetChannelDirection(Direction::Neutral);
-        if (state_ == State::Intk && !s0) {
-            SetSerializerDirection(Direction::Forward);
-        } else {
-            SetSerializerDirection(Direction::Neutral);
+   // Intake::Position commanded_pos = state_ == State::Intk
+     //                                    ? Intake::Position::INTAKING
+       //                                  : Intake::Position::STOWED;
+    if (state_ == State::Intk) {
+        intake_.SetIntaking(Intake::RollerState::INTAKING);
+        intake_.SetWantPosition(Intake::Position::INTAKING);
+        if (s2) {
+            SetChannelDirection(Direction::Neutral);
+            return;
         }
-        if (s0) {
-            intake_.SetWantPosition(Intake::Position::STOWED);
-        } else {
-            intake_.SetWantPosition(commanded_pos);
-        }
-    } else if (!s1 && !s2) {
-        SetSerializerDirection(Direction::Forward);
-        SetChannelDirection(Direction::Neutral);
-        intake_.SetWantPosition(commanded_pos);
-    } else if (s1 && !s2) {
-        SetSerializerDirection(Direction::Forward);
-        SetChannelDirection(Direction::Forward);
-        intake_.SetWantPosition(commanded_pos);
-    } else if (s1 && s2) {
-        SetSerializerDirection(Direction::Neutral);
-        SetChannelDirection(Direction::Forward);
-        intake_.SetWantPosition(commanded_pos);
-    } else if (!s1 && s2) {
-        SetSerializerDirection(Direction::Forward);
-        SetChannelDirection(Direction::Forward);
-        intake_.SetWantPosition(commanded_pos);
-    } else {
-        // LOG uh oh
+        if (s0) SetChannelDirection(Direction::Forward);
+        else SetChannelDirection(Direction::Neutral);
     }
+    
 }
 /**
 * does nothing, presumable purpose to stop action and reset things
@@ -229,42 +206,17 @@ void BallPath::OutputTelemetry() {}
 **/
 void BallPath::SetWantState(BallPath::State s) { state_ = s; }
 /**
-* sets the current shot's flywheel speed and hood angle atributes to the appropriate angles 
+* sets the current shot's flywheel speed and hood angle atributes to the appropriate angles using auto SHOOOOOOT
 **/
-void BallPath::SetWantShot(BallPath::ShotType shot) {
-    kicker_.Set(ControlMode::PercentOutput, shooter_cfg_.kicker_cmd);
-   // READING_SDB_NUMERIC(double, FlyWheelSpeed) flywheel_speed;
-   // READING_SDB_NUMERIC(double, HoodAngle) hood_angle;
-   double flywheel_speed = -69.0; double hood_angle = -420.0;
-   SmartDashboard::PutNumber("FlywheelSpeed", flywheel_speed);
-   SmartDashboard::PutNumber("HoodAngle", hood_angle);
-    
-    current_shot_.flywheel_sp = flywheel_speed;
-    current_shot_.hood_angle = hood_angle;
+void BallPath::SetShot() {
+    std::pair<double, double> temp = auto_shoot_calc(limelight_.GetNetworkTable()); 
+    current_shot_.flywheel_sp = temp.second;
+    current_shot_.hood_angle = temp.first; 
 
-    
-    //auto shoot stuff
-  /*  std::pair<double, double> temp = auto_shoot_calc(limelight_.GetNetworkTable()); 
-    current_shot_.flywheel_sp = temp.first;
-    current_shot_.hood_angle = temp.second; */
-
-
-    //edit shot type to have a flywheel speed & hood angle
-    //get rid of switch, just set flywheel sp and 
-    // switch (shot) {
-    //     case BallPath::ShotType::Short:
-    //         current_shot_.flywheel_sp = 20000;
-    //         current_shot_.hood_angle = 40;
-    //         break;
-    //     case BallPath::ShotType::Med:
-    //         current_shot_.flywheel_sp = 32000;
-    //         current_shot_.hood_angle = 40;
-    //         break;
-    //     case BallPath::ShotType::Long:
-    //         current_shot_.flywheel_sp = 40000;
-    //         current_shot_.hood_angle = 20;
-    //         break;
-    // }
+    current_shot_.flywheel_sp = 35000;
+  /*  current_shot_.hood_angle = hood_angle;
+     READING_SDB_NUMERIC(double, FlyWheelSpeed) flywheel_speed;
+     READING_SDB_NUMERIC(double, HoodAngle) hood_angle; */
 }
 /**
 * does nothing, presumable purpose to use camera info to update shot type
@@ -315,23 +267,24 @@ void BallPath::SetChannelDirection(BallPath::Direction dir) {
 *  sets the serilaizer's direction to forward, backwards or neutral 
 **/
 void BallPath::SetSerializerDirection(BallPath::Direction dir) {
+  //  std::cout << "SetSerializerDirection() called" << std::endl;
     switch (dir) {
         case BallPath::Direction::Forward:
             serializer_.Set(ControlMode::PercentOutput,
                             channel_cfg_.serializer_cmd);
-            intake_.SetIntaking(Intake::RollerState::INTAKING);
+         //   intake_.SetIntaking(Intake::RollerState::INTAKING);
             break;
         case BallPath::Direction::Reverse:
             serializer_.Set(ControlMode::PercentOutput,
                             -channel_cfg_.serializer_cmd);
-            intake_.SetIntaking(Intake::RollerState::OUTTAKING);
+       //     intake_.SetIntaking(Intake::RollerState::OUTTAKING);
             break;
         case BallPath::Direction::Neutral:
             serializer_.Set(ControlMode::PercentOutput, 0.0);
-            intake_.SetIntaking(Intake::RollerState::NEUTRAL);
+       //     intake_.SetIntaking(Intake::RollerState::NEUTRAL);
             break;
     }
 }
 
-}  // namespace c2020
+    }  // namespace c2020
 }  // namespace team114
