@@ -54,7 +54,7 @@ const RobotConfig MakeDefaultRobotConfig() {
 
     // TODO the rest
     c.intake.rot_talon_id = 41;
-    c.intake.roller_talon_id = 42;
+    c.intake.roller_talon_id = 20;
     c.intake.intake_cmd = 0.60;
     c.intake.rot_current_limit = 10;
     c.intake.zeroing_kp = 0.001;
@@ -87,7 +87,7 @@ const RobotConfig MakeDefaultRobotConfig() {
     c.hood.profile_acc = 20000;  // TODO
     c.hood.profile_vel = 9000;   // TODO
     c.hood.kP = 2.0;
-    c.hood.kI = 0.02;
+    c.hood.kI = 0.01;
     c.hood.kD = 10.0;
     c.hood.ctre_curve_smoothing = 2;
 
@@ -111,10 +111,10 @@ const RobotConfig MakeDefaultRobotConfig() {
     c.ball_channel.current_limit = 25;
     c.ball_channel.serializer_cmd = 1.00;
     c.ball_channel.channel_cmd = 0.75;
-    c.ball_channel.s0_port = 3;
-    c.ball_channel.s1_port = 0;
+    c.ball_channel.s0_port = 0;
+    c.ball_channel.s1_port = 1;
     c.ball_channel.s2_port = 2;
-    c.ball_channel.s3_port = 1;
+    c.ball_channel.s3_port = 3;
 
     c.climber.master_id = 19;
     c.climber.slave_id = 20;
