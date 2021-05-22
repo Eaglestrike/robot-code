@@ -155,7 +155,10 @@ void Intake::SetIntaking(Intake::RollerState state) {
             roller_talon_.Set(ControlMode::PercentOutput, 0.0);
             break;
         case Intake::RollerState::INTAKING:
+         //  std::cout <<  << std::endl;
             roller_talon_.Set(ControlMode::PercentOutput, cfg_.intake_cmd);
+            //can::TalonSRX* rt = new TalonSRX(42);
+           // rt->Set(ControlMode::PercentOutput, 60); 
             break;
         case Intake::RollerState::OUTTAKING:
             roller_talon_.Set(ControlMode::PercentOutput, -cfg_.intake_cmd);
