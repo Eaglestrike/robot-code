@@ -65,14 +65,14 @@ void Robot::RobotPeriodic() {
 
      // c.intake.rot_talon_id = 41;
   //  READING_SDB_NUMERIC(double, intake_rot) intake_rot;
-  //  can::TalonSRX* irt = new TalonSRX(41); 
-  //  irt->Set(ControlMode::PercentOutput, 30);
+ //   can::TalonSRX* irt = new TalonSRX(41); 
+  //  irt->Set(ControlMode::PercentOutput, 60);
    // std::cout << intake_rot << std::endl;
 
-    //c.intake.roller_talon_id = 42;
+    //c.intake.roller_talon_id = 20;
    // READING_SDB_NUMERIC(double, roller)  roller;
-   // can::TalonSRX* rt = new TalonSRX(42);
-  //  rt->Set(ControlMode::PercentOutput, 30); 
+  //  can::TalonSRX* rt = new TalonSRX(20);
+  //  rt->Set(ControlMode::PercentOutput, 0.6); 
 
   /*   //c.hood.talon_id = 52;
     READING_SDB_NUMERIC(double, hood)  hood;
@@ -93,12 +93,12 @@ void Robot::RobotPeriodic() {
     READING_SDB_NUMERIC(double, kicker)  kicker;
     can::TalonSRX* kt = new TalonSRX(51); 
     kt->Set(ControlMode::PercentOutput, kicker);
-
+*/
     // c.ball_channel.serializer_id = 43;
     READING_SDB_NUMERIC(double, serializer)  serializer;
     can::TalonSRX* st = new TalonSRX(43); 
     st->Set(ControlMode::PercentOutput, serializer);
-
+/*
     //c.ball_channel.channel_id = 44;
     READING_SDB_NUMERIC(double, channel)  channel;
     can::TalonSRX* ct = new TalonSRX(44); 
@@ -109,7 +109,7 @@ void Robot::RobotPeriodic() {
     can::TalonSRX* cmt = new TalonSRX(19); 
     cmt->Set(ControlMode::PercentOutput, master_climber);
 
-    // c.climber.slave_id = 20;
+    // c.climber.slave_id = 20; (NOTE 20 IS BEING USED 4 INTAKE)
     READING_SDB_NUMERIC(double, slave_climber)  slave_climber;
     can::TalonSRX* cst = new TalonSRX(20); 
     cst->Set(ControlMode::PercentOutput, slave_climber);
@@ -197,10 +197,10 @@ void Robot::TeleopPeriodic() {
     // }
 
     if (controls_.Shoot()) {
-        ball_path_.SetWantShot(BallPath::ShotType::Long);
+        ball_path_.SetShot();
         ball_path_.SetWantState(BallPath::State::Shoot);
-        drive_.SetWantOrientForShot();
-    } else if (controls_.Unjam()) {
+      //  drive_.SetWantOrientForShot(limelight_);
+    } else if (controls_.Unjam()) { 
         ball_path_.SetWantState(BallPath::State::Unjm);
     } else if (controls_.Intake()) {
         ball_path_.SetWantState(BallPath::State::Intk);
