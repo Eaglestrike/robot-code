@@ -141,12 +141,13 @@ void BallPath::Periodic() {
    // bool s2 = !s2_.Get();
     bool s2 = !s2_.Get();
 
-    std::cout << "s0: " << s0 << std::endl;
-    std::cout<< "s2: " << s2 << std::endl;
-    std::cout <<" " << std::endl;
+   // std::cout << "s0: " << s0 << std::endl;
+   // std::cout<< "s2: " << s2 << std::endl;
+   // std::cout <<" " << std::endl;
    
 
     if (state_ == State::Idle) {
+   //     std::cout << "idle" << std::endl;
         SetChannelDirection(Direction::Neutral);
         SetSerializerDirection(Direction::Neutral);
         intake_.SetIntaking(Intake::RollerState::NEUTRAL);
@@ -155,6 +156,7 @@ void BallPath::Periodic() {
     }
 
     if (state_ == State::Unjm) {
+       //  std::cout << "unjm" << std::endl;
         intake_.SetWantPosition(Intake::Position::INTAKING);
         SetChannelDirection(Direction::Reverse);
         SetSerializerDirection(Direction::Reverse);
@@ -163,16 +165,18 @@ void BallPath::Periodic() {
         return;
     }
     if (state_ == State::Shoot) {
+    //     std::cout << "shoot" << std::endl;
         intake_.SetWantPosition(Intake::Position::STOWED);
         // UpdateShotFromVision();
         hood_.SetWantPosition(current_shot_.hood_angle);
         shooter_master_.Set(ControlMode::Velocity, current_shot_.flywheel_sp);
-        if (shooter_master_.GetClosedLoopError() < 5000) {
-            //check with prints
-            cout << "minimal shooter error reached" << endl;
-            SetSerializerDirection(Direction::Forward);
-            SetChannelDirection(Direction::Forward);
-        } //intake and kicker
+      //  double d = shooter_master_.GetClosedLoopError(0);
+      //  std::cout << "shooter error: " << d << std::endl;
+       // std::cout << "shooter velocity: " << shooter_master_.GetSelectedSensorVelocity(1) << std::endl;
+        std::cout << std::endl;
+        double adjusted_sp = current_shot_.flywheel_sp / 3;
+        std::cout << "calculated error: " << abs(adjusted_sp - (-1)*shooter_master_.GetSelectedSensorVelocity(1)) << std::endl;
+        if (abs(adjusted_sp - (-1)*shooter_master_.GetSelectedSensorVelocity(1)) < 5000) SetChannelDirection(Direction::Forward); //intake and kicker
         return; 
     } 
     hood_.SetWantStow();
@@ -183,22 +187,23 @@ void BallPath::Periodic() {
      //                                    ? Intake::Position::INTAKING
        //                                  : Intake::Position::STOWED;
     if (state_ == State::Intk) {
+       //  std::cout << "intake" << std::endl;
         intake_.SetIntaking(Intake::RollerState::INTAKING);
         intake_.SetWantPosition(Intake::Position::INTAKING);
-        //Have the serializer run 
         SetSerializerDirection(Direction::Forward);
         if (s2) {
             SetChannelDirection(Direction::Neutral);
-            SetSerializerDirection(Direction::Neutral);
+            std::cout << "s2 triggered" << std::endl;
             return;
         }
+        std::cout << "s0: " << s0 << std::endl;
         if (s0) {
             SetChannelDirection(Direction::Forward);
-            SetSerializerDirection(Direction::Neutral);
+            std::cout << "s0 triggered" << std::endl;
         }
         else {
             SetChannelDirection(Direction::Neutral);
-            SetSerializerDirection(Direction::Neutral);
+            std::cout << "s0 NOT triggered" << std::endl;
         }
     }
     
@@ -227,7 +232,7 @@ void BallPath::SetShot() {
     current_shot_.flywheel_sp = temp.second;
     current_shot_.hood_angle = temp.first; 
 
-    current_shot_.flywheel_sp = 35000;
+   // current_shot_.flywheel_sp = 30000;
   /*  current_shot_.hood_angle = hood_angle;
      READING_SDB_NUMERIC(double, FlyWheelSpeed) flywheel_speed;
      READING_SDB_NUMERIC(double, HoodAngle) hood_angle; */
@@ -263,14 +268,17 @@ void BallPath::SetChannelDirection(BallPath::Direction dir) {
     switch (dir) {
         case BallPath::Direction::Forward:
             channel_.Set(ControlMode::PercentOutput, channel_cfg_.channel_cmd);
+         //    std::cout << "forward channel" << std::endl;
             kicker_.Set(ControlMode::PercentOutput, shooter_cfg_.kicker_cmd);
             break;
         case BallPath::Direction::Reverse:
             channel_.Set(ControlMode::PercentOutput, -channel_cfg_.channel_cmd);
+          //   std::cout << "reverse channel" << std::endl;
             kicker_.Set(ControlMode::PercentOutput, -shooter_cfg_.kicker_cmd);
             break;
         case BallPath::Direction::Neutral:
             channel_.Set(ControlMode::PercentOutput, 0.0);
+          //   std::cout << "neutral channel" << std::endl;
             kicker_.Set(ControlMode::PercentOutput, 0.0);
             break;
     }
@@ -286,15 +294,18 @@ void BallPath::SetSerializerDirection(BallPath::Direction dir) {
         case BallPath::Direction::Forward:
             serializer_.Set(ControlMode::PercentOutput,
                             channel_cfg_.serializer_cmd);
+         //   std::cout << "forwared serializer" << std::endl;
          //   intake_.SetIntaking(Intake::RollerState::INTAKING);
             break;
         case BallPath::Direction::Reverse:
             serializer_.Set(ControlMode::PercentOutput,
                             -channel_cfg_.serializer_cmd);
+          //  std::cout << "reverse serializer" << std::endl;
        //     intake_.SetIntaking(Intake::RollerState::OUTTAKING);
             break;
         case BallPath::Direction::Neutral:
             serializer_.Set(ControlMode::PercentOutput, 0.0);
+         //   std::cout << "neutral serializer" << std::endl;
        //     intake_.SetIntaking(Intake::RollerState::NEUTRAL);
             break;
     }
