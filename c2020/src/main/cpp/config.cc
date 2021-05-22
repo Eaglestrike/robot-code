@@ -55,7 +55,7 @@ const RobotConfig MakeDefaultRobotConfig() {
     // TODO the rest
     c.intake.rot_talon_id = 41;
     c.intake.roller_talon_id = 20;
-    c.intake.intake_cmd = 0.60;
+    c.intake.intake_cmd = 0.80;
     c.intake.rot_current_limit = 10;
     c.intake.zeroing_kp = 0.001;
     c.intake.zeroing_vel = 8;
@@ -110,7 +110,7 @@ const RobotConfig MakeDefaultRobotConfig() {
     c.ball_channel.channel_id = 44;
     c.ball_channel.current_limit = 25;
     c.ball_channel.serializer_cmd = 1.00;
-    c.ball_channel.channel_cmd = 0.75;
+    c.ball_channel.channel_cmd = 0.9;
     c.ball_channel.s0_port = 0;
     c.ball_channel.s1_port = 1;
     c.ball_channel.s2_port = 2;
