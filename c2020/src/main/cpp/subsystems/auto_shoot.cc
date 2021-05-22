@@ -47,28 +47,9 @@ double distance(double y_off) {// x (horizontal) distance to goal
 std::pair<double, double> auto_shoot_calc(std::shared_ptr<nt::NetworkTable> network_table) {
     double y_off = network_table->GetNumber("ty", 0.0);
 	std::cout << "distance (in meters): " << distance(y_off) << std::endl;
-	std::cout << "flywhel speed: " << distance_to_settings(distance(y_off)).first << " hood angle: " << distance_to_settings(distance(y_off)).second << std::endl;
+	std::cout << "flywhel speed: " << distance_to_settings(distance(y_off)).second << " hood angle: " << distance_to_settings(distance(y_off)).first << std::endl;
 	return distance_to_settings(distance(y_off));
 }
-
-//unfinished
-/*void center(std::shared_ptr<nt::NetworkTable> network_table) { //makes robot face target
-	double Kp = -0.1; //idk its just what the docs had
-	double min_command = 0.05;
-
-	double x_off = network_table->GetNumber("tx", 0.0);
-//	double y_off = network_table->GetNumber("ty", 0.0);
-//	double area = network_table->GetNumber("ta", 0.0);
-
-	//auto position robot so x_off is reasonable
-	//https://docs.limelightvision.io/en/latest/cs_aiming.html
-	double heading_error = -x_off;
-	double steering_adjust = 0.0;
-	if (x_off > 1.0) steering_adjust = Kp*heading_error - min_command;
-	else if (x_off < 1.0) steering_adjust = Kp*heading_error - min_command;
-	//left wheel += steering_adjust
-	//right wheel -= steering_adjust
-} */
 
 
 
