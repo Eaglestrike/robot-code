@@ -203,9 +203,29 @@ void Drive::UpdatePathController() {
 /**
  * Changes the current state of the robot to orient its vision sensor for a shot, and sets the angle at which the sensor should be rotated to
 **/
-void Drive::SetWantOrientForShot() {
-    state_ = DriveState::SHOOT_ORIENT;
+void Drive::SetWantOrientForShot(Limelight& limelight) {
+  /*  state_ = DriveState::SHOOT_ORIENT;
     vision_rot_.SetGoal(0.0_rad);
+
+	double Kp = -0.1; //idk its just what the docs had
+	double min_command = 0.05;
+
+	double x_off = limelight.GetNetworkTable()->GetNumber("tx", 0.0);
+//	double y_off = network_table->GetNumber("ty", 0.0);
+//	double area = network_table->GetNumber("ta", 0.0);
+
+	//auto position robot so x_off is reasonable
+	//https://docs.limelightvision.io/en/latest/cs_aiming.html
+	double heading_error = -x_off;
+	double steering_adjust = 0.0;
+	if (x_off > 1.0) steering_adjust = Kp*heading_error - min_command;
+	else if (x_off < 1.0) steering_adjust = Kp*heading_error - min_command;
+	left_master_.Set(ControlMode::PercentOutput, previous percent output //+ steering_adjust); //try 1 if it isn't working
+  //  left_master_.Set(ControlMode::PercentOutput, previous percent output - steering_adjust); //try 1 if it isn't working
+    //left wheel += steering_adjust
+	//right wheel -= steering_adjust */
+   // left_master_.getCurrent either stator or supply, idk see which one works better
+
 }
 
 /**
@@ -234,14 +254,14 @@ void Drive::UpdateOrientController() {
     READING_SDB_NUMERIC(double, RotAcc) acc;
     vision_rot_.SetConstraints({static_cast<double>(vel) * 1_rad / 1_s,
                                 static_cast<double>(acc) * 1_rad / 1_s / 1_s});
-    std::cout << "read gains " << kp << " " << ki << " " << kd << " " << vel << " " << acc << std::endl;
+  //  std::cout << "read gains " << kp << " " << ki << " " << kd << " " << vel << " " << acc << std::endl;
     has_vision_target_ = true;
     auto err = latest.value().second;
     double demand = vision_rot_.Calculate(err);
     pout_.control_mode = ControlMode::PercentOutput;
     pout_.left_demand = -demand;
     pout_.right_demand = demand;
-    std::cout << "orient w/ tgt, dmd " << err << " " << demand << std::endl;
+  //  std::cout << "orient w/ tgt, dmd " << err << " " << demand << std::endl;
 }
 
 /**
