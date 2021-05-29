@@ -33,7 +33,7 @@ std::pair<double, double> distance_to_settings(double dist) {
 
 double distance(double y_off) {// x (horizontal) distance to goal
 
-	double shooter_height = 2.86; //310 cm tall
+	double shooter_height = 2.41; //310 cm tall
 	double cam_height = 0.55; //taken from config.cc
 //	double cam_angle = 8.0; //in degrees, taken from config.cc
 	double angle_to_top = y_off; //in degrees???
@@ -42,7 +42,7 @@ double distance(double y_off) {// x (horizontal) distance to goal
 	return (shooter_height - cam_height) / tan ( (cam_height + angle_to_top) * PI / 180.0);
 }
 
-
+//thinks its 11-12 meters away when it's actually 5-6 meters away
 //.first is hood angle, .second is flywheel speed
 std::pair<double, double> auto_shoot_calc(std::shared_ptr<nt::NetworkTable> network_table) {
     double y_off = network_table->GetNumber("ty", 0.0);
