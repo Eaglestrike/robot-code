@@ -37,8 +37,8 @@ class Drive : public Subsystem {
     void SetWantRawOpenLoop(const frc::DifferentialDriveWheelSpeeds& openloop);
     void SetWantCheesyDrive(double throttle, double wheel, bool quick_turn);
 
-    void SetWantOrientForShot(Limelight& limelight);
-    bool OrientedForShot();
+    void SetWantOrientForShot(Limelight& limelight, double Kp, double Ki, double Kd);
+    bool OrientedForShot(Limelight& limelight);
 
    private:
     enum class DriveState {
