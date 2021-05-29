@@ -104,7 +104,7 @@ const RobotConfig MakeDefaultRobotConfig() {
     c.shooter.shootable_err_pct = 0.04;
     c.shooter.kicker_id = 51;
     c.shooter.kicker_current_limit = 20;
-    c.shooter.kicker_cmd = 0.45;
+    c.shooter.kicker_cmd = 0.45; //IIF YOU CHANGE THIS U GOTTA REDO AUTO SHOOT DATA
 
     c.ball_channel.serializer_id = 43;
     c.ball_channel.channel_id = 44;
