@@ -196,10 +196,14 @@ void Robot::TeleopPeriodic() {
     //     ball_path_.SetWantShot(BallPath::ShotType::Long);
     // }
 
+    READING_SDB_NUMERIC(double, ORIENT_P)  Kp;
+    READING_SDB_NUMERIC(double, ORIENT_I)  Ki;
+    READING_SDB_NUMERIC(double, ORIENT_D)  Kd;
+
     if (controls_.Shoot()) {
+        drive_.SetWantOrientForShot(limelight_, Kp, Ki, Kd);
         ball_path_.SetShot();
         ball_path_.SetWantState(BallPath::State::Shoot);
-      //  drive_.SetWantOrientForShot(limelight_);
     } else if (controls_.Unjam()) { 
         ball_path_.SetWantState(BallPath::State::Unjm);
     } else if (controls_.Intake()) {
