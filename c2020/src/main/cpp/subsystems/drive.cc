@@ -203,37 +203,35 @@ void Drive::UpdatePathController() {
 /**
  * Changes the current state of the robot to orient its vision sensor for a shot, and sets the angle at which the sensor should be rotated to
 **/
-void Drive::SetWantOrientForShot(Limelight& limelight) {
-  /*  state_ = DriveState::SHOOT_ORIENT;
+void Drive::SetWantOrientForShot(Limelight& limelight, double Kp, double Ki, double Kd) {
+    state_ = DriveState::SHOOT_ORIENT;
     vision_rot_.SetGoal(0.0_rad);
 
-	double Kp = -0.1; //idk its just what the docs had
-	double min_command = 0.05;
+	//double Kp = 0.013; 
+    //double Ki = 0.006;
 
 	double x_off = limelight.GetNetworkTable()->GetNumber("tx", 0.0);
-//	double y_off = network_table->GetNumber("ty", 0.0);
-//	double area = network_table->GetNumber("ta", 0.0);
 
 	//auto position robot so x_off is reasonable
 	//https://docs.limelightvision.io/en/latest/cs_aiming.html
 	double heading_error = -x_off;
 	double steering_adjust = 0.0;
-	if (x_off > 1.0) steering_adjust = Kp*heading_error - min_command;
-	else if (x_off < 1.0) steering_adjust = Kp*heading_error - min_command;
-	left_master_.Set(ControlMode::PercentOutput, previous percent output //+ steering_adjust); //try 1 if it isn't working
-  //  left_master_.Set(ControlMode::PercentOutput, previous percent output - steering_adjust); //try 1 if it isn't working
-    //left wheel += steering_adjust
-	//right wheel -= steering_adjust */
-   // left_master_.getCurrent either stator or supply, idk see which one works better
-
+	steering_adjust = Kp*heading_error + Ki;
+    if (steering_adjust < -1) steering_adjust = 1;
+    if (steering_adjust > 1) steering_adjust = 1;
+   // std::cout <<"x offset: " << x_off << std::endl; 
+   // std::cout << "steering adjust: " << steering_adjust << std::endl; 
+    pout_.control_mode = ControlMode::PercentOutput;
+    pout_.left_demand = steering_adjust;
+    pout_.right_demand = -steering_adjust; 
 }
 
 /**
  * Returns true if the vision sensor has correctly rotated to the position set
 **/
-bool Drive::OrientedForShot() {
-    return state_ == DriveState::SHOOT_ORIENT && has_vision_target_ &&
-           vision_rot_.AtGoal();
+bool Drive::OrientedForShot(Limelight& limelight) {
+    double x_off = limelight.GetNetworkTable()->GetNumber("tx", 0.0);
+    return (x_off < 2);
 }
 
 /**
@@ -241,7 +239,7 @@ bool Drive::OrientedForShot() {
  * It updates the vision controller, which determines the movement the vision sensor takes towards the goal
 **/
 void Drive::UpdateOrientController() {
-    auto latest = robot_state_.GetLatestAngleToOuterPort();
+  /*  auto latest = robot_state_.GetLatestAngleToOuterPort();
     if (!latest.has_value()) {
         return;
         has_vision_target_ = false;
@@ -261,7 +259,7 @@ void Drive::UpdateOrientController() {
     pout_.control_mode = ControlMode::PercentOutput;
     pout_.left_demand = -demand;
     pout_.right_demand = demand;
-  //  std::cout << "orient w/ tgt, dmd " << err << " " << demand << std::endl;
+  //  std::cout << "orient w/ tgt, dmd " << err << " " << demand << std::endl; */
 }
 
 /**
@@ -320,6 +318,9 @@ void Drive::WriteOuts() {
     SDB_NUMERIC(double, RightDriveTalonDemand){pout_.right_demand};
     left_master_.Set(pout_.control_mode, pout_.left_demand);
     right_master_.Set(pout_.control_mode, pout_.right_demand);
+ //   if (pout_.left_demand == 0 && pout_.right_demand == 0) return;
+ //   std::cout << "write out left demand: " << pout_.left_demand << std::endl;
+   // std::cout << "write out right demand: " << pout_.right_demand << std::endl;
 }
 
 /**
