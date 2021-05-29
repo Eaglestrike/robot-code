@@ -165,6 +165,7 @@ void BallPath::Periodic() {
         return;
     }
     if (state_ == State::Shoot) {
+        if (!ReadyToShoot()) return;
     //     std::cout << "shoot" << std::endl;
         intake_.SetWantPosition(Intake::Position::STOWED);
         // UpdateShotFromVision();
@@ -175,8 +176,8 @@ void BallPath::Periodic() {
        // std::cout << "shooter velocity: " << shooter_master_.GetSelectedSensorVelocity(1) << std::endl;
         std::cout << std::endl;
         double adjusted_sp = current_shot_.flywheel_sp / 3;
-        std::cout << "calculated error: " << abs(adjusted_sp - (-1)*shooter_master_.GetSelectedSensorVelocity(1)) << std::endl;
-        if (abs(adjusted_sp - (-1)*shooter_master_.GetSelectedSensorVelocity(1)) < 5000) SetChannelDirection(Direction::Forward); //intake and kicker
+       // std::cout << "calculated error: " << abs(adjusted_sp - (-1)*shooter_master_.GetSelectedSensorVelocity(1)) << std::endl;
+        if (abs(adjusted_sp - (-1)*shooter_master_.GetSelectedSensorVelocity(1)) < 2000) SetChannelDirection(Direction::Forward); //intake and kicker
         return; 
     } 
     hood_.SetWantStow();
@@ -193,17 +194,13 @@ void BallPath::Periodic() {
         SetSerializerDirection(Direction::Forward);
         if (s2) {
             SetChannelDirection(Direction::Neutral);
-            std::cout << "s2 triggered" << std::endl;
             return;
         }
-        std::cout << "s0: " << s0 << std::endl;
         if (s0) {
             SetChannelDirection(Direction::Forward);
-            std::cout << "s0 triggered" << std::endl;
         }
         else {
             SetChannelDirection(Direction::Neutral);
-            std::cout << "s0 NOT triggered" << std::endl;
         }
     }
     
@@ -247,7 +244,7 @@ void BallPath::UpdateShotFromVision() {
 * returns true if the hood, flywheel, and drive systems are ready to shoot
 **/
 bool BallPath::ReadyToShoot() {
-    bool hood = hood_.IsAtPosition();
+  /*  bool hood = hood_.IsAtPosition();
     SDB_NUMERIC(double, ShooterError)
     shooter_err = std::abs(shooter_master_.GetSelectedSensorVelocity() -
                            current_shot_.flywheel_sp);
@@ -256,10 +253,10 @@ bool BallPath::ReadyToShoot() {
     // std::cout << "fly_sp, accept_err, err" << current_shot_.flywheel_sp << "
     // "
     //           << (current_shot_.flywheel_sp * shooter_cfg_.shootable_err_pct)
-    //           << " " << shooter_err << std::endl;
-    bool drive = Drive::GetInstance().OrientedForShot();
+    //           << " " << shooter_err << std::endl;*/
+    bool drive = Drive::GetInstance().OrientedForShot(limelight_);
   //  std::cout << "shot rdy status " << hood << flywheel << drive << std::endl;
-    return hood && flywheel && drive;
+    return /*hood && flywheel* &&*/ drive;
 }
 /**
 * Sets the channel to forward, backward, or neutral
