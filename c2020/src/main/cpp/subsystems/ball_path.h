@@ -36,7 +36,9 @@ class BallPath : public Subsystem {
         Med,
         Long,
     };
-    void SetWantShot(ShotType shot);
+    void SetShot();
+    void ShortShot();
+    void LongShot();
 
    private:
     enum class Direction {
@@ -49,6 +51,7 @@ class BallPath : public Subsystem {
     struct Shot {
         double hood_angle;
         double flywheel_sp;
+        double kicker_cmd;
     };
     void SetWantShot(Shot shot);
     void UpdateShotFromVision();
