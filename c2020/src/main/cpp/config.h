@@ -10,16 +10,16 @@ namespace c2020 {
 namespace conf {
 
 struct DriveConfig {
-    int left_master_id;
-    int left_slave_id;
-    int right_master_id;
-    int right_slave_id;
+    int left_master_id; /** < talon id of master drive motor on left side **/
+    int left_slave_id;  /** < talon id of slave drive motor on left side **/
+    int right_master_id; /** < talon id of master drive motor on right side **/
+    int right_slave_id; /** < talon id of slave drive motor on right side **/
     units::meter_t track_width;
-    units::meter_t meters_per_falcon_tick;
+    units::meter_t meters_per_falcon_tick; /**< self explanitory, look up what a frc falcon tick is **/
     units::meters_per_second_t traj_max_vel;
     units::meters_per_second_squared_t traj_max_accel;
     units::meters_per_second_squared_t traj_max_centrip_accel;
-    double orient_kp;
+    double orient_kp; 
     double orient_ki;
     double orient_kd;
     double orient_vel;
@@ -27,25 +27,25 @@ struct DriveConfig {
 };
 
 struct ControlPanelConfig {
-    int talon_id;
-    double current_limit;
-    double ticks_per_inch;
-    double kP;
-    double kI;
-    double kD;
-    double ticks_per_color_slice;
+    int talon_id; /** < talon id for control panel motor **/
+    double current_limit; /** < current limit (amps) for said motor **/
+    double ticks_per_inch; /**< self explanitory, look up what a frc falcon tick is **/
+    double kP; /**< P constant for this motor's pid **/
+    double kI; /**< I constant for this motor's pid **/
+    double kD; /**< D constant for this motor's pid **/
+    double ticks_per_color_slice; /**< # of ticks to rotate the color wheel one "slice" (which is a specific angle) **/
     double rot_control_ticks;
     double scoot_cmd;
-    int solenoid_channel;
+    int solenoid_channel; /**< I think the wheel is lifted with a pneumatic, and this is likely its solenoid **/
     std::string sdb_key;
 };
 
 struct IntakeConfig {
     int rot_talon_id;
     int roller_talon_id;
-    double intake_cmd;
-    double rot_current_limit;
-    double roller_current_limit;
+    double intake_cmd; /**< percent output for when intake is running **/
+    double rot_current_limit; /**< current limit (amps) for rotator motor **/
+    double roller_current_limit; /**< current limit (amps) for roller motor **/
     double zeroing_kp;
     double zeroing_vel;
     double abs_enc_tick_offset;
@@ -65,11 +65,11 @@ struct IntakeConfig {
 };
 
 struct HoodConfig {
-    int talon_id;
-    double ticks_per_degree;
-    double min_degrees;
-    double max_degrees;
-    double current_limit;
+    int talon_id; /**< talon id of motor that moves the shooter hood **/
+    double ticks_per_degree; /**< self explanitory, look up what a frc falcon tick is **/
+    double min_degrees; /** < smallest angle hood can move to **/
+    double max_degrees; /** < largest angle hood can move to **/
+    double current_limit; /** < current limit (amps) for hood motor **/
     double zeroing_current;
     double zeroing_kp;
     double zeroing_vel;
@@ -81,32 +81,33 @@ struct HoodConfig {
     int ctre_curve_smoothing;
 };
 
+
 struct ShooterConifg {
-    int master_id; /**< Each motor has an ID. There are 2 shooter motors performing the same action, and this is the master ID. */
-    int slave_id; /**< The respective slave ID. */
-    double shooter_current_limit; /**< The current limit (in amps) of the talons */
-    double kF; /**< F (feedforward) term in shooter PID */
-    double kP; /**< P term in shooter PID */
-    double kI; /**< I term in shooter PID */
-    double kD; /**< D term in shooter PID */
-    VelocityMeasPeriod meas_period; /**< Period of time over which velocidty is measured */
-    int meas_filter_width; /**< Not sure, is there some sort of filter on the shooter? */
-    double shootable_err_pct; /**< Perhaps ammount of error acceptable when trying to make a shot? */
-    int kicker_id; /**< Perhaps another talon motor that could be enabled to help the shooter wheel spin faster? */
-    double kicker_current_limit; /**< Current limit (amps) for kicker talon */
-    double kicker_cmd; /**< Percent output for kicker talon when engaged */
+    int master_id; /**< The shooter flywheel takes 2 motors to spin, this is the master's id. left of shooter **/
+    int slave_id; /**< The respective slave ID. Right of shooter. **/
+    double shooter_current_limit; /**< The current limit (amps) of the talons **/
+    double kF; /**< F (feedforward) term in shooter PID **/
+    double kP; /**< P term in shooter PID **/
+    double kI; /**< I term in shooter PID **/
+    double kD; /**< D term in shooter PID **/
+    VelocityMeasPeriod meas_period; /**< Talons can return "velocity". Velocity is measured every period and averaged. */
+    int meas_filter_width; /**< Helps with velocity measurement. **/
+    double shootable_err_pct; /**< Perhaps ammount of error acceptable when trying to make a shot? idk josh wrote this and we now have a new system*/
+    int kicker_id; /**< Motor/wheel that spins weels into shooter wheel. **/
+    double kicker_current_limit; /**< Current limit (amps) for kicker talon (small green wheel below flywheel, helps feed balls into shooter) */
+    double kicker_cmd; /**< Percent output for kicker talon when engaged **/
 };
 
 struct BallChannelConfig {
-    int serializer_id; /**< Talon ID of serializing(?) talon motor **/
-    int channel_id; /**< Talon ID of another talon motor, perhaps to help channel the balls? **/
+    int serializer_id; /**< Talon ID of serializing talon motor. Serializer is in front of robot, it feeds balls into channel after they are intaked**/
+    int channel_id; /**< Talon id of the channel motor **/
     double current_limit; /**< The current limit (amps) of the talons **/
-    double serializer_cmd; /**< Percent output to serializer talon for it to serialize? **/
-    double channel_cmd; /**< Percent output to channel motor for it to channel? **/
-    int s0_port; /**< I'm guessing this would be one of 4 sensors in the serializer, perhaps to gain info on state of balls. **/
-    int s1_port; /**< I'm guessing this would be one of 4 sensors in the serializer, perhaps to gain info on state of balls. **/
-    int s2_port; /**< I'm guessing this would be one of 4 sensors in the serializer, perhaps to gain info on state of balls. **/
-    int s3_port; /**< I'm guessing this would be one of 4 sensors in the serializer, perhaps to gain info on state of balls. **/
+    double serializer_cmd; /**< percent output to serializing talon when it is turned on **/
+    double channel_cmd; /**< percent output to channel talon when it is turned on **/
+    int s0_port; /**< we use sensors to track the balls in the channel. this is one of them **/
+    int s1_port; /**< we use sensors to track the balls in the channel. this is one of them **/
+    int s2_port; /**< antiquated, we don't use this sensor **/
+    int s3_port; /**< antiquated, we don't use this sensor **/
 };
 
 struct ClimberConfig {
@@ -127,7 +128,7 @@ struct LimelightConfig {
     std::string name; /**< Unused? Name of limelight**/
     std::string table_name; /**< Name used for limelight NetworkTable**/
     units::meter_t diff_height; /**< Not sure, unused **/
-    units::radian_t angle_above_horizontal; /**< Probaly offset, camera won't be exactly level **/
+    units::radian_t angle_above_horizontal; /**< limelight isn't exaclty level; this is the offset angle **/
 };
 
 struct RobotConfig {
@@ -157,12 +158,13 @@ enum class FeedbackType {
     None,
 };
 
-void SetFramePeriodsForPidTalon(
-    TalonSRX& talon, FeedbackType feedback_type = FeedbackType::None);
+void SetFramePeriodsForPidTalon(TalonSRX& talon, FeedbackType feedback_type = FeedbackType::None);
+void SetFramePeriodsForPidTalonFX(TalonFX& talon, FeedbackType feedback_type = FeedbackType::None);
 
 void SetFramePeriodsForOpenLoopTalon(TalonSRX& talon);
 
 void SetFramePeriodsForSlaveTalon(TalonSRX& talon);
+void SetFramePeriodsForSlaveTalonFX(TalonFX& talon);
 
 }  // namespace conf
 }  // namespace c2020
