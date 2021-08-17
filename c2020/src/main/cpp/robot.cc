@@ -152,16 +152,22 @@ void Robot::AutonomousInit() {
  * Calls periodic function of select structs.
 **/
 void Robot::AutonomousPeriodic() {
-    auto_executor_.Periodic();
+   // auto_executor_.Periodic(); //i don't know what this is... it looks like Josh wrote a whole method of making auto actions, but this is quick for now
     hood_.Periodic();
     intake_.Periodic();
+ 
+    ball_path_.Periodic();
+
+    drive_.BackUp(9); //9 inches    
+    ball_path_.ShortShot();
+    ball_path_.SetWantState(BallPath::State::Shoot);
 }
 
 /**
  * Finishes initialition (stows hood?).
 **/
 void Robot::TeleopInit() { hood_.SetWantStow(); }
-
+                                    
 /**
  * Calls remaining periodic funtions. Checks if robot is shooting, climbing or doing the control panel and calls functions accordingly.
 **/
@@ -200,9 +206,20 @@ void Robot::TeleopPeriodic() {
     READING_SDB_NUMERIC(double, ORIENT_I)  Ki;
     READING_SDB_NUMERIC(double, ORIENT_D)  Kd;
 
-    if (controls_.Shoot()) {
+    controls_.OPrints();
+
+    if (controls_.Shoot()) { 
         drive_.SetWantOrientForShot(limelight_, Kp, Ki, Kd);
         ball_path_.SetShot();
+        ball_path_.SetWantState(BallPath::State::Shoot);
+    } else if (controls_.ShortShot()) {
+        ///drive_.SetWantOrientForShot(limelight_, Kp, Ki, Kd);
+        drive_.BackUp(9); //9 inches    
+        ball_path_.ShortShot();
+        ball_path_.SetWantState(BallPath::State::Shoot);
+    } else if (controls_.LongShot()) {
+        drive_.SetWantOrientForShot(limelight_, Kp, Ki, Kd);
+        ball_path_.LongShot();
         ball_path_.SetWantState(BallPath::State::Shoot);
     } else if (controls_.Unjam()) { 
         ball_path_.SetWantState(BallPath::State::Unjm);
