@@ -169,15 +169,18 @@ void BallPath::Periodic() {
     //     std::cout << "shoot" << std::endl;
         intake_.SetWantPosition(Intake::Position::STOWED);
         // UpdateShotFromVision();
+      //  std::cout << "setting shoot motors" << std::endl;
         hood_.SetWantPosition(current_shot_.hood_angle);
         shooter_master_.Set(ControlMode::Velocity, current_shot_.flywheel_sp);
+        std::cout << "hood: " << current_shot_.hood_angle << std::endl;
+        std::cout << "wheel: " << current_shot_.flywheel_sp << std::endl;
       //  double d = shooter_master_.GetClosedLoopError(0);
       //  std::cout << "shooter error: " << d << std::endl;
        // std::cout << "shooter velocity: " << shooter_master_.GetSelectedSensorVelocity(1) << std::endl;
         std::cout << std::endl;
         double adjusted_sp = current_shot_.flywheel_sp / 3;
-       // std::cout << "calculated error: " << abs(adjusted_sp - (-1)*shooter_master_.GetSelectedSensorVelocity(1)) << std::endl;
-        if (abs(adjusted_sp - (-1)*shooter_master_.GetSelectedSensorVelocity(1)) < 2000) SetChannelDirection(Direction::Forward); //intake and kicker
+        std::cout << "calculated error: " << abs(adjusted_sp - (-1)*shooter_master_.GetSelectedSensorVelocity(1)) << std::endl;
+        if (abs(adjusted_sp - (-1)*shooter_master_.GetSelectedSensorVelocity(1)) < 1000) SetChannelDirection(Direction::Forward); //intake and kicker
         return; 
     } 
     hood_.SetWantStow();
@@ -225,15 +228,36 @@ void BallPath::SetWantState(BallPath::State s) { state_ = s; }
 * sets the current shot's flywheel speed and hood angle atributes to the appropriate angles using auto SHOOOOOOT
 **/
 void BallPath::SetShot() {
-    std::pair<double, double> temp = auto_shoot_calc(limelight_.GetNetworkTable()); 
-    current_shot_.flywheel_sp = temp.second;
-    current_shot_.hood_angle = temp.first; 
-
-   // current_shot_.flywheel_sp = 30000;
-  /*  current_shot_.hood_angle = hood_angle;
-     READING_SDB_NUMERIC(double, FlyWheelSpeed) flywheel_speed;
-     READING_SDB_NUMERIC(double, HoodAngle) hood_angle; */
+    std::tuple<double, double, double> temp = auto_shoot_calc(limelight_.GetNetworkTable()); 
+    double dist = distance();
+    if (dist < 20) { //if the limelight actually sees the goal
+        std::cout << "distance in meters: " << dist << std::endl;
+       // std::cout << "" << std::endl;
+        current_shot_.flywheel_sp = std::get<1>(temp);
+        current_shot_.hood_angle = std::get<0>(temp);
+        current_shot_.kicker_cmd = std::get<2>(temp);
+     /*   READING_SDB_NUMERIC(double, FlyWheelSpeed) flywheel_speed;
+        READING_SDB_NUMERIC(double, HoodAngle) hood_angle;
+        READING_SDB_NUMERIC(double, KickerSpeed) kicker_cmd;
+        current_shot_.flywheel_sp = flywheel_speed;
+        current_shot_.hood_angle = hood_angle; 
+        current_shot_.kicker_cmd = kicker_cmd;*/
+    }
+    
 }
+
+void BallPath::ShortShot() {
+    current_shot_.flywheel_sp = 30000;
+    current_shot_.hood_angle = 63;
+    current_shot_.kicker_cmd = 0.7; 
+}
+
+void BallPath::LongShot() {
+    current_shot_.flywheel_sp = 40000;
+    current_shot_.hood_angle = 20;
+    current_shot_.kicker_cmd = 0.97; 
+}
+
 /**
 * does nothing, presumable purpose to use camera info to update shot type
 **/
@@ -255,10 +279,10 @@ bool BallPath::ReadyToShoot() {
     //           << (current_shot_.flywheel_sp * shooter_cfg_.shootable_err_pct)
     //           << " " << shooter_err << std::endl;*/
     bool drive = Drive::GetInstance().OrientedForShot(limelight_);
-  //  std::cout << "shot rdy status " << hood << flywheel << drive << std::endl;
+  //  std::cout << "shot rdy status "  << drive << std::endl;
     return /*hood && flywheel* &&*/ drive;
 }
-/**
+/** 
 * Sets the channel to forward, backward, or neutral
 **/
 void BallPath::SetChannelDirection(BallPath::Direction dir) {
@@ -266,12 +290,12 @@ void BallPath::SetChannelDirection(BallPath::Direction dir) {
         case BallPath::Direction::Forward:
             channel_.Set(ControlMode::PercentOutput, channel_cfg_.channel_cmd);
          //    std::cout << "forward channel" << std::endl;
-            kicker_.Set(ControlMode::PercentOutput, shooter_cfg_.kicker_cmd);
+            kicker_.Set(ControlMode::PercentOutput, current_shot_.kicker_cmd);
             break;
         case BallPath::Direction::Reverse:
             channel_.Set(ControlMode::PercentOutput, -channel_cfg_.channel_cmd);
           //   std::cout << "reverse channel" << std::endl;
-            kicker_.Set(ControlMode::PercentOutput, -shooter_cfg_.kicker_cmd);
+            kicker_.Set(ControlMode::PercentOutput, -current_shot_.kicker_cmd);
             break;
         case BallPath::Direction::Neutral:
             channel_.Set(ControlMode::PercentOutput, 0.0);
