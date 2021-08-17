@@ -200,6 +200,16 @@ void Drive::UpdatePathController() {
     pout_.right_demand = MetersPerSecToTicksPerDecisec(wheel_v.right);
 }
 
+void Drive::BackUp(double dist) { //units are inches for now
+    double wheel_diameter = 5.75; //inches
+    double circumference = wheel_diameter*M_PI;
+    double rotations = dist/circumference;
+    double ticks = rotations*2048;
+    pout_.control_mode = ControlMode::MotionMagic;
+    pout_.left_demand = ticks;
+    pout_.right_demand = ticks;
+}
+
 /**
  * Changes the current state of the robot to orient its vision sensor for a shot, and sets the angle at which the sensor should be rotated to
 **/
@@ -207,8 +217,8 @@ void Drive::SetWantOrientForShot(Limelight& limelight, double Kp, double Ki, dou
     state_ = DriveState::SHOOT_ORIENT;
     vision_rot_.SetGoal(0.0_rad);
 
-	//double Kp = 0.013; 
-    //double Ki = 0.006;
+	Kp = 0.017; 
+    Ki = 0.015;
 
 	double x_off = limelight.GetNetworkTable()->GetNumber("tx", 0.0);
 
@@ -219,8 +229,8 @@ void Drive::SetWantOrientForShot(Limelight& limelight, double Kp, double Ki, dou
 	steering_adjust = Kp*heading_error + Ki;
     if (steering_adjust < -1) steering_adjust = 1;
     if (steering_adjust > 1) steering_adjust = 1;
-   // std::cout <<"x offset: " << x_off << std::endl; 
-   // std::cout << "steering adjust: " << steering_adjust << std::endl; 
+  //  std::cout <<"x offset: " << x_off << std::endl; 
+    std::cout << "steering adjust: " << steering_adjust << std::endl; 
     pout_.control_mode = ControlMode::PercentOutput;
     pout_.left_demand = steering_adjust;
     pout_.right_demand = -steering_adjust; 
@@ -231,6 +241,7 @@ void Drive::SetWantOrientForShot(Limelight& limelight, double Kp, double Ki, dou
 **/
 bool Drive::OrientedForShot(Limelight& limelight) {
     double x_off = limelight.GetNetworkTable()->GetNumber("tx", 0.0);
+    std::cout << x_off << std::endl;
     return (x_off < 2);
 }
 
