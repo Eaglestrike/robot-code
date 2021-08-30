@@ -37,10 +37,12 @@ class Drive : public Subsystem {
     void SetWantRawOpenLoop(const frc::DifferentialDriveWheelSpeeds& openloop);
     void SetWantCheesyDrive(double throttle, double wheel, bool quick_turn);
 
-    void BackUp(double dist);
-
     void SetWantOrientForShot(Limelight& limelight, double Kp, double Ki, double Kd);
     bool OrientedForShot(Limelight& limelight);
+
+    bool BackUp(double dist);
+
+    TalonFX left_master_, right_master_; //this is my code, and I do what I want
 
    private:
     enum class DriveState {
@@ -65,7 +67,7 @@ class Drive : public Subsystem {
 
     SDB_NUMERIC(unsigned int, DriveFalconResetCount) falcon_reset_count_{0};
 
-    TalonFX left_master_, right_master_;
+    //TalonFX left_master_, right_master_;
     TalonFX left_slave_, right_slave_;
     AHRS navx_{frc::SPI::Port::kMXP};
 
