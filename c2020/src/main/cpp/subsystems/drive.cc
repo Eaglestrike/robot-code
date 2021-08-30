@@ -200,15 +200,44 @@ void Drive::UpdatePathController() {
     pout_.right_demand = MetersPerSecToTicksPerDecisec(wheel_v.right);
 }
 
-void Drive::BackUp(double dist) { //units are inches for now
+bool Drive::BackUp(double dist) { //units are meters
+
+  /*  double Kp = -0.5;
+    dist_gone += 0.5*(navx_.GetWorldLinearAccelX())*(pow((1.0/50.0), 2.0)); //try actual timer instead of 1/50 approximation
+    double error = dist - dist_gone; //should this be negative?
+    double correction = Kp * error;
+    pout_.control_mode = ControlMode::PercentOutput;
+    pout_.left_demand = correction;
+    pout_.right_demand = correction; 
+    std::cout << "acceleration: " << navx_.GetWorldLinearAccelX() << std::endl;
+    std::cout << "distance gone: " << dist_gone << std::endl;
+    std::cout << "correction: " << correction << std::endl;
+    return (error < 0.01); //if we are tolerable close */
+
+    //do pid but until desired # of ticks works
     double wheel_diameter = 5.75; //inches
     double circumference = wheel_diameter*M_PI;
     double rotations = dist/circumference;
-    double ticks = rotations*2048;
-    pout_.control_mode = ControlMode::MotionMagic;
-    pout_.left_demand = ticks;
-    pout_.right_demand = ticks;
+    double ticks = -rotations*35000; 
+
+    double ticks_gone = left_master_.GetSelectedSensorPosition();
+    double Kp = -0.00003;
+    double Ki = -0.00002;
+    double error = abs(ticks) - abs(ticks_gone);
+    double correction = Kp*error + Ki;
+
+    pout_.control_mode = ControlMode::PercentOutput;
+    pout_.left_demand = correction;
+    pout_.right_demand = correction;
+
+    std::cout << "ticks: " << ticks << std::endl;
+    std::cout << "ticks gone: " << ticks_gone << std::endl;
+    std::cout << "correction: " << correction << std::endl;
+
+    return abs(ticks - ticks_gone) < 50;
+
 }
+
 
 /**
  * Changes the current state of the robot to orient its vision sensor for a shot, and sets the angle at which the sensor should be rotated to
@@ -330,8 +359,8 @@ void Drive::WriteOuts() {
     left_master_.Set(pout_.control_mode, pout_.left_demand);
     right_master_.Set(pout_.control_mode, pout_.right_demand);
  //   if (pout_.left_demand == 0 && pout_.right_demand == 0) return;
- //   std::cout << "write out left demand: " << pout_.left_demand << std::endl;
-   // std::cout << "write out right demand: " << pout_.right_demand << std::endl;
+  //  std::cout << "write out left demand: " << pout_.left_demand << std::endl;
+  //  std::cout << "write out right demand: " << pout_.right_demand << std::endl;
 }
 
 /**
