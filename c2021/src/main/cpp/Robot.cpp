@@ -1,65 +1,100 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+#include "robot.h"
 
-#include "Robot.h"
+#include <units/units.h>
 
 #include <iostream>
-#include <frc/smartdashboard/SmartDashboard.h>
 
+namespace team114 {
+namespace c2020 {
 
+/**
+ * Instentiates structs for future use.
+**/
+Robot::Robot()
+    : frc::TimedRobot{Robot::kPeriod},
+      controls_{},
+      ljoy_{0},
+      rjoy_{1},
+      ojoy_{2},
+      cfg{conf::GetConfig()} {}
+
+/**
+ * Nothing.
+**/
 void Robot::RobotInit() {
-  m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
-  m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
-  frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
 }
 
+
+/**
+ * Calls period function of select classes. Possibly unfinished?
+**/
 void Robot::RobotPeriodic() {
+
+    drive_.Periodic();
   
 }
 
-//Not used right now
+/**
+ * Zeroing sensors, selecting auto mode.
+**/
 void Robot::AutonomousInit() {
-  /*m_autoSelected = m_chooser.GetSelected();
-  // m_autoSelected = SmartDashboard::GetString("Auto Selector",
-  //     kAutoNameDefault);
-  std::cout << "Auto selected: " << m_autoSelected << std::endl;
 
-  if (m_autoSelected == kAutoNameCustom) {
-    // Custom Auto goes here
-  } else {
-    // Default Auto goes here
-  }*/
 }
 
-//Not used right now
+/**
+ * Calls periodic function of select structs.
+**/
 void Robot::AutonomousPeriodic() {
-  // if (m_autoSelected == kAutoNameCustom) {
-  //   // Custom Auto goes here
-  // } else {
-  //   // Default Auto goes here
-  // }
+
 }
 
-void Robot::TeleopInit() {}
+/**
+ * Finishes initialition (stows hood?).
+**/
+void Robot::TeleopInit() {
 
+}
+                                    
+/**
+ * Calls remaining periodic funtions. Checks if robot is shooting, climbing or doing the control panel and calls functions accordingly.
+**/
 void Robot::TeleopPeriodic() {
-  double forward = -1 * l_joy.GetRawAxis(1);
-  double turn = +1 * r_joy.GetRawAxis(1);
+   // if (!controls_.Shoot()) { 
+        drive_.SetWantCheesyDrive(controls_.Throttle(), controls_.Wheel(),
+                                  controls_.QuickTurn());
+  //  }
+
+  //check if different contol buttons have been pressed, act accordingly
+
 }
 
-
-void Robot::DisabledInit() {}
-
-void Robot::DisabledPeriodic() {}
-
-
+/**
+ * Nothing.
+**/
 void Robot::TestInit() {}
 
-void Robot::TestPeriodic() {}
+/**
+ * Simulates the climbing portion of periodic action. 
+**/
+void Robot::TestPeriodic() {
+  
+}
+
+/**
+ * Resets a couple things (most zeroing happens in AutonomousInit()). 
+**/
+void Robot::DisabledInit() {
+    
+}
+
+/**
+ * Updates auto selector.
+**/
+void Robot::DisabledPeriodic() { auto_selector_.UpdateSelection(); }
+
+}  // namespace c2020
+}  // namespace team114
 
 #ifndef RUNNING_FRC_TESTS
-int main() {
-  return frc::StartRobot<Robot>();
-}
+int main() { return frc::StartRobot<team114::c2020::Robot>(); }
 #endif

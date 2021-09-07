@@ -1,11 +1,8 @@
-See file:///C:/Users/sheeh/OneDrive/Documents/2021robocode/build/tmp/compileFrcUserProgramReleaseExecutableFrcUserProgramCpp/output.txt for all output for compileFrcUserProgramReleaseExecutableFrcUserProgramCpp.
-compiling Robot.cpp successful.
-C:\Users\sheeh\OneDrive\Documents\2021robocode\src\main\cpp\Robot.cpp: In member function 'virtual void Robot::TeleopPeriodic()':
-C:\Users\sheeh\OneDrive\Documents\2021robocode\src\main\cpp\Robot.cpp:49:10: warning: unused variable 'forward' [-Wunused-variable]
-   double forward = l_joy.GetRawAxis(1);
-          ^~~~~~~
-C:\Users\sheeh\OneDrive\Documents\2021robocode\src\main\cpp\Robot.cpp:50:10: warning: unused variable 'turn' [-Wunused-variable]
-   double turn = r_joy.GetRawAxis(2);
-          ^~~~
+See file:///home/susan/c2021/build/tmp/compileFrcUserProgramReleaseExecutableFrcUserProgramCpp/output.txt for all output for compileFrcUserProgramReleaseExecutableFrcUserProgramCpp.
+compiling config.cpp successful.
 
-Finished compileFrcUserProgramReleaseExecutableFrcUserProgramCpp, see full log file:///C:/Users/sheeh/OneDrive/Documents/2021robocode/build/tmp/compileFrcUserProgramReleaseExecutableFrcUserProgramCpp/output.txt.
+compiling drive.cpp successful.
+
+compiling controls.cpp successful.
+
+Finished compileFrcUserProgramReleaseExecutableFrcUserProgramCpp, see full log file:///home/susan/c2021/build/tmp/compileFrcUserProgramReleaseExecutableFrcUserProgramCpp/output.txt.

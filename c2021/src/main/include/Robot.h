@@ -1,41 +1,44 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 #pragma once
 
-#include <string>
-
-#include <frc/TimedRobot.h>
-#include <frc/smartdashboard/SendableChooser.h>
 #include <frc/Joystick.h>
-#include <frc/XboxController.h>
+#include <frc/TimedRobot.h>
+#include <units/units.h>
 
-#include "Drivetrain.h"
+#include <optional>
+
+#include "controls.h"
+
+
+namespace team114 {
+namespace c2020 {
 
 class Robot : public frc::TimedRobot {
- public:
-  void RobotInit() override;
-  void RobotPeriodic() override;
-  void AutonomousInit() override;
-  void AutonomousPeriodic() override;
-  void TeleopInit() override;
-  void TeleopPeriodic() override;
-  void DisabledInit() override;
-  void DisabledPeriodic() override;
-  void TestInit() override;
-  void TestPeriodic() override;
+   public:
+    inline static const auto kPeriod = 10_ms;
+    Robot();
+    void RobotInit() override;
+    void RobotPeriodic() override;
 
- private:
-  frc::SendableChooser<std::string> m_chooser;
-  const std::string kAutoNameDefault = "Default";
-  const std::string kAutoNameCustom = "My Auto";
-  std::string m_autoSelected;
+    void AutonomousInit() override;
+    void AutonomousPeriodic() override;
 
-  Drivetrain m_drive;
-  Shooter m_shoot;
+    void TeleopInit() override;
+    void TeleopPeriodic() override;
 
-  frc::Joystick l_joy{0};
-  frc::Joystick r_joy{1};
-  frc::Joystick o_joy{2};
+    void TestInit() override;
+    void TestPeriodic() override;
+
+    void DisabledInit() override;
+    void DisabledPeriodic() override;
+
+   private:
+    frc::Joystick ljoy_;
+    frc::Joystick rjoy_;
+    frc::Joystick ojoy_;
+    conf::RobotConfig cfg;
+
+    // CachingSolenoid brake_{frc::Solenoid{6}};
 };
+
+}  // namespace c2020
+}  // namespace team114
