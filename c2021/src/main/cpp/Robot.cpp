@@ -1,4 +1,4 @@
-#include "robot.h"
+#include "Robot.h"
 
 #include <units/units.h>
 
@@ -13,6 +13,8 @@ namespace c2020 {
 Robot::Robot()
     : frc::TimedRobot{Robot::kPeriod},
       controls_{},
+      drive_{Drive::GetInstance()},
+      robot_state_{RobotState::GetInstance()},
       ljoy_{0},
       rjoy_{1},
       ojoy_{2},
@@ -90,7 +92,7 @@ void Robot::DisabledInit() {
 /**
  * Updates auto selector.
 **/
-void Robot::DisabledPeriodic() { auto_selector_.UpdateSelection(); }
+void Robot::DisabledPeriodic() { }
 
 }  // namespace c2020
 }  // namespace team114

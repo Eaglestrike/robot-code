@@ -37,6 +37,9 @@
       "/home/susan/.gradle/caches/transforms-2/files-2.1/f18d5684258cbda6b77f22deb8f9153d/cscore-cpp-2021.1.2-headers/",
       "/home/susan/.gradle/caches/transforms-2/files-2.1/8feb87186d3c56a54088d70139d94ed6/opencv-cpp-3.4.7-5-headers/",
       "/home/susan/c2021/src/main/include/",
+      "/home/susan/c2021/src/main/include/util/",
+      "/home/susan/c2021/src/main/cpp/shims/",
+      "/home/susan/c2021/src/main/cpp/subsystems/",
       "/home/susan/.gradle/caches/transforms-2/files-2.1/06696fd6390b59cc3f012d577e3d9b95/wpilibOldCommands-cpp-2021.1.2-sources/",
       "/home/susan/.gradle/caches/transforms-2/files-2.1/6b9203e9ea8f7de0620b89eca006502a/wpilibc-cpp-2021.1.2-sources/",
       "/home/susan/.gradle/caches/transforms-2/files-2.1/78fdc72219c32f7b97d333b008631d98/ntcore-cpp-2021.1.2-sources/",
@@ -81,7 +84,10 @@
       "/home/susan/.gradle/caches/transforms-2/files-2.1/8e8fc5a48bce9f1001e69e76c04ef836/cameraserver-cpp-2021.1.2-headers/",
       "/home/susan/.gradle/caches/transforms-2/files-2.1/f18d5684258cbda6b77f22deb8f9153d/cscore-cpp-2021.1.2-headers/",
       "/home/susan/.gradle/caches/transforms-2/files-2.1/8feb87186d3c56a54088d70139d94ed6/opencv-cpp-3.4.7-5-headers/",
-      "/home/susan/c2021/src/main/include/"
+      "/home/susan/c2021/src/main/include/",
+      "/home/susan/c2021/src/main/include/util/",
+      "/home/susan/c2021/src/main/cpp/shims/",
+      "/home/susan/c2021/src/main/cpp/subsystems/"
     ],
     "binaries": [
       {
@@ -90,6 +96,7 @@
           {
             "source": {
               "srcDirs": [
+                "/home/susan/c2021/src/main/cpp/subsystems/",
                 "/home/susan/c2021/src/main/cpp/"
               ],
               "includes": [
@@ -100,7 +107,10 @@
             },
             "exportedHeaders": {
               "srcDirs": [
-                "/home/susan/c2021/src/main/include/"
+                "/home/susan/c2021/src/main/cpp/subsystems/",
+                "/home/susan/c2021/src/main/include/",
+                "/home/susan/c2021/src/main/include/util/",
+                "/home/susan/c2021/src/main/cpp/shims/"
               ],
               "includes": [
                 "**/*.cpp",
@@ -150,7 +160,10 @@
           "/home/susan/.gradle/caches/transforms-2/files-2.1/8e8fc5a48bce9f1001e69e76c04ef836/cameraserver-cpp-2021.1.2-headers/",
           "/home/susan/.gradle/caches/transforms-2/files-2.1/f18d5684258cbda6b77f22deb8f9153d/cscore-cpp-2021.1.2-headers/",
           "/home/susan/.gradle/caches/transforms-2/files-2.1/8feb87186d3c56a54088d70139d94ed6/opencv-cpp-3.4.7-5-headers/",
-          "/home/susan/c2021/src/main/include/"
+          "/home/susan/c2021/src/main/include/",
+          "/home/susan/c2021/src/main/include/util/",
+          "/home/susan/c2021/src/main/cpp/shims/",
+          "/home/susan/c2021/src/main/cpp/subsystems/"
         ],
         "sharedLibrary": false,
         "executable": true
@@ -160,6 +173,7 @@
       {
         "source": {
           "srcDirs": [
+            "/home/susan/c2021/src/main/cpp/subsystems/",
             "/home/susan/c2021/src/main/cpp/"
           ],
           "includes": [
@@ -192,7 +206,10 @@
       {
         "source": {
           "srcDirs": [
-            "/home/susan/c2021/src/main/include/"
+            "/home/susan/c2021/src/main/cpp/subsystems/",
+            "/home/susan/c2021/src/main/include/",
+            "/home/susan/c2021/src/main/include/util/",
+            "/home/susan/c2021/src/main/cpp/shims/"
           ],
           "includes": [
             "**/*.cpp",
@@ -264,6 +281,9 @@
       "/home/susan/.gradle/caches/transforms-2/files-2.1/f18d5684258cbda6b77f22deb8f9153d/cscore-cpp-2021.1.2-headers/",
       "/home/susan/.gradle/caches/transforms-2/files-2.1/8feb87186d3c56a54088d70139d94ed6/opencv-cpp-3.4.7-5-headers/",
       "/home/susan/c2021/src/main/include/",
+      "/home/susan/c2021/src/main/include/util/",
+      "/home/susan/c2021/src/main/cpp/shims/",
+      "/home/susan/c2021/src/main/cpp/subsystems/",
       "/home/susan/.gradle/caches/transforms-2/files-2.1/06696fd6390b59cc3f012d577e3d9b95/wpilibOldCommands-cpp-2021.1.2-sources/",
       "/home/susan/.gradle/caches/transforms-2/files-2.1/6b9203e9ea8f7de0620b89eca006502a/wpilibc-cpp-2021.1.2-sources/",
       "/home/susan/.gradle/caches/transforms-2/files-2.1/78fdc72219c32f7b97d333b008631d98/ntcore-cpp-2021.1.2-sources/",
@@ -308,7 +328,10 @@
       "/home/susan/.gradle/caches/transforms-2/files-2.1/8e8fc5a48bce9f1001e69e76c04ef836/cameraserver-cpp-2021.1.2-headers/",
       "/home/susan/.gradle/caches/transforms-2/files-2.1/f18d5684258cbda6b77f22deb8f9153d/cscore-cpp-2021.1.2-headers/",
       "/home/susan/.gradle/caches/transforms-2/files-2.1/8feb87186d3c56a54088d70139d94ed6/opencv-cpp-3.4.7-5-headers/",
-      "/home/susan/c2021/src/main/include/"
+      "/home/susan/c2021/src/main/include/",
+      "/home/susan/c2021/src/main/include/util/",
+      "/home/susan/c2021/src/main/cpp/shims/",
+      "/home/susan/c2021/src/main/cpp/subsystems/"
     ],
     "binaries": [
       {
@@ -317,6 +340,7 @@
           {
             "source": {
               "srcDirs": [
+                "/home/susan/c2021/src/main/cpp/subsystems/",
                 "/home/susan/c2021/src/main/cpp/"
               ],
               "includes": [
@@ -327,7 +351,10 @@
             },
             "exportedHeaders": {
               "srcDirs": [
-                "/home/susan/c2021/src/main/include/"
+                "/home/susan/c2021/src/main/cpp/subsystems/",
+                "/home/susan/c2021/src/main/include/",
+                "/home/susan/c2021/src/main/include/util/",
+                "/home/susan/c2021/src/main/cpp/shims/"
               ],
               "includes": [
                 "**/*.cpp",
@@ -376,7 +403,10 @@
           "/home/susan/.gradle/caches/transforms-2/files-2.1/8e8fc5a48bce9f1001e69e76c04ef836/cameraserver-cpp-2021.1.2-headers/",
           "/home/susan/.gradle/caches/transforms-2/files-2.1/f18d5684258cbda6b77f22deb8f9153d/cscore-cpp-2021.1.2-headers/",
           "/home/susan/.gradle/caches/transforms-2/files-2.1/8feb87186d3c56a54088d70139d94ed6/opencv-cpp-3.4.7-5-headers/",
-          "/home/susan/c2021/src/main/include/"
+          "/home/susan/c2021/src/main/include/",
+          "/home/susan/c2021/src/main/include/util/",
+          "/home/susan/c2021/src/main/cpp/shims/",
+          "/home/susan/c2021/src/main/cpp/subsystems/"
         ],
         "sharedLibrary": false,
         "executable": true
@@ -386,6 +416,7 @@
       {
         "source": {
           "srcDirs": [
+            "/home/susan/c2021/src/main/cpp/subsystems/",
             "/home/susan/c2021/src/main/cpp/"
           ],
           "includes": [
@@ -417,7 +448,10 @@
       {
         "source": {
           "srcDirs": [
-            "/home/susan/c2021/src/main/include/"
+            "/home/susan/c2021/src/main/cpp/subsystems/",
+            "/home/susan/c2021/src/main/include/",
+            "/home/susan/c2021/src/main/include/util/",
+            "/home/susan/c2021/src/main/cpp/shims/"
           ],
           "includes": [
             "**/*.cpp",

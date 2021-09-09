@@ -71,10 +71,14 @@ model {
             sources.cpp {
                 source {
                     srcDir 'src/main/cpp'
+                    srcDir 'src/main/cpp/subsystems'
                     include '**/*.cpp', '**/*.cc'
                 }
                 exportedHeaders {
                     srcDir 'src/main/include'
+                    srcDir 'src/main/include/util'
+                    srcDir 'src/main/cpp/shims'
+                    srcDir 'src/main/cpp/subsystems'
                     if (includeSrcInIncludeRoot) {
                         srcDir 'src/main/cpp'
                     }

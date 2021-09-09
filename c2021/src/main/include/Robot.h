@@ -32,6 +32,9 @@ class Robot : public frc::TimedRobot {
     void DisabledPeriodic() override;
 
    private:
+    Controls controls_;
+    Drive& drive_;
+    RobotState& robot_state_;
     frc::Joystick ljoy_;
     frc::Joystick rjoy_;
     frc::Joystick ojoy_;

@@ -8,7 +8,7 @@
 
 #include <units/units.h>
 
-//#include "util/number_util.h" weird josh stuff
+#include "number_util.h" 
 
 namespace team114 {
 namespace c2020 {
@@ -123,7 +123,7 @@ void Drive::Stop() {}
 void Drive::ZeroSensors() {
     robot_state_.ResetFieldToRobot();
     WaitForNavxCalibration(0.5);
-    navx_.ZeroYaw();
+  //  navx_.ZeroYaw();
     left_master_.SetSelectedSensorPosition(0);
     right_master_.SetSelectedSensorPosition(0);
     odometry_.ResetPosition({}, GetYaw());
@@ -133,7 +133,7 @@ void Drive::ZeroSensors() {
  * Gives the NavX (navigation sensor for field oriented, auto balancing, collision detection, etc...) a time interval to calibrate
  * Calibration retries, failures, and successes are supposed to be log, but atm nothing has been written to log it
 **/
-void Drive::WaitForNavxCalibration(double timeout_sec) {
+/* void Drive::WaitForNavxCalibration(double timeout_sec) {
     frc::Timer time;
     time.Start();
     while (navx_.IsCalibrating() && time.Get() < timeout_sec) {
@@ -145,7 +145,7 @@ void Drive::WaitForNavxCalibration(double timeout_sec) {
     } else {
         // LOG success
     }
-}
+} */
 
 /**
  * Empty method, presumably to ... output telemetry
@@ -169,7 +169,7 @@ void Drive::UpdateRobotState() {
     odometry_.Update(GetYaw(), GetEncoder(left_master_),
                      GetEncoder(right_master_));
     robot_state_.ObserveFieldToRobot(frc2::Timer::GetFPGATimestamp(),
-                                     odometry_.GetPose());
+                                     odometry_.GetPose()); 
 }
 
 /**
@@ -229,7 +229,7 @@ bool Drive::BackUp(double dist) { //units are meters
 /**
  * Changes the current state of the robot to orient its vision sensor for a shot, and sets the angle at which the sensor should be rotated to
 **/
-void Drive::SetWantOrientForShot(Limelight& limelight, double Kp, double Ki, double Kd) {
+/*void Drive::SetWantOrientForShot(Limelight& limelight, double Kp, double Ki, double Kd) {
     state_ = DriveState::SHOOT_ORIENT;
     vision_rot_.SetGoal(0.0_rad);
 
@@ -250,16 +250,16 @@ void Drive::SetWantOrientForShot(Limelight& limelight, double Kp, double Ki, dou
     pout_.control_mode = ControlMode::PercentOutput;
     pout_.left_demand = steering_adjust;
     pout_.right_demand = -steering_adjust; 
-}
+}*/
 
 /**
  * Returns true if the vision sensor has correctly rotated to the position set
 **/
-bool Drive::OrientedForShot(Limelight& limelight) {
+/*bool Drive::OrientedForShot(Limelight& limelight) {
     double x_off = limelight.GetNetworkTable()->GetNumber("tx", 0.0);
     std::cout << x_off << std::endl;
     return (x_off < 2);
-}
+}*/
 
 /**
  * Called if the current drive state is to orient for a shot
@@ -341,8 +341,8 @@ void Drive::SetWantCheesyDrive(double throttle, double wheel, bool quick_turn) {
  * Writes the relevant outputs  
 **/
 void Drive::WriteOuts() {
-    SDB_NUMERIC(double, LeftDriveTalonDemand){pout_.left_demand};
-    SDB_NUMERIC(double, RightDriveTalonDemand){pout_.right_demand};
+   // SDB_NUMERIC(double, LeftDriveTalonDemand){pout_.left_demand};
+  //  SDB_NUMERIC(double, RightDriveTalonDemand){pout_.right_demand};
     left_master_.Set(pout_.control_mode, pout_.left_demand);
     right_master_.Set(pout_.control_mode, pout_.right_demand);
  //   if (pout_.left_demand == 0 && pout_.right_demand == 0) return;
@@ -354,9 +354,9 @@ void Drive::WriteOuts() {
  * Gets the rotation of the drive in terms of radians
 **/
 constexpr auto RAD_PER_DEGREE = units::constants::pi * 1_rad / 180.0;
-frc::Rotation2d Drive::GetYaw() {
+/*frc::Rotation2d Drive::GetYaw() {
     return frc::Rotation2d(navx_.GetYaw() * RAD_PER_DEGREE);
-}
+}*/
 
 /**
  * Simple getter method to get the encoder object of the Talon motor controller

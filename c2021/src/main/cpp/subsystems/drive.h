@@ -2,7 +2,7 @@
 
 #include <optional>
 
-#include "shims/minimal_phoenix.h"
+#include "minimal_phoenix.h"
 
 #include <frc/Timer.h>
 #include <frc/controller/ProfiledPIDController.h>
@@ -13,7 +13,7 @@
 #include <units/units.h>
 
 #include "config.h"
-//#include "robot_state.h"
+#include "robot_state.h"
 //#include "shims/navx_ahrs.h"
 #include "subsystem.h"
 //#include "util/sdb_types.h"
@@ -22,8 +22,8 @@ namespace team114 {
 namespace c2020 {
 
 class Drive : public Subsystem {
-    SUBSYSTEM_PRELUDE(Drive)
    public:
+    Drive();
     Drive(const conf::DriveConfig& cfg);
     void Periodic() override;
     void Stop() override;
@@ -37,8 +37,8 @@ class Drive : public Subsystem {
     void SetWantRawOpenLoop(const frc::DifferentialDriveWheelSpeeds& openloop);
     void SetWantCheesyDrive(double throttle, double wheel, bool quick_turn);
 
-    void SetWantOrientForShot(Limelight& limelight, double Kp, double Ki, double Kd);
-    bool OrientedForShot(Limelight& limelight);
+   // void SetWantOrientForShot(Limelight& limelight, double Kp, double Ki, double Kd);
+ //   bool OrientedForShot(Limelight& limelight);
 
     bool BackUp(double dist);
 
@@ -67,7 +67,8 @@ class Drive : public Subsystem {
     units::meter_t GetEncoder(TalonFX& master_talon);
     void WaitForNavxCalibration(double timeout_sec);
 
-    SDB_NUMERIC(unsigned int, DriveFalconResetCount) falcon_reset_count_{0};
+ //   SDB_NUMERIC(unsigned int, DriveFalconResetCount) falcon_reset_count_{0};
+        unsigned int falcon_reset_count_ = 0; //temporary? can't tell what line above is supposed to do
 
     //TalonFX left_master_, right_master_;
     TalonFX left_slave_, right_slave_;
