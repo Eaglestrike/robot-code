@@ -1,8 +1,30 @@
 See file:///home/susan/c2021/build/tmp/compileFrcUserProgramDebugExecutableFrcUserProgramCpp/output.txt for all output for compileFrcUserProgramDebugExecutableFrcUserProgramCpp.
 compiling drive.cpp successful.
+In file included from /home/susan/c2021/src/main/cpp/subsystems/drive.h:13:0,
+                 from /home/susan/c2021/src/main/cpp/subsystems/drive.cpp:1:
+/home/susan/.gradle/caches/transforms-2/files-2.1/3c022fe058c09e0066251f7014b31212/wpimath-cpp-2021.1.2-headers/units/units.h:14:2: warning: #warning is a GCC extension
+ #warning "Including this header drastically increases compilation times and is bad style. Include only what you use instead."
+  ^~~~~~~
+/home/susan/.gradle/caches/transforms-2/files-2.1/3c022fe058c09e0066251f7014b31212/wpimath-cpp-2021.1.2-headers/units/units.h:14:2: warning: #warning "Including this header drastically increases compilation times and is bad style. Include only what you use instead." [-Wcpp]
+In file included from /home/susan/c2021/src/main/include/robot_state.h:10:0,
+                 from /home/susan/c2021/src/main/cpp/subsystems/drive.h:16,
+                 from /home/susan/c2021/src/main/cpp/subsystems/drive.cpp:1:
+/home/susan/c2021/src/main/include/util/construcotr_macros.h:6:36: warning: backslash-newline at end of file
+ #define DISALLOW_COPY_ASSIGN(Type) \
+                                     
 
-compiling config.cpp successful.
-
-compiling controls.cpp successful.
+compiling Robot.cpp successful.
+In file included from /home/susan/c2021/src/main/include/Robot.h:5:0,
+                 from /home/susan/c2021/src/main/cpp/Robot.cpp:1:
+/home/susan/.gradle/caches/transforms-2/files-2.1/3c022fe058c09e0066251f7014b31212/wpimath-cpp-2021.1.2-headers/units/units.h:14:2: warning: #warning is a GCC extension
+ #warning "Including this header drastically increases compilation times and is bad style. Include only what you use instead."
+  ^~~~~~~
+/home/susan/.gradle/caches/transforms-2/files-2.1/3c022fe058c09e0066251f7014b31212/wpimath-cpp-2021.1.2-headers/units/units.h:14:2: warning: #warning "Including this header drastically increases compilation times and is bad style. Include only what you use instead." [-Wcpp]
+In file included from /home/susan/c2021/src/main/include/robot_state.h:10:0,
+                 from /home/susan/c2021/src/main/include/Robot.h:7,
+                 from /home/susan/c2021/src/main/cpp/Robot.cpp:1:
+/home/susan/c2021/src/main/include/util/construcotr_macros.h:6:36: warning: backslash-newline at end of file
+ #define DISALLOW_COPY_ASSIGN(Type) \
+                                     
 
 Finished compileFrcUserProgramDebugExecutableFrcUserProgramCpp, see full log file:///home/susan/c2021/build/tmp/compileFrcUserProgramDebugExecutableFrcUserProgramCpp/output.txt.

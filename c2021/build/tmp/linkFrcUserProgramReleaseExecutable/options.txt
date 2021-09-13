@@ -1,7 +1,9 @@
 -o
 /home/susan/c2021/build/exe/frcUserProgram/release/frcUserProgram
 /home/susan/c2021/build/objs/frcUserProgram/release/frcUserProgramCpp/9760xtgdau9jsoxxi90ozrpww/Robot.o
+/home/susan/c2021/build/objs/frcUserProgram/release/frcUserProgramCpp/f497phzlkn4zcdu357bc0nmrm/robot_state.o
 /home/susan/c2021/build/objs/frcUserProgram/release/frcUserProgramCpp/80oatj20ch5owdsu6zbkknzoa/drive.o
+/home/susan/c2021/build/objs/frcUserProgram/release/frcUserProgramCpp/dr8sn5cg47ztmwzxemsqwkfz4/limelight.o
 /home/susan/c2021/build/objs/frcUserProgram/release/frcUserProgramCpp/9qzfi49ibq2n1ttwltzule3yh/config.o
 /home/susan/c2021/build/objs/frcUserProgram/release/frcUserProgramCpp/ahv8rgsjbzm1mlchpi6gpqakw/controls.o
 /home/susan/.gradle/caches/transforms-2/files-2.1/6ac86600322ed53dc915604ac3a599ec/wpilibOldCommands-cpp-2021.1.2-linuxathena/linux/athena/shared/libwpilibOldCommands.so
@@ -10,6 +12,7 @@
 /home/susan/.gradle/caches/transforms-2/files-2.1/9aa5d6c34fa5792d3d7bad130fdd4665/cci-5.19.4-linuxathenastatic/linux/athena/static/libCTRE_PhoenixCCI.a
 /home/susan/.gradle/caches/transforms-2/files-2.1/ce19078657a27b648e9996d28a989095/diagnostics-5.19.4-linuxathenastatic/linux/athena/static/libCTRE_PhoenixDiagnostics.a
 /home/susan/.gradle/caches/transforms-2/files-2.1/73c1adb22e2ee6d272e74015eb55adf5/core-5.19.4-linuxathenastatic/linux/athena/static/libCTRE_PhoenixCore.a
+/home/susan/.gradle/caches/transforms-2/files-2.1/c3e1a340b1278e882e93a4d70e2ca80c/navx-cpp-4.0.428-linuxathenastatic/linux/athena/static/libnavx_frc.a
 /home/susan/.gradle/caches/transforms-2/files-2.1/b7ec1660ae0df36c8d072ad6278cb412/wpilibc-cpp-2021.1.2-linuxathena/linux/athena/shared/libwpilibc.so
 /home/susan/.gradle/caches/transforms-2/files-2.1/050df38048263d5e41172babd452bf4e/ntcore-cpp-2021.1.2-linuxathena/linux/athena/shared/libntcore.so
 /home/susan/.gradle/caches/transforms-2/files-2.1/64d2dd88ee4f74f7450c78b578a5e6c0/hal-cpp-2021.1.2-linuxathena/linux/athena/shared/libwpiHal.so

@@ -14,7 +14,7 @@
 
 #include "config.h"
 #include "robot_state.h"
-//#include "shims/navx_ahrs.h"
+#include "navx_ahrs.h"
 #include "subsystem.h"
 //#include "util/sdb_types.h"
 
@@ -22,6 +22,8 @@ namespace team114 {
 namespace c2020 {
 
 class Drive : public Subsystem {
+    DISALLOW_COPY_ASSIGN(Drive)
+    CREATE_SINGLETON(Drive)
    public:
     Drive();
     Drive(const conf::DriveConfig& cfg);
@@ -43,6 +45,7 @@ class Drive : public Subsystem {
     bool BackUp(double dist);
 
     TalonFX left_master_, right_master_; //this is my code, and I do what I want
+    AHRS navx_{frc::SPI::Port::kMXP};
 
     struct PeriodicOut {
         ControlMode control_mode;

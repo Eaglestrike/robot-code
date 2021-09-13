@@ -4,6 +4,9 @@
 #include <frc/TimedRobot.h>
 #include <units/units.h>
 
+#include "robot_state.h"
+#include "drive.h"
+
 #include <optional>
 
 #include "controls.h"

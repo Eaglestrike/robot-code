@@ -18,6 +18,12 @@ c++
 -I
 /home/susan/c2021/src/main/include
 -I
+/home/susan/c2021/src/main/include/util
+-I
+/home/susan/c2021/src/main/cpp/shims
+-I
+/home/susan/c2021/src/main/cpp/subsystems
+-I
 /home/susan/.gradle/caches/transforms-2/files-2.1/27320799d5d13e300e92dc5f4bebc3b6/wpilibOldCommands-cpp-2021.1.2-headers
 -I
 /home/susan/.gradle/caches/transforms-2/files-2.1/366f4c4399d035682d02e69dfe6150ad/wpiapi-cpp-5.19.4-headers
@@ -39,6 +45,8 @@ c++
 /home/susan/.gradle/caches/transforms-2/files-2.1/fff62b9a0e900bc59009f4f12fb372fa/simTalonSRX-5.19.4-headers
 -I
 /home/susan/.gradle/caches/transforms-2/files-2.1/c7a53f961c4057f6586211562d809803/simVictorSPX-5.19.4-headers
+-I
+/home/susan/.gradle/caches/transforms-2/files-2.1/9275a3315dd0dff92da5e499b204d86f/navx-cpp-4.0.428-headers
 -I
 /home/susan/.gradle/caches/transforms-2/files-2.1/73a8c09341e1a5b112fbc37fb81a94b1/wpilibc-cpp-2021.1.2-headers
 -I

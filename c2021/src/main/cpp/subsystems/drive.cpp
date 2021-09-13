@@ -123,7 +123,7 @@ void Drive::Stop() {}
 void Drive::ZeroSensors() {
     robot_state_.ResetFieldToRobot();
     WaitForNavxCalibration(0.5);
-  //  navx_.ZeroYaw();
+    navx_.ZeroYaw();
     left_master_.SetSelectedSensorPosition(0);
     right_master_.SetSelectedSensorPosition(0);
     odometry_.ResetPosition({}, GetYaw());
@@ -133,7 +133,7 @@ void Drive::ZeroSensors() {
  * Gives the NavX (navigation sensor for field oriented, auto balancing, collision detection, etc...) a time interval to calibrate
  * Calibration retries, failures, and successes are supposed to be log, but atm nothing has been written to log it
 **/
-/* void Drive::WaitForNavxCalibration(double timeout_sec) {
+ void Drive::WaitForNavxCalibration(double timeout_sec) {
     frc::Timer time;
     time.Start();
     while (navx_.IsCalibrating() && time.Get() < timeout_sec) {
@@ -145,7 +145,7 @@ void Drive::ZeroSensors() {
     } else {
         // LOG success
     }
-} */
+} 
 
 /**
  * Empty method, presumably to ... output telemetry
@@ -354,9 +354,9 @@ void Drive::WriteOuts() {
  * Gets the rotation of the drive in terms of radians
 **/
 constexpr auto RAD_PER_DEGREE = units::constants::pi * 1_rad / 180.0;
-/*frc::Rotation2d Drive::GetYaw() {
+frc::Rotation2d Drive::GetYaw() {
     return frc::Rotation2d(navx_.GetYaw() * RAD_PER_DEGREE);
-}*/
+}
 
 /**
  * Simple getter method to get the encoder object of the Talon motor controller
