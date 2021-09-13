@@ -1,0 +1,10 @@
+See file:///C:/Users/sheeh/OneDrive/Documents/robot-code/2021/build/tmp/compileFrcUserProgramReleaseExecutableFrcUserProgramCpp/output.txt for all output for compileFrcUserProgramReleaseExecutableFrcUserProgramCpp.
+compiling Shoot.cpp successful.
+In file included from C:\Users\sheeh\OneDrive\Documents\robot-code\2021\src\main\include/Shoot.h:5:0,
+                 from C:\Users\sheeh\OneDrive\Documents\robot-code\2021\src\main\cpp\Shoot.cpp:1:
+C:\Users\sheeh\.gradle\caches\transforms-2\files-2.1\20271b42bfa940400d49306d3601e7af\wpilibc-cpp-2021.3.1-headers/frc/WPILib.h:11:2: warning: #warning is a GCC extension
+ #warning "Including this header drastically increases compilation times and is bad style. Include only what you use instead."
+  ^~~~~~~
+C:\Users\sheeh\.gradle\caches\transforms-2\files-2.1\20271b42bfa940400d49306d3601e7af\wpilibc-cpp-2021.3.1-headers/frc/WPILib.h:11:2: warning: #warning "Including this header drastically increases compilation times and is bad style. Include only what you use instead." [-Wcpp]
+
+Finished compileFrcUserProgramReleaseExecutableFrcUserProgramCpp, see full log file:///C:/Users/sheeh/OneDrive/Documents/robot-code/2021/build/tmp/compileFrcUserProgramReleaseExecutableFrcUserProgramCpp/output.txt.
