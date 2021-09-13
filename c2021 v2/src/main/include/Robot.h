@@ -1,51 +1,50 @@
 #pragma once
 
-#include <string>
-
-#include <frc/TimedRobot.h>
-#include <frc/smartdashboard/SendableChooser.h>
-#include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/Joystick.h>
-#include <frc/XboxController.h>
-#include <frc/Timer.h>
+#include <frc/TimedRobot.h>
+#include <units/units.h>
 
-#include "ctre/Phoenix.h"
-#include "frc/WPILib.h"
-#include <iostream>
+#include "robot_state.h"
+#include "drive.h"
 
-#include <frc/SpeedControllerGroup.h>
-#include <frc/controller/PIDController.h>
-#include <frc/kinematics/DifferentialDriveKinematics.h>
-#include <frc/kinematics/DifferentialDriveOdometry.h>
-#include <frc/drive/DifferentialDrive.h>
+#include <optional>
 
-#include "Drive.h"
-#include "Shoot.h"
+#include "controls.h"
 
-//Drive
-frc::Joystick l_joy{0};
-frc::Joystick r_joy{1};
-frc::XboxController xbox{2};
+
+namespace team114 {
+namespace c2020 {
 
 class Robot : public frc::TimedRobot {
-  public:
+   public:
+    inline static const auto kPeriod = 10_ms;
+    Robot();
     void RobotInit() override;
     void RobotPeriodic() override;
+
     void AutonomousInit() override;
     void AutonomousPeriodic() override;
+
     void TeleopInit() override;
     void TeleopPeriodic() override;
-    void DisabledInit() override;
-    void DisabledPeriodic() override;
+
     void TestInit() override;
     void TestPeriodic() override;
 
-  private:
-    frc::SendableChooser<std::string> m_chooser;
-    const std::string kAutoNameDefault = "Default";
-    const std::string kAutoNameCustom = "My Auto";
-    std::string m_autoSelected;
+    void DisabledInit() override;
+    void DisabledPeriodic() override;
 
-  Drive Drivetrain;
-  Shoot Shooter;
+   private:
+    Controls controls_;
+    Drive& drive_;
+    RobotState& robot_state_;
+    frc::Joystick ljoy_;
+    frc::Joystick rjoy_;
+    frc::Joystick ojoy_;
+    conf::RobotConfig cfg;
+
+    // CachingSolenoid brake_{frc::Solenoid{6}};
 };
+
+}  // namespace c2020
+}  // namespace team114
