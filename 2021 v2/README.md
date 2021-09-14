@@ -1,0 +1,3 @@
+another patch... 
+Notes:
+Susan write stuff in void Shoot::Periodic();
