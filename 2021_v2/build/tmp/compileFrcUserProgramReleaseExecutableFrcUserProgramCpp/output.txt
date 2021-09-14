@@ -1,0 +1,40 @@
+See file:///home/susan/2021_v2/build/tmp/compileFrcUserProgramReleaseExecutableFrcUserProgramCpp/output.txt for all output for compileFrcUserProgramReleaseExecutableFrcUserProgramCpp.
+compiling Drive.cpp successful.
+In file included from /home/susan/2021_v2/src/main/include/Drive.h:4:0,
+                 from /home/susan/2021_v2/src/main/cpp/Drive.cpp:1:
+/home/susan/.gradle/caches/transforms-2/files-2.1/73a8c09341e1a5b112fbc37fb81a94b1/wpilibc-cpp-2021.1.2-headers/frc/WPILib.h:11:2: warning: #warning is a GCC extension
+ #warning "Including this header drastically increases compilation times and is bad style. Include only what you use instead."
+  ^~~~~~~
+/home/susan/.gradle/caches/transforms-2/files-2.1/73a8c09341e1a5b112fbc37fb81a94b1/wpilibc-cpp-2021.1.2-headers/frc/WPILib.h:11:2: warning: #warning "Including this header drastically increases compilation times and is bad style. Include only what you use instead." [-Wcpp]
+
+compiling Controls.cpp successful.
+In file included from /home/susan/2021_v2/src/main/include/Drive.h:4:0,
+                 from /home/susan/2021_v2/src/main/include/Controls.h:6,
+                 from /home/susan/2021_v2/src/main/cpp/Controls.cpp:1:
+/home/susan/.gradle/caches/transforms-2/files-2.1/73a8c09341e1a5b112fbc37fb81a94b1/wpilibc-cpp-2021.1.2-headers/frc/WPILib.h:11:2: warning: #warning is a GCC extension
+ #warning "Including this header drastically increases compilation times and is bad style. Include only what you use instead."
+  ^~~~~~~
+/home/susan/.gradle/caches/transforms-2/files-2.1/73a8c09341e1a5b112fbc37fb81a94b1/wpilibc-cpp-2021.1.2-headers/frc/WPILib.h:11:2: warning: #warning "Including this header drastically increases compilation times and is bad style. Include only what you use instead." [-Wcpp]
+
+compiling Robot.cpp successful.
+In file included from /home/susan/2021_v2/src/main/include/Drive.h:4:0,
+                 from /home/susan/2021_v2/src/main/include/Controls.h:6,
+                 from /home/susan/2021_v2/src/main/include/Robot.h:12,
+                 from /home/susan/2021_v2/src/main/cpp/Robot.cpp:1:
+/home/susan/.gradle/caches/transforms-2/files-2.1/73a8c09341e1a5b112fbc37fb81a94b1/wpilibc-cpp-2021.1.2-headers/frc/WPILib.h:11:2: warning: #warning is a GCC extension
+ #warning "Including this header drastically increases compilation times and is bad style. Include only what you use instead."
+  ^~~~~~~
+/home/susan/.gradle/caches/transforms-2/files-2.1/73a8c09341e1a5b112fbc37fb81a94b1/wpilibc-cpp-2021.1.2-headers/frc/WPILib.h:11:2: warning: #warning "Including this header drastically increases compilation times and is bad style. Include only what you use instead." [-Wcpp]
+
+compiling Shoot.cpp successful.
+In file included from /home/susan/2021_v2/src/main/include/Shoot.h:5:0,
+                 from /home/susan/2021_v2/src/main/cpp/Shoot.cpp:1:
+/home/susan/.gradle/caches/transforms-2/files-2.1/73a8c09341e1a5b112fbc37fb81a94b1/wpilibc-cpp-2021.1.2-headers/frc/WPILib.h:11:2: warning: #warning is a GCC extension
+ #warning "Including this header drastically increases compilation times and is bad style. Include only what you use instead."
+  ^~~~~~~
+/home/susan/.gradle/caches/transforms-2/files-2.1/73a8c09341e1a5b112fbc37fb81a94b1/wpilibc-cpp-2021.1.2-headers/frc/WPILib.h:11:2: warning: #warning "Including this header drastically increases compilation times and is bad style. Include only what you use instead." [-Wcpp]
+/home/susan/2021_v2/src/main/cpp/Shoot.cpp:31:2: warning: extra ';' [-Wpedantic]
+ };
+  ^
+
+Finished compileFrcUserProgramReleaseExecutableFrcUserProgramCpp, see full log file:///home/susan/2021_v2/build/tmp/compileFrcUserProgramReleaseExecutableFrcUserProgramCpp/output.txt.
