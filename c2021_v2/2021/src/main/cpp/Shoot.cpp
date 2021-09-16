@@ -11,12 +11,14 @@ Shoot::Shoot(){
 //We can't even test due to no serializer so... idk have percent output on dashboard when we test
 void Shoot::Periodic(){
     if (state == State::Idle) {
-        //reset? idk
+        limelight->setLEDMode("OFF");
     } 
     if (state == State::Aiming) {
+        limelight->setLEDMode("ON");
         Aim();
     }
     if (state == Shooting) {
+        limelight->setLEDMode("ON");
         //set hood
         // set flywheel
     }
