@@ -12,3 +12,8 @@ double Limelight::getXOff() {
 double Limelight::getYOff() {
     return network_table->GetNumber("ty", 10000.0);
 }
+
+void Limelight::setLEDMode(std::string mode) {
+    if (mode == "OFF") network_table->PutNumber("ledMode", 1);
+    if (mode == "ON") network_table->PutNumber("ledMode", 3);
+}
