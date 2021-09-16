@@ -6,6 +6,7 @@ class Limelight{
         Limelight();
         double getXOff();
         double getYOff();
+        void setLEDMode(std::string mode);
         std::shared_ptr<nt::NetworkTable> GetNetworkTable();
     private:
         void ReadPeriodicIn();
