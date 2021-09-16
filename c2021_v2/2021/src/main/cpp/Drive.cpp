@@ -23,4 +23,3 @@ void Drive::Auto(){
     m_drive.ArcadeDrive(-0.1, 0, false);
     m_drive.SetRightSideInverted(false);
 }
-

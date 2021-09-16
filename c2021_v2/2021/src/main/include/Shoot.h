@@ -4,6 +4,7 @@
 #include <ctre/Phoenix.h>
 #include "frc/WPILib.h"
 #include <frc/XboxController.h>
+#include "frc/smartdashboard/SmartDashboard.h"
 #include "Limelight.h"
 #include <frc/Servo.h>
 #include <cmath>
@@ -22,6 +23,7 @@ class Shoot{
         void Auto();
         void Manual(const frc::XboxController & xbox);
         void setState(State newState);
+        void Calibration();
 
     private:
         WPI_TalonFX * turret = new WPI_TalonFX(4);
@@ -34,4 +36,6 @@ class Shoot{
         Limelight * limelight = new Limelight();
 
         State state;
+        double TKp; 
+        double TKi;
 };

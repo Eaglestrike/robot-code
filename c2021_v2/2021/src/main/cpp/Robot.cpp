@@ -19,7 +19,7 @@ void Robot::TeleopPeriodic() {
   _control.Manual(xbox, l_joy, r_joy);
   //uncomment the following for periodic mode
   //_control.Periodic(xbox, l_joy, r_joy);
-}
+  }
 
 void Robot::DisabledInit() {}
 void Robot::DisabledPeriodic() {}
