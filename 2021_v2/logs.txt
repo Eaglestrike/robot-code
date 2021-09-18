@@ -1,0 +1,18 @@
+As of 9/17/21
+
+TODO:
+1. Limelight doesn't actually turn off
+2. Turret Aim() in Shoot.cpp needs a lot of work. PID is a mess maybe look into using encoder or motion magic??
+3. Servos did not respond to Set(). Maybe use SetAngle()?
+4. Channel class add photogate to know when to stop intaking balls
+5. Intake class I've added the pneumatics, but perhaps in Robot.cpp RobotPeriodic() I have to add recompressing
+6. Drive class State needs to be updated to put Talons on Brake mode when the robot is IDLE
+7. Climb class - I only added skeleton stucture
+8. Refactor, things are turning into a mess 
+
+UPDATES:
+1. Manual Mode bool value on dashboard
+2. Add Intake, Climb, & Channel files
+3. // Testing() in Controls
+4. Controls now has working intake now we need to build it
+5. Should now be Auto mode where robo just backs up slowly
