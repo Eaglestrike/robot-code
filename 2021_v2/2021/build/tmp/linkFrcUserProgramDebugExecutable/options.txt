@@ -1,10 +1,13 @@
 -o
 C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2021\\build\\exe\\frcUserProgram\\debug\\frcUserProgram
 C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2021\\build\\objs\\frcUserProgram\\debug\\frcUserProgramCpp\\18qw1h33r19q2ughc13st2pzq\\Limelight.o
+C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2021\\build\\objs\\frcUserProgram\\debug\\frcUserProgramCpp\\1q3nmz23eyq7mv8szac7tikov\\Intake.o
+C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2021\\build\\objs\\frcUserProgram\\debug\\frcUserProgramCpp\\1seiqsbh6rzxaiy4bcogume5x\\Climb.o
 C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2021\\build\\objs\\frcUserProgram\\debug\\frcUserProgramCpp\\3bg5a77l7vd4edmrxq5jco6ri\\Robot.o
 C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2021\\build\\objs\\frcUserProgram\\debug\\frcUserProgramCpp\\9g9qsepoi07wxtrwqney31uil\\Controls.o
 C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2021\\build\\objs\\frcUserProgram\\debug\\frcUserProgramCpp\\cchz2wma7cv5kb0ov2pwkp3kn\\Shoot.o
 C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2021\\build\\objs\\frcUserProgram\\debug\\frcUserProgramCpp\\cknty4hqduw5rso40snqz12k5\\Drive.o
+C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2021\\build\\objs\\frcUserProgram\\debug\\frcUserProgramCpp\\pppvqylvyy6ns3yrsjy9v0rx\\Channel.o
 C:\\Users\\sheeh\\.gradle\\caches\\transforms-2\\files-2.1\\8f1f4c2c9ce43ff8daa712f79b50ce74\\navx-cpp-4.0.428-linuxathenastaticdebug\\linux\\athena\\static\\libnavx_frcd.a
 C:\\Users\\sheeh\\.gradle\\caches\\transforms-2\\files-2.1\\ffd7c7c99138055e6e3ac30699598723\\wpiapi-cpp-5.19.4-linuxathenastaticdebug\\linux\\athena\\static\\libCTRE_Phoenix_WPI.a
 C:\\Users\\sheeh\\.gradle\\caches\\transforms-2\\files-2.1\\7cda99e3aa5e20a287354ab50ed6429e\\api-cpp-5.19.4-linuxathenastaticdebug\\linux\\athena\\static\\libCTRE_Phoenix.a

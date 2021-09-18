@@ -7,11 +7,13 @@
 #include <frc/Joystick.h>
 #include <frc/XboxController.h>
 #include <frc/Timer.h>
+#include <frc/Compressor.h>
 #include "Controls.h"
 
 frc::Joystick l_joy{0};
 frc::Joystick r_joy{1};
 frc::XboxController xbox{2};
+frc::Compressor compressor; //{?}
 
 class Robot : public frc::TimedRobot {
   public:

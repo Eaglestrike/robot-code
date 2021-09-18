@@ -24,10 +24,10 @@ class Drive{
         void Auto();
         
     private:
-        WPI_TalonFX * left_master = new WPI_TalonFX(0);
-        WPI_TalonFX * left_slave = new WPI_TalonFX(1);
-        WPI_TalonFX * right_master = new WPI_TalonFX(2);
-        WPI_TalonFX * right_slave = new WPI_TalonFX(3);
+        WPI_TalonFX * left_master = new WPI_TalonFX(2);
+        WPI_TalonFX * left_slave = new WPI_TalonFX(3);
+        WPI_TalonFX * right_master = new WPI_TalonFX(0);
+        WPI_TalonFX * right_slave = new WPI_TalonFX(1);
         
         frc::SpeedControllerGroup left_side{*left_master, *left_slave};
         frc::SpeedControllerGroup right_side{*right_master, *right_slave};

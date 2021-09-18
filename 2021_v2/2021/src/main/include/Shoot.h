@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iostream>
 #include <ctre/Phoenix.h>
 #include "frc/WPILib.h"
 #include <frc/XboxController.h>
@@ -37,4 +36,5 @@ class Shoot{
         State state;
 
         double TKi, TKp, x_off;
+        double flywheel_speed = 0, hood_angle = 0;
 };
