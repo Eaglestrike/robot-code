@@ -23,6 +23,8 @@ class Controls{
         //This is for calibration to see values on dashboard
         void Testing(const frc::XboxController & xbox, const frc::Joystick & l_joy, const frc::Joystick & r_joy);
 
+        void Zero();
+
     private:
         Drive _drivetrain;
         Shoot _shooter;

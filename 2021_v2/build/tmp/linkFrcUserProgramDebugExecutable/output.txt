@@ -1,4 +1,0 @@
-See file:///home/susan/2021_v2/build/tmp/linkFrcUserProgramDebugExecutable/output.txt for all output for linkFrcUserProgramDebugExecutable.
-linking frcUserProgram successful.
-
-Finished linkFrcUserProgramDebugExecutable, see full log file:///home/susan/2021_v2/build/tmp/linkFrcUserProgramDebugExecutable/output.txt.

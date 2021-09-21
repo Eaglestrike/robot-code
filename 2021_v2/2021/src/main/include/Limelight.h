@@ -8,10 +8,11 @@ class Limelight{
         double getYOff();
         void setLEDMode(std::string mode);
         std::shared_ptr<nt::NetworkTable> GetNetworkTable();
+
+        double height;
+        double angle_above_horizontal;
     private:
         void ReadPeriodicIn();
         std::shared_ptr<nt::NetworkTable> network_table;
         std::string table_name = "limelight";
-        double height;
-        double angle_above_horizontal;
 };

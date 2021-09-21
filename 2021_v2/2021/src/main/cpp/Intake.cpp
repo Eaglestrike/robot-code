@@ -2,8 +2,8 @@
 
 void Intake::Deploy(){
     deployed = true;
-    left_pneumatic.Set(true);
-    right_pneumatic.Set(true);
+    //left_pneumatic.Set(true);
+    //right_pneumatic.Set(true);
 }
 
 void Intake::Retract(){
@@ -11,16 +11,16 @@ void Intake::Retract(){
         return;
     }
     deployed = false;
-    left_pneumatic.Set(false);
-    right_pneumatic.Set(false);
+    //left_pneumatic.Set(false);
+    //right_pneumatic.Set(false);
 }
 
 void Intake::Run(){
-    intake_motor->Set(ControlMode::PercentOutput, 0.25);
+    //intake_motor->Set(ControlMode::PercentOutput, 0.25);
 }
 
 void Intake::Unjam(){
-    intake_motor->Set(ControlMode::PercentOutput, -0.25);
+    //intake_motor->Set(ControlMode::PercentOutput, -0.25);
 }
 
 bool Intake::Deployed(){

@@ -9,14 +9,11 @@
 #include <frc/kinematics/DifferentialDriveKinematics.h>
 #include <frc/kinematics/DifferentialDriveOdometry.h>
 #include <frc/drive/DifferentialDrive.h>
+#include <cmath>
 #include <iostream>
 
 class Drive{
     public:
-        enum State{
-            Idle,
-            Driving
-        };
 
         Drive();
         // TODO: change parameters to double for axis

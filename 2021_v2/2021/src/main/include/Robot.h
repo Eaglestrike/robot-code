@@ -9,6 +9,7 @@
 #include <frc/Timer.h>
 #include <frc/Compressor.h>
 #include "Controls.h"
+#include "Shoot.h"
 
 frc::Joystick l_joy{0};
 frc::Joystick r_joy{1};

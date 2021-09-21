@@ -4,6 +4,7 @@ C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2021\\build\\objs\\frcUserPro
 C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2021\\build\\objs\\frcUserProgram\\debug\\frcUserProgramCpp\\1q3nmz23eyq7mv8szac7tikov\\Intake.o
 C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2021\\build\\objs\\frcUserProgram\\debug\\frcUserProgramCpp\\1seiqsbh6rzxaiy4bcogume5x\\Climb.o
 C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2021\\build\\objs\\frcUserProgram\\debug\\frcUserProgramCpp\\3bg5a77l7vd4edmrxq5jco6ri\\Robot.o
+C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2021\\build\\objs\\frcUserProgram\\debug\\frcUserProgramCpp\\3t150i5sq80f7tmzgwz51krjm\\AutoShoot.o
 C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2021\\build\\objs\\frcUserProgram\\debug\\frcUserProgramCpp\\9g9qsepoi07wxtrwqney31uil\\Controls.o
 C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2021\\build\\objs\\frcUserProgram\\debug\\frcUserProgramCpp\\cchz2wma7cv5kb0ov2pwkp3kn\\Shoot.o
 C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2021\\build\\objs\\frcUserProgram\\debug\\frcUserProgramCpp\\cknty4hqduw5rso40snqz12k5\\Drive.o

@@ -12,7 +12,7 @@ class Channel{
     
     private:
     //TODO: add photogate
-        WPI_TalonFX * channel_master = new WPI_TalonFX(8);
-        WPI_TalonFX * channel_slave = new WPI_TalonFX(9);
+        //WPI_TalonFX * channel_master = new WPI_TalonFX(9);
+        //WPI_TalonFX * channel_slave = new WPI_TalonFX(10);
 
 };

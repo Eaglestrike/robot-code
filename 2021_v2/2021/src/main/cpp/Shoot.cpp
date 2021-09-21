@@ -8,18 +8,20 @@ Shoot::Shoot(){
 
 //Limelight aiming and stuff
 void Shoot::Periodic(){
-    if (state == State::Idle) {
-        limelight->setLEDMode("OFF");
-        std::cout <<"idle\n";
-    } 
-    if (state == State::Aiming) {
-        limelight->setLEDMode("ON");
-        Aim();
-    }
-    if (state == State::Shooting) {
-        limelight->setLEDMode("ON");
-        //Check aim
-        //shoot
+    switch(state){
+        case State::Idle:
+            limelight->setLEDMode("OFF");
+            std::cout<<"IDLE Shoot\n";
+            break;
+        case State::Aiming:
+            limelight->setLEDMode("ON");
+            std::cout<<"AIM Shoot\n";
+            Aim();
+            break;
+        case State::Shooting:
+            limelight->setLEDMode("ON");
+        default:
+            break;
     }
 }
 
@@ -29,13 +31,12 @@ void Shoot::setState(Shoot::State newState) {
 
 //Aim would align turret and hood angle not shooter speed
 void Shoot::Aim(){
-    //PID constants ~13 lbs
-    frc::SmartDashboard::PutNumber("Turret P", TKp);
-    frc::SmartDashboard::PutNumber("Turret I", TKi);
+    READING_SDB_NUMERIC(double, Turret_P) TKi;
+    READING_SDB_NUMERIC(double, Turret_I) TKp;
 
 	x_off = limelight->getXOff();
-    TKp = 0.01;
-    TKi = 0;
+  //  TKp = 0.01;
+  //  TKi = 0;
 	double power = TKp*x_off + TKi;
     if (power < -0.99) power = -0.99;
     if (power > 0.99) power = 0.99;
@@ -82,4 +83,13 @@ void Shoot::Calibration(){
 
     servo_left.Set(hood_angle);
     servo_right.Set(hood_angle);
+}
+
+
+void Shoot::Zero(){
+    //When the limit hits it is false
+    while(turret_limit_switch->Get()){
+        turret->Set(ControlMode::PercentOutput, 0.10);
+    }
+    turret->Set(ControlMode::PercentOutput, 0.0);
 }

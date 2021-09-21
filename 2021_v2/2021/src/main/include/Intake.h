@@ -16,8 +16,8 @@ class Intake{
         
     private:
 
-        WPI_TalonFX * intake_motor = new WPI_TalonFX(7);
+        /*WPI_TalonFX * intake_motor = new WPI_TalonFX(8);
         frc::Solenoid right_pneumatic{0};
-        frc::Solenoid left_pneumatic{1};
+        frc::Solenoid left_pneumatic{1};*/
         bool deployed = false;
 };
