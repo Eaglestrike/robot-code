@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 
-frc::Timer* timer;
+//frc::Timer* timer;
 std::map <double, double> output_to_time;
 double max_out = 0.9; //can adjust 
 

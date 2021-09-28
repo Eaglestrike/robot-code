@@ -18,6 +18,8 @@ class Drive{
         Drive();
         void Periodic(double forward, double turn);
         void Auto();
+        void SetWantCheesyDrive(double throttle, double wheel, bool quick_turn);
+        void SetWantRawOpenLoop(const frc::DifferentialDriveWheelSpeeds& openloop);
         
     private:
         WPI_TalonFX * left_master = new WPI_TalonFX(2);

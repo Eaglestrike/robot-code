@@ -22,10 +22,12 @@ void Robot::TeleopPeriodic() {
   _drivetrain.Periodic(l_joy.GetRawAxis(1), -1*r_joy.GetRawAxis(0));
   _shooter.Manual_Turret(xbox.GetX(frc::GenericHID::kRightHand));
 
+   _drivetrain.SetWantCheesyDrive(-l_joy.GetRawAxis(1), r_joy.GetRawAxis(0), r_joy.GetRawButton(1));
+
   //Button 1 is A
   if(xbox.GetRawButton(1)){
       _shooter.setState(Shoot::State::Aiming);
-      _shooter.Periodic();
+      _shooter.Periodic(); //shouldn't this be outside an if statement??
   } else {
       _shooter.setState(Shoot::State::Idle);
   }
