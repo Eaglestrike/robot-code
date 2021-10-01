@@ -20,7 +20,8 @@ void Robot::AutonomousPeriodic() {
   } else {
     _drivetrain.Stop();
     _shooter.Aim();
-    if(Auto_timer.Get() < 7){
+    if (GetLimelightY() == 10000.0) return; //turret doesn't see it at all, return to prevent damage
+    if(Auto_timer.Get() < 7 || GetLimelightY() < 0.5){ //shoot if range is good (adjust 0.5)
       _shooter.Its_gonna_shoot();
     }
   }
