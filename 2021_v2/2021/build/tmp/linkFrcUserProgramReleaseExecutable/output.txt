@@ -1,4 +1,0 @@
-See file:///C:/Users/sheeh/OneDrive/Documents/robot-code/2021/build/tmp/linkFrcUserProgramReleaseExecutable/output.txt for all output for linkFrcUserProgramReleaseExecutable.
-linking frcUserProgram successful.
-
-Finished linkFrcUserProgramReleaseExecutable, see full log file:///C:/Users/sheeh/OneDrive/Documents/robot-code/2021/build/tmp/linkFrcUserProgramReleaseExecutable/output.txt.
