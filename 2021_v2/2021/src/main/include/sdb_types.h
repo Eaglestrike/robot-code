@@ -6,7 +6,7 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 
 namespace team114 {
-namespace c2020 {
+namespace c2021 {
 
 // no string literals in templates yet, so have to resort to an ugly macro
 // defining an anonymous type. When/if those come, we can unify all types
@@ -16,7 +16,7 @@ namespace c2020 {
     struct __SdbKey_##key_ident {                                  \
         static const std::string GetName() { return #key_ident; }; \
     };                                                             \
-    team114::c2020::SdbNumeric<type, __SdbKey_##key_ident>
+    team114::c2021::SdbNumeric<type, __SdbKey_##key_ident>
 
 template <typename NumericTy, typename KeyTy>
 struct SdbNumeric {
@@ -43,7 +43,7 @@ struct SdbNumeric {
     struct __SdbKey_##key_ident {                                  \
         static const std::string GetName() { return #key_ident; }; \
     };                                                             \
-    team114::c2020::SdbBool<__SdbKey_##key_ident>
+    team114::c2021::SdbBool<__SdbKey_##key_ident>
 
 template <typename KeyTy>
 struct SdbBool {
@@ -65,7 +65,7 @@ struct SdbBool {
     struct __SdbKey_##key_ident {                                  \
         static const std::string GetName() { return #key_ident; }; \
     };                                                             \
-    team114::c2020::ReadingSdbNumeric<type, __SdbKey_##key_ident>
+    team114::c2021::ReadingSdbNumeric<type, __SdbKey_##key_ident>
 
 template <typename NumericTy, typename KeyTy>
 struct ReadingSdbNumeric {

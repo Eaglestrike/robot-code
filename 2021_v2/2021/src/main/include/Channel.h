@@ -7,12 +7,20 @@
 
 class Channel{
     public:
+        enum State {
+            Idle,
+            Intake,
+            Shooting
+        };
+
         Channel();
-        void Run();
+        void Periodic();
         void Stop();
-        void kicker_run(double percent_out);
+        void setState(State newState);
     
     private:
+        State state;
+
         WPI_TalonFX * channel = new WPI_TalonFX(8);
         WPI_TalonFX * kicker = new WPI_TalonFX(7);
         frc::DigitalInput * photogate = new frc::DigitalInput(2);

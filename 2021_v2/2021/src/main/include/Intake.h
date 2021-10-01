@@ -8,16 +8,24 @@
 
 class Intake{
     public:
-        void Deploy();
+        enum State {
+            Idle,
+            Deploy,
+            Unjam
+        };
+
+        Intake();
         void Run();
-        void Retract();
-        void Unjam();
         bool Deployed();
+        void Periodic();
+        void setState(State newState);
         
     private:
 
-        /*WPI_TalonFX * intake_motor = new WPI_TalonFX(9);
-        frc::Solenoid right_pneumatic{0};
-        frc::Solenoid left_pneumatic{1};
-        bool deployed = false;*/
+        WPI_TalonFX * intake_motor = new WPI_TalonFX(9);
+        frc::Solenoid l_pneumatic{0};
+        frc::Solenoid r_pneumatic{1};
+        bool deployed = false;
+
+        State state;
 };

@@ -10,36 +10,65 @@ void Robot::RobotPeriodic() {
   compressor.Start();
 }
 
-void Robot::AutonomousInit() {}
+void Robot::AutonomousInit() {
+  Auto_timer.Reset();
+  Auto_timer.Start();
+}
 void Robot::AutonomousPeriodic() {
-  _drivetrain.Auto();
+  if(Auto_timer.Get() < 2){
+    _drivetrain.Auto();
+  } else {
+    _drivetrain.Stop();
+    _shooter.Aim();
+    if(Auto_timer.Get() < 7){
+      _shooter.Its_gonna_shoot();
+    }
+  }
 }
 void Robot::TeleopInit() {
+  Auto_timer.Stop();
   _shooter.Zero();
 }
 
 void Robot::TeleopPeriodic() {
-  _drivetrain.Periodic(l_joy.GetRawAxis(1), -1*r_joy.GetRawAxis(0));
+  
+  //Drive & Manual turret movement
   _shooter.Manual_Turret(xbox.GetX(frc::GenericHID::kRightHand));
+  _drivetrain.Periodic(l_joy.GetRawAxis(1), -1*r_joy.GetRawAxis(0));
 
-   _drivetrain.SetWantCheesyDrive(-l_joy.GetRawAxis(1), r_joy.GetRawAxis(0), r_joy.GetRawButton(1));
-
-  //Button 1 is A
+  //Aim
   if(xbox.GetRawButton(1)){
       _shooter.setState(Shoot::State::Aiming);
-      _shooter.Periodic(); //shouldn't this be outside an if statement??
   } else {
       _shooter.setState(Shoot::State::Idle);
   }
 
-  //Button 2 is B?
-  if(xbox.GetRawButton(2)){
-      _channel.Run();
-      _shooter.Shooter_Calibrate();
+  //Shoot
+  if(xbox.GetRawButton(3)){
+    _shooter.setState(Shoot::State::Shooting);
+    _channel.setState(Channel::State::Shooting);
   } else {
-      _channel.Stop();
-      _shooter.setState(Shoot::State::Idle);
-      _shooter.Periodic();
+    _channel.setState(Channel::State::Idle);
+    _shooter.setState(Shoot::State::Idle);
+  }
+
+  //Intake 
+  if(xbox.GetRawButton(4)){
+    _intake.setState(Intake::State::Deploy);
+    _channel.setState(Channel::State::Intake);
+  } else {
+    _channel.setState(Channel::State::Idle);
+    _intake.setState(Intake::State::Idle);
+  }
+
+  _shooter.Periodic();
+  _channel.Periodic();
+  _intake.Periodic();
+
+  //Climb
+  if(l_joy.GetTrigger() && r_joy.GetTrigger()){
+    std::cout << "Climb" << std::endl;
+    //Do climbing stuff
   }
 }
 

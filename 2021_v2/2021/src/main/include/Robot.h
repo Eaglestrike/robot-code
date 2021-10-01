@@ -13,6 +13,7 @@
 #include "Intake.h"
 #include "Channel.h"
 #include "Climb.h"
+#include <cmath>
 
 frc::Joystick l_joy{0};
 frc::Joystick r_joy{1};
@@ -37,6 +38,8 @@ class Robot : public frc::TimedRobot {
     const std::string kAutoNameDefault = "Default";
     const std::string kAutoNameCustom = "My Auto";
     std::string m_autoSelected;
+
+    frc::Timer Auto_timer;
 
     Drive _drivetrain;
     Shoot _shooter;

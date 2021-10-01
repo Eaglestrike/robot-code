@@ -9,6 +9,8 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/DigitalInput.h>
 #include <cmath>
+#include <vector>
+#include <unordered_map>
 #include "AutoShoot.h"
 #include "Channel.h"
 
@@ -29,9 +31,10 @@ class Shoot{
         void Manual_Turret(double turret_rot);
         void Its_gonna_shoot();
         void Shooter_Calibrate();
-        void output_to_tine_f();
+        //void output_to_tine_f();
+        double GetLimelightY();
+        bool interpolate(std::vector<double>& array, double p, double& p1, double& p2);
         
-        //void Manual(const frc::XboxController & xbox);
 
     private:
 
@@ -51,7 +54,12 @@ class Shoot{
 
         frc::DigitalInput *turret_limit_switch = new frc::DigitalInput(1);
 
-        void output_to_time_init();
-        std::map <double, double> output_to_time;
-        double max_out = 0.9; //can adjust 
+        std::vector<double> dataPoints = {-3.8, -1.2, 1.0, 3.0, 4.57, 5.47, 9.5, 14.06, 18.2, 20.1, 22.4};
+
+	    // hash map: data points => {angle, speed}
+	    std::unordered_map<double, std::pair<double, double>> dataMap;
+
+        //void output_to_time_init();
+        //std::map <double, double> output_to_time;
+        //double max_out = 0.9; //can adjust 
 };
