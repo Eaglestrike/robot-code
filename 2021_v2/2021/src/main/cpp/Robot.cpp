@@ -37,7 +37,7 @@ void Robot::TeleopPeriodic() {
   _drivetrain.Periodic(l_joy.GetRawAxis(1), -1*r_joy.GetRawAxis(0));
 
   //Aim
-  if(xbox.GetRawButton(1)){
+  if(xbox.GetRawButton(0)){
       _shooter.setState(Shoot::State::Aiming);
   } else {
       _shooter.setState(Shoot::State::Idle);
