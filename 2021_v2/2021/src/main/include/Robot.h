@@ -14,11 +14,17 @@
 #include "Channel.h"
 #include "Climb.h"
 #include <cmath>
+#include "cameraserver/CameraServer.h"
 
 frc::Joystick l_joy{0};
 frc::Joystick r_joy{1};
 frc::XboxController xbox{2};
 frc::Compressor compressor{0};
+
+//Check ports
+cs::UsbCamera camera;
+
+
 
 class Robot : public frc::TimedRobot {
   public:
@@ -34,12 +40,15 @@ class Robot : public frc::TimedRobot {
     void TestPeriodic() override;
 
   private:
+
     frc::SendableChooser<std::string> m_chooser;
     const std::string kAutoNameDefault = "Default";
     const std::string kAutoNameCustom = "My Auto";
     std::string m_autoSelected;
 
     frc::Timer Auto_timer;
+
+    bool compressorOn = true;
 
     Drive _drivetrain;
     Shoot _shooter;

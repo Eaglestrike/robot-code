@@ -12,21 +12,34 @@ Shoot::Shoot(){
     shoot_slave->Follow(*shoot_master);
     turret->ConfigMotionCruiseVelocity(500);
     turret->ConfigMotionAcceleration(500);
-    turret->SetExpiration(5);
-    shoot_slave->SetExpiration(5);
-    shoot_master->SetExpiration(5);
+    turret->SetExpiration(30);
+    shoot_slave->SetExpiration(30);
+    shoot_master->SetExpiration(30);
 
-    dataMap[-3.8] = {0.36, 0.79};
-	dataMap[-1.2] = {0.37, 0.77};
-	dataMap[1.0] = {0.39, 0.72};
-	dataMap[3.0] = {0.39, 0.7};
-	dataMap[4.57] = {0.38, 0.68};
-	dataMap[5.47] = {0.37, 0.65};
-	dataMap[9.5] = {0.35, 0.62};
-    dataMap[14.06] = {0.32, 0.59};
-    dataMap[18.2] = {0.06, 0.58};
-    dataMap[20.1] = {0.05, 0.57};
-    dataMap[22.4] = {0.0, 0.53};
+    dataMap[-3.8] = {0.47, 0.95};
+	dataMap[-1.2] = {0.44, 0.95};
+	dataMap[1.0] = {0.45, 0.92};
+	dataMap[3.0] = {0.44, 0.92};
+	dataMap[4.57] = {0.43, 0.92};
+	dataMap[5.47] = {0.42, 0.92};
+	dataMap[9.5] = {0.41, 0.92};
+    dataMap[14.06] = {0.40, 0.90};
+    dataMap[18.2] = {0.20, 0.90};
+    dataMap[20.1] = {0.12, 0.90};
+    dataMap[22.4] = {0.0, 0.90};
+
+    // dataMap[-3.8] = {0.36, 0.79};
+	// dataMap[-1.2] = {0.37, 0.77};
+	// dataMap[1.0] = {0.39, 0.72};
+	// dataMap[3.0] = {0.39, 0.7};
+	// dataMap[4.57] = {0.38, 0.68};
+	// dataMap[5.47] = {0.37, 0.65};
+	// dataMap[9.5] = {0.35, 0.62};
+    // dataMap[14.06] = {0.32, 0.59};
+    // dataMap[18.2] = {0.06, 0.58};
+    // dataMap[20.1] = {0.05, 0.57};
+    // dataMap[22.4] = {0.0, 0.53};
+
     //output_to_time_init();
 }
 
@@ -56,15 +69,17 @@ Shoot::Shoot(){
 void Shoot::Periodic(){
     switch(state){
         case State::Idle:
-            limelight->setLEDMode("OFF");
+            limelight->setLEDMode("ON");
             shoot_master->Set(ControlMode::PercentOutput, 0.0);
             shoot_slave->Set(ControlMode::PercentOutput, 0.0);
+            //turret->SetNeutralMode(NeutralMode::Brake);
             break;
         case State::Aiming:
             limelight->setLEDMode("ON");
             Aim();
             break;
         case State::Shooting:
+            turret->SetNeutralMode(NeutralMode::Brake);
             limelight->setLEDMode("ON");
             Its_gonna_shoot();
         default:
@@ -77,7 +92,7 @@ void Shoot::setState(Shoot::State newState) {
 }
 
 
-void Shoot::Its_gonna_shoot(){
+bool Shoot::Its_gonna_shoot(){
     double point = limelight->getYOff();
 	double angle, speed;
 
@@ -106,13 +121,15 @@ void Shoot::Its_gonna_shoot(){
 			speed = (speed1 + speed2) / 2;
 
 		} else {
-			return;
+			return false;
 		}
 	}
+    //std::cout << "flywheel output: " << speed << std::endl;
     shoot_master->Set(ControlMode::PercentOutput, speed);
     shoot_slave->Set(ControlMode::PercentOutput, -speed);
     servo_left.Set(angle);
     servo_right.Set(angle);
+    return true;
 //     AutoShoot::Settings s;
 //   //  s = AutoShootCalc(limelight.getNetworkTable());
 
@@ -134,9 +151,19 @@ void Shoot::Aim() {
     TKi = -0.013;
     TKd = 0.009;
 	x_off = limelight->getXOff();
+    double power;
+    // if(x_off > 500){
+    //     if (turret->GetSelectedSensorPosition() < -19870.0/2.0) power = 0.25;
+    //     if (turret->GetSelectedSensorPosition() > -19870.0/2.0) power = -0.25;
+    // }
+    if (x_off > 500) { //give up
+        power = 0;
+       // turret->SetNeutralMode(NeutralMode::Brake);
+    }
     double delta_xoff = (x_off - prev_xoff);
-	double power = TKp*x_off + TKi + TKd*delta_xoff;
+	power = TKp*x_off + TKi + TKd*delta_xoff;
     prev_xoff = x_off;
+    
     if (power < -0.5) power = -0.5;
     if (power > 0.5) power = 0.5;
     if((turret->GetSelectedSensorPosition() > 0 ) || (turret->GetSelectedSensorPosition() < -19870)){
@@ -161,15 +188,25 @@ double Shoot::GetLimelightY(){
     return limelight->getYOff();
 }
 
+double Shoot::GetLimelightX(){
+    return limelight->getXOff();
+}
 
-void Shoot::Auto(){}
+void Shoot::Auto(){
+    
+}
 
 
 void Shoot::Zero(){
-    while(turret_limit_switch->Get()){
-        turret->Set(ControlMode::PercentOutput, 0.10);
-    }
+    // while(turret_limit_switch->Get()){
+    //     turret->Set(ControlMode::PercentOutput, 0.12);
+    // }
     turret->SetSelectedSensorPosition(0);
+    turret->Set(ControlMode::PercentOutput, 0);
+    //Please work
+    while(turret->GetSelectedSensorPosition() > -9500){
+        turret->Set(ControlMode::PercentOutput, -0.1);
+    }
     turret->Set(ControlMode::PercentOutput, 0);
 }
 
@@ -210,4 +247,11 @@ bool Shoot::interpolate(std::vector<double>& array, double p, double& p1, double
 		mid = (left+right)/2;
 	}
 	return false;
+}
+
+void Shoot::Unjam(){
+    // servo_left.Set(1.0);
+    // servo_right.Set(1.0);
+    shoot_master->Set(ControlMode::PercentOutput, 0.5);
+    //shoot_slave->Set(ControlMode::PercentOutput, -0.5);
 }

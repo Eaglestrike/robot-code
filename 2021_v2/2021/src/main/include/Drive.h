@@ -20,6 +20,7 @@ class Drive{
         void Periodic(double forward, double turn);
         void Auto();
         void Stop();
+        void Auto2();
 
     private:
         WPI_TalonFX * left_master = new WPI_TalonFX(2);
