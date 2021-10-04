@@ -25,6 +25,8 @@ class Intake{
         WPI_TalonFX * intake_motor = new WPI_TalonFX(9);
         frc::Solenoid l_pneumatic{0};
         frc::Solenoid r_pneumatic{1};
+        frc::Solenoid test1_pneumatic{2};
+        frc::Solenoid test2_pneumatic{3};
         bool deployed = false;
 
         State state;

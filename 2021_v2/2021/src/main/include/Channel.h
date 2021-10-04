@@ -17,6 +17,7 @@ class Channel{
         void Periodic();
         void Stop();
         void setState(State newState);
+        Channel::State getState();
     
     private:
         State state;

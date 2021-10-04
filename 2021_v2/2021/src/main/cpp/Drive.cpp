@@ -9,10 +9,14 @@ Drive::Drive(){
     left_slave->Follow(*left_master);
     right_slave->Follow(*right_master);
 
-    left_master->SetExpiration(5);
-    right_master->SetExpiration(5);
-    left_slave->SetExpiration(5);
-    right_slave->SetExpiration(5);
+    left_master->SetSafetyEnabled(false);
+    right_master->SetSafetyEnabled(false);
+    left_slave->SetSafetyEnabled(false);
+    right_slave->SetSafetyEnabled(false);
+    left_master->SetExpiration(30);
+    right_master->SetExpiration(30);
+    left_slave->SetExpiration(30);
+    right_slave->SetExpiration(30);
     
 }
 
@@ -27,8 +31,12 @@ void Drive::Periodic(double forward, double turn){
 }
 
 void Drive::Auto(){
-    m_drive.ArcadeDrive(-0.3, 0.1, false);
+    m_drive.ArcadeDrive(0.2, 0.0, false);
     m_drive.SetRightSideInverted(false);
+}
+
+void Drive::Auto2(){
+    m_drive.ArcadeDrive(0.0,0.3, false);
 }
 
 void Drive::Stop(){

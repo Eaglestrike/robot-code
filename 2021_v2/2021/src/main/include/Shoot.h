@@ -29,12 +29,13 @@ class Shoot{
         void setState(State newState);
         void Zero();
         void Manual_Turret(double turret_rot);
-        void Its_gonna_shoot();
+        bool Its_gonna_shoot();
         void Shooter_Calibrate();
         //void output_to_tine_f();
         double GetLimelightY();
+        double GetLimelightX();
         bool interpolate(std::vector<double>& array, double p, double& p1, double& p2);
-        
+        void Unjam();
 
     private:
 
@@ -58,8 +59,4 @@ class Shoot{
 
 	    // hash map: data points => {angle, speed}
 	    std::unordered_map<double, std::pair<double, double>> dataMap;
-
-        //void output_to_time_init();
-        //std::map <double, double> output_to_time;
-        //double max_out = 0.9; //can adjust 
 };

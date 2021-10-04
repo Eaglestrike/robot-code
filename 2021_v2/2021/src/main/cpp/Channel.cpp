@@ -1,15 +1,18 @@
 #include "Channel.h"
 
 Channel::Channel(){
-    channel->SetExpiration(5);
-    kicker->SetExpiration(5);
+    channel->SetExpiration(10);
+    kicker->SetExpiration(10);
 }
 
 void Channel::Periodic(){
     switch(state){
         case State::Idle:
             Stop();
+           // std::cout<<"IDLE\n";
+            break;
         case State::Intake:
+          //  std::cout<<"INTAKE\n";
             if(!photogate->Get()){
                 Stop();
                 return;
@@ -19,12 +22,17 @@ void Channel::Periodic(){
             }
             break;
         case State::Shooting:
-            channel->Set(ControlMode::PercentOutput, -0.3);
-            kicker->Set(ControlMode::PercentOutput, -0.4);
+         //   std::cout<<"Shooting\n";
+            channel->Set(ControlMode::PercentOutput, -0.35);
+            kicker->Set(ControlMode::PercentOutput, -0.45);
             break;
         default:
             break;
     }
+}
+
+Channel::State Channel::getState() {
+    return state;
 }
 
 void Channel::setState(Channel::State newState){
