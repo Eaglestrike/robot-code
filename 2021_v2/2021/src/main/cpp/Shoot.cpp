@@ -4,11 +4,10 @@
 #include <string>
 #include <map>
 
-// frc::Timer* timer;
-// std::map <double, double> output_to_time;
-// double max_out = 0.9; //can adjust 
 
+//Shooter constructor
 Shoot::Shoot(){
+    //Configure motors
     shoot_slave->Follow(*shoot_master);
     turret->ConfigMotionCruiseVelocity(500);
     turret->ConfigMotionAcceleration(500);
@@ -16,6 +15,7 @@ Shoot::Shoot(){
     shoot_slave->SetExpiration(30);
     shoot_master->SetExpiration(30);
 
+    //Hash map for hood and flywheel values
     dataMap[-3.8] = {0.47, 0.95};
 	dataMap[-1.2] = {0.44, 0.95};
 	dataMap[1.0] = {0.45, 0.92};
@@ -27,50 +27,41 @@ Shoot::Shoot(){
     dataMap[18.2] = {0.20, 0.90};
     dataMap[20.1] = {0.12, 0.90};
     dataMap[22.4] = {0.0, 0.90};
-
-    // dataMap[-3.8] = {0.36, 0.79};
-	// dataMap[-1.2] = {0.37, 0.77};
-	// dataMap[1.0] = {0.39, 0.72};
-	// dataMap[3.0] = {0.39, 0.7};
-	// dataMap[4.57] = {0.38, 0.68};
-	// dataMap[5.47] = {0.37, 0.65};
-	// dataMap[9.5] = {0.35, 0.62};
-    // dataMap[14.06] = {0.32, 0.59};
-    // dataMap[18.2] = {0.06, 0.58};
-    // dataMap[20.1] = {0.05, 0.57};
-    // dataMap[22.4] = {0.0, 0.53};
-
-   
 }
 
 
-
 void Shoot::Periodic(){
+    turret->SetNeutralMode(NeutralMode::Brake);
     switch(state){
         case State::Idle:
             limelight->setLEDMode("ON");
             shoot_master->Set(ControlMode::PercentOutput, 0.0);
             shoot_slave->Set(ControlMode::PercentOutput, 0.0);
-            //turret->SetNeutralMode(NeutralMode::Brake);
             break;
         case State::Aiming:
             limelight->setLEDMode("ON");
             Aim();
             break;
         case State::Shooting:
-            turret->SetNeutralMode(NeutralMode::Brake);
             limelight->setLEDMode("ON");
             Its_gonna_shoot();
+            break;
+        case State::Calibrate:
+            Shooter_Calibrate();
+            break;
         default:
             break;
     }    
 }
 
+
+//Set shooter states
 void Shoot::setState(Shoot::State newState) {
     state = newState;
 }
 
 
+//Shoot - Find values from the limelight and set shooter values
 bool Shoot::Its_gonna_shoot(){
     double point = limelight->getYOff();
 	double angle, speed;
@@ -109,74 +100,49 @@ bool Shoot::Its_gonna_shoot(){
     servo_left.Set(angle);
     servo_right.Set(angle);
     return true;
-//     AutoShoot::Settings s;
-//   //  s = AutoShootCalc(limelight.getNetworkTable());
-
-
-//      servo_left.Set(hood_out); //set hood
-//      servo_right.Set(hood_out);
-    // shoot_master->Set(ControlMode::PercentOutput, flywheel_out);
-    // if (abs(output_to_time_f(flywheel_out) - timer->Get()) > 0.1) return; //adjust tolerance
-    
-}
-
-void Shoot::ShortShot() {
-    //eventually get rid of arguments and use constants
-    //aim?
-    shoot_master->Set(ControlMode::Velocity, 0.0);
-    if (shoot_master->GetSelectedSensorVelocity() - 0.0 < 100) { //adjust
-        servo_left.Set(0.0);
-        servo_right.Set(0.0);
-    }
-    
 }
 
 
-int prev_xoff = 0;
+//Aim the turret to the goal
+double prev_xoff = 0;
+double acc_error = 0; //shh, this was totally here the whole time
 void Shoot::Aim() {
     READING_SDB_NUMERIC(double, Turret_P) TKp;
     READING_SDB_NUMERIC(double, Turret_I) TKi;
     READING_SDB_NUMERIC(double, Turret_D) TKd;
-   
-   // TKp = 0.015; //just this by itself is ok
- 
+
+    frc::SmartDashboard::PutNumber("Turret voltage", turret->GetMotorOutputVoltage());
+
 	x_off = limelight->getXOff();
     double power;
+
     // if(x_off > 500){
     //     if (turret->GetSelectedSensorPosition() < -19870.0/2.0) power = 0.25;
     //     if (turret->GetSelectedSensorPosition() > -19870.0/2.0) power = -0.25;
-    // }
-    if (x_off > 500) { //give up
+    // }  
+    if (x_off > 500) {
         power = 0;
-       // turret->SetNeutralMode(NeutralMode::Brake);
     }
-    double delta_xoff = (x_off - prev_xoff);
 
-	power = TKp*x_off + TKi + TKd*delta_xoff;
+    double TKp = 0.017;
+    double TKi = 0.0;
+    double TKd = 0.015;
+
+
+   double delta_xoff = (x_off - prev_xoff);
+   acc_error += x_off;
+
+	double heading_error = x_off;
+	power = 0.0;
+	power = TKp*heading_error + TKi*acc_error + TKd*delta_xoff;
     prev_xoff = x_off;
     
-    if (power < -0.5) power = -0.5;
-    if (power > 0.5) power = 0.5;
+    if (power < -0.25) power = -0.25;
+    if (power > 0.25) power = 0.25;
     if((turret->GetSelectedSensorPosition() > 0 ) || (turret->GetSelectedSensorPosition() < -19870)){
         power = 0;
     }
-     std::cout << power << std::endl;
     turret->Set(ControlMode::PercentOutput, power);
-
-     std::cout << "x_off: " << x_off << std::endl;
-     std::cout << "power: " << power << std::endl;
-}
-
-
-void Shoot::Shooter_Calibrate(){
-    READING_SDB_NUMERIC(double, Hood_angle_out) hood_out;
-    READING_SDB_NUMERIC(double, Flywheel_speed) flywheel_out;
-
-    shoot_master->Set(ControlMode::Velocity, flywheel_out);
-    shoot_slave->Set(ControlMode::Velocity, -flywheel_out);
-
-    servo_left.Set(hood_out);
-    servo_right.Set(hood_out);
 }
 
 
@@ -194,9 +160,6 @@ void Shoot::Auto(){
 
 
 void Shoot::Zero(){
-    // while(turret_limit_switch->Get()){
-    //     turret->Set(ControlMode::PercentOutput, 0.12);
-    // }
     turret->SetSelectedSensorPosition(0);
     turret->Set(ControlMode::PercentOutput, 0);
     //Please work
@@ -207,6 +170,16 @@ void Shoot::Zero(){
 }
 
 
+void Shoot::Manual_Zero(){
+    while(turret_limit_switch->Get()){
+        turret->Set(ControlMode::PercentOutput, 0.12);
+    }
+    turret->Set(ControlMode::PercentOutput, 0);
+    turret->SetSelectedSensorPosition(0);
+}
+
+
+//Operator movement
 void Shoot::Manual_Turret(double turret_rot){
     if(abs(turret_rot) <= 0.05){
         turret_rot = 0;
@@ -245,9 +218,35 @@ bool Shoot::interpolate(std::vector<double>& array, double p, double& p1, double
 	return false;
 }
 
-void Shoot::Unjam(){
-    // servo_left.Set(1.0);
-    // servo_right.Set(1.0);
-    shoot_master->Set(ControlMode::PercentOutput, 0.5);
-    //shoot_slave->Set(ControlMode::PercentOutput, -0.5);
+
+//Testing function for calibrating shooter values
+void Shoot::Shooter_Calibrate(){
+    READING_SDB_NUMERIC(double, Hood_angle_out) hood_out;
+    READING_SDB_NUMERIC(double, Flywheel_percent_out) flywheel_out;
+
+    shoot_master->Set(ControlMode::PercentOutput, flywheel_out);
+    shoot_slave->Set(ControlMode::PercentOutput, -flywheel_out);
+    servo_left.Set(hood_out);
+    servo_right.Set(hood_out);
+}
+
+void Shoot::Turret_Calibrate(){
+    READING_SDB_NUMERIC(double, Turret_P) TKp;
+    READING_SDB_NUMERIC(double, Turret_I) TKi;
+    READING_SDB_NUMERIC(double, Turret_D) TKd;
+    x_off = limelight->getXOff();
+    double power;
+    if (x_off > 500) {
+        power = 0;
+    }
+    double delta_xoff = (x_off - prev_xoff);
+	power = TKp*x_off + TKi + TKd*delta_xoff;
+    prev_xoff = x_off;
+    
+    if (power < -0.5) power = -0.5;
+    if (power > 0.5) power = 0.5;
+    if((turret->GetSelectedSensorPosition() > 0 ) || (turret->GetSelectedSensorPosition() < -19870)){
+        power = 0;
+    }
+    turret->Set(ControlMode::PercentOutput, power);
 }

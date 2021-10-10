@@ -15,5 +15,5 @@ double Limelight::getYOff() {
 
 void Limelight::setLEDMode(std::string mode) {
     if (mode == "OFF") network_table->PutNumber("ledMode", 1);
+    if (mode == "ON") network_table->PutNumber("ledMode", 3);
 }
-   
