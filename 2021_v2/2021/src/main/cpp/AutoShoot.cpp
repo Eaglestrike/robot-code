@@ -5,41 +5,46 @@
 #define INF pow(10, 10); //why not?
 
 double y_off = 0;
-double max_dist = 7.42; //last key in map
+double max_yoff = 22.4; //last key in mapdist
 
 
 //distance in meters
-std::map<double, AutoShoot::Settings> distance_to_settings_map; 
+std::map<double, AutoShoot::Settings> yoff_to_settings_map; 
 
 AutoShoot::AutoShoot() {
-	distance_to_settings_map.insert({ 3.28 , (Settings){25.0, 35000.0, 0.7} });
-	distance_to_settings_map.insert({ 3.86 , (Settings){22.0, 35000.0, 0.7} });
-	distance_to_settings_map.insert({ 4.67 , (Settings){20.0, 35000.0, 0.7} });
-	distance_to_settings_map.insert({ 5.91 , (Settings){20.0, 40000.0, 0.7} });
-	distance_to_settings_map.insert({ 6.24 , (Settings){20.0, 37000.0, 0.75} });
-	distance_to_settings_map.insert({ 7.42 , (Settings){20.0, 40000.0, 0.8} });
+	yoff_to_settings_map.insert({ 22.4 , (Settings){0.53, 0, -0.22} });
+	yoff_to_settings_map.insert({ 20.1 , (Settings){0.57, 0.05, -0.22} });
+	yoff_to_settings_map.insert({ 18.2 , (Settings){0.58, 0.06, -0.22} });
+	yoff_to_settings_map.insert({ 14.06 , (Settings){0.59, 0.32, -0.22} });
+	yoff_to_settings_map.insert({ 9.5 , (Settings){0.62, 0.35, -0.22} });
+	yoff_to_settings_map.insert({ 5.47 , (Settings){0.65, 0.37, -0.22} });
+    yoff_to_settings_map.insert({ 4.57 , (Settings){0.68, 0.38, -0.22} });
+    yoff_to_settings_map.insert({ 3 , (Settings){0.7, 0.39, -0.22} });
+    yoff_to_settings_map.insert({ 1 , (Settings){0.72, 0.39, -0.22} });
+    yoff_to_settings_map.insert({ -1.2 , (Settings){0.77, 0.37, -0.22} });
+    yoff_to_settings_map.insert({ -3.8 , (Settings){0.79, 0.36  , -0.22} });
 }
 
-AutoShoot::Settings distance_to_settings(double dist) {
+AutoShoot::Settings yoff_to_settings(double yoff) {
 	AutoShoot::Settings best_combo;
 	std::map<double, AutoShoot::Settings>::iterator it;
-	it = distance_to_settings_map.begin();
-	for (it = distance_to_settings_map.begin(); it != distance_to_settings_map.end(); it++) //iterate through settings
+	it = yoff_to_settings_map.begin();
+	for (it = yoff_to_settings_map.begin(); it != yoff_to_settings_map.end(); it++) //iterate through settings
 	{
-		double prevDist = it->first;
-		double nextDist = (std::next(it, 1))->first;
+		double prevYOff = it->first;
+		double nextYOff = (std::next(it, 1))->first;
 		AutoShoot::Settings prevSetting = it->second;
 		AutoShoot::Settings nextSetting = (std::next(it, 1))->second;
-        if (dist < prevDist) return prevSetting; //min threshold
-		if (prevDist <= dist && dist <= nextDist) { //we want something between these settings
+        if (yoff < prevYOff) return prevSetting; //min threshold
+		if (prevYOff <= yoff && yoff <= nextYOff) { //we want something between these settings
 			//it's the previous setting plus the difference to the next setting times the percent (0-1) to the next setting the input distance is
-			best_combo.flywheel_speed = prevSetting.flywheel_speed + (nextSetting.flywheel_speed - prevSetting.flywheel_speed)*((dist-prevDist)/(nextDist-prevDist));
-			best_combo.kicker_speed = prevSetting.kicker_speed + (nextSetting.kicker_speed - prevSetting.kicker_speed)*((dist-prevDist)/(nextDist-prevDist));
-			best_combo.hood_angle = prevSetting.hood_angle + (nextSetting.hood_angle - prevSetting.hood_angle)*((dist-prevDist)/(nextDist-prevDist));
+			best_combo.flywheel_out = prevSetting.flywheel_out + (nextSetting.flywheel_out - prevSetting.flywheel_out)*((yoff-prevYOff)/(nextYOff-prevYOff));
+			best_combo.kicker_out = prevSetting.kicker_out + (nextSetting.kicker_out - prevSetting.kicker_out)*((yoff-prevYOff)/(nextYOff-prevYOff));
+			best_combo.hood_out = prevSetting.hood_out + (nextSetting.hood_out - prevSetting.hood_out)*((yoff-prevYOff)/(nextYOff-prevYOff));
             return best_combo;
         }
 	}
-	return distance_to_settings_map[max_dist];
+	return yoff_to_settings_map[max_yoff];
 }
 
 double distance(Limelight& limelight) {// x (horizontal) distance to goal
@@ -57,6 +62,6 @@ double distance(Limelight& limelight) {// x (horizontal) distance to goal
 //.first is hood angle, .second is flywheel speed
 AutoShoot::Settings AutoShootCalc(std::shared_ptr<nt::NetworkTable> network_table, Limelight& limelight) {
     if (limelight.getYOff() > 0) y_off = limelight.getYOff();
-	else std::cout << "doesn't see it" << std::endl;
-	return distance_to_settings(distance(limelight));
+//	else std::cout << "doesn't see it" << std::endl;
+	return yoff_to_settings(distance(limelight));
 }

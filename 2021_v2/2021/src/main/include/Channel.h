@@ -18,6 +18,7 @@ class Channel{
         void Stop();
         void setState(State newState);
         Channel::State getState();
+        void setKicker(double d);
     
     private:
         State state;

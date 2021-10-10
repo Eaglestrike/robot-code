@@ -9,10 +9,10 @@ void Channel::Periodic(){
     switch(state){
         case State::Idle:
             Stop();
-           // std::cout<<"IDLE\n";
+          //  std::cout<<"IDLE\n";
             break;
         case State::Intake:
-          //  std::cout<<"INTAKE\n";
+           // std::cout<<"INTAKE\n";
             if(!photogate->Get()){
                 Stop();
                 return;
@@ -22,7 +22,7 @@ void Channel::Periodic(){
             }
             break;
         case State::Shooting:
-         //   std::cout<<"Shooting\n";
+       //    std::cout<<"Shooting\n";
             channel->Set(ControlMode::PercentOutput, -0.35);
             kicker->Set(ControlMode::PercentOutput, -0.45);
             break;
@@ -30,6 +30,8 @@ void Channel::Periodic(){
             break;
     }
 }
+
+void Channel::setKicker(double d) {kicker->Set(ControlMode::PercentOutput, d);} //temp
 
 Channel::State Channel::getState() {
     return state;

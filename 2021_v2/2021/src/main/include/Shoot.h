@@ -19,33 +19,27 @@ class Shoot{
         enum State {
             Idle,
             Aiming,
-            Shooting,
-            Calibrate
+            Shooting
         };
 
         Shoot();
-        
-        //Periodic
         void Periodic();
-        void Manual_Turret(double turret_rot);
-        void Zero();
-        void Manual_Zero();
-
+        void Aim();
         void Auto();
         void setState(State newState);
-        
-        //Shooting & Aiming
-        void Aim();
+        void Zero();
+        void Manual_Turret(double turret_rot);
         bool Its_gonna_shoot();
-        bool interpolate(std::vector<double>& array, double p, double& p1, double& p2);
+        void ShortShot();
+        void Shooter_Calibrate();
+        //void output_to_tine_f();
         double GetLimelightY();
         double GetLimelightX();
-
-        //Calibrating Shooter
-        void Shooter_Calibrate();
-        void Turret_Calibrate();
+        bool interpolate(std::vector<double>& array, double p, double& p1, double& p2);
+        void Unjam();
 
     private:
+
         WPI_TalonFX * turret = new WPI_TalonFX(4);
         WPI_TalonFX * shoot_master = new WPI_TalonFX(5);
         WPI_TalonFX * shoot_slave = new WPI_TalonFX(6);
@@ -63,6 +57,7 @@ class Shoot{
         frc::DigitalInput *turret_limit_switch = new frc::DigitalInput(1);
 
         std::vector<double> dataPoints = {-3.8, -1.2, 1.0, 3.0, 4.57, 5.47, 9.5, 14.06, 18.2, 20.1, 22.4};
+
 	    // hash map: data points => {angle, speed}
 	    std::unordered_map<double, std::pair<double, double>> dataMap;
 };

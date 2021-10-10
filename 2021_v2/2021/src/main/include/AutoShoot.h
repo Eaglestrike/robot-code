@@ -9,13 +9,13 @@
 class AutoShoot {
     public:
          struct Settings {
-            double flywheel_speed;
-            double kicker_speed;
-            double hood_angle;
+            double flywheel_out;
+            double hood_out;
+            double kicker_out;
         };
 
         AutoShoot();
-        AutoShoot::Settings distance_to_settings(double dist);
+        AutoShoot::Settings yoff_to_settings(double dist);
         double distance(double y_off);
         AutoShoot::Settings AutoShootCalc(std::shared_ptr<nt::NetworkTable> network_table);
 };
