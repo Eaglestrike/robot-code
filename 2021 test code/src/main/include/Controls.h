@@ -16,7 +16,7 @@ class Controls
         double throttle();
         double turn();
 
-        bool revShooter();
+        bool readyShot();
         bool shoot();
 
         int intake();

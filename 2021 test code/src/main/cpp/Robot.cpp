@@ -10,7 +10,7 @@ void Robot::RobotInit() {}
 /**
  * initiate robot, call subsystems' constructors
  */
-Robot::Robot() : frc::TimedRobot{}, controls{Controls::controlMethod::joysticks}, drive{}, intake{}
+Robot::Robot() : frc::TimedRobot{}, timer{}, controls{Controls::controlMethod::gamecubeController}, drive{}, intake{}, shoot{}
 {
 
 }
@@ -39,17 +39,49 @@ void Robot::RobotPeriodic()
  * if-else structure below with additional strings. If using the SendableChooser
  * make sure to add them to the chooser code above as well.
  */
-void Robot::AutonomousInit() {}
-void Robot::AutonomousPeriodic() {}
+void Robot::AutonomousInit() 
+{
+    timer.Reset();
+    timer.Start();
+}
+void Robot::AutonomousPeriodic() 
+{
+    if (timer.Get() < 1)
+    {
+        drive.autoDrive();
+    }else
+    {
+        drive.stop();
+    }
+    
+}
 
 void Robot::TeleopInit() {}
 /**
  * call subsystem periodics, probably other stuff later on
  */
-void Robot::TeleopPeriodic() 
+void Robot::TeleopPeriodic() //I do like using a controls class, but passing it each time feels not right, is there a way to make like a global controls class
 {
+    timer.Stop();
     drive.periodic(controls);
     intake.periodic(controls);
+    channel.periodic(controls);
+
+    Shoot::state state = shoot.periodic(controls);
+    switch(state)
+    {
+        case Shoot::idle:
+            shoot.stop();
+            break;
+        case Shoot::aiming: //something about overriding drive?
+            drive.drive(0, shoot.horizontalAim());
+            //something with vertical hood
+            break;
+        case Shoot::shooting:
+            shoot.shootShot();
+            break;
+    }
+    
 }
 
 /**

@@ -21,7 +21,10 @@ class Intake
         void setState(State state);
 
         void intake(Controls &controls);
-        void deploy(Controls &controls);
+        void deploy();
+        void retract();
+
+        bool isDeployed() {return deployed; };
 
     private:
         WPI_TalonSRX &intakeMotor = *new WPI_TalonSRX(20);

@@ -39,19 +39,32 @@ void Intake::setState(Intake::State setState)
  */
 void Intake::intake(Controls &controls)
 {
-    deploy(controls);
-    intakeMotor.Set(ControlMode::PercentOutput, controls.intake() * 0.25); //test powers
+    if(controls.intake() != 0)
+    {
+        deploy();
+    }else
+    {
+        retract();
+    }
+    intakeMotor.Set(ControlMode::PercentOutput, controls.intake() * 0.65); //test powers
 }
 
 /**
  * there is no motor or pneumatic to deploy the intake right now
  */
-void Intake::deploy(Controls &controls)
+void Intake::deploy()
 {
-    if(deployed || controls.deploy() == 0)
+    if(isDeployed()/* || controls.deploy() == 0*/)
         return;
     //do something with pneumatics or motors
     deployed = true;
 
     
+}
+void Intake::retract()
+{
+    if(!isDeployed())
+        return;
+    //do something with pneumatics or motors
+    deployed = false;
 }

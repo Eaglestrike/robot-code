@@ -20,6 +20,9 @@ class Drive
     public:
         Drive();
         void periodic(Controls& controls);
+        void autoDrive();
+        void drive(double throttle, double turn);
+        void stop();
 
     private:
         WPI_TalonFX &leftM = *new WPI_TalonFX(22);

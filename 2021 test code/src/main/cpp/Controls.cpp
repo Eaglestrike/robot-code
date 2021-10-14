@@ -18,7 +18,13 @@ double Controls::throttle()
         { 
             return value; 
         } else {return 0;}
-    }else{ return lJoy.GetY(); }
+    }else if (method == controlMethod::joysticks)
+    { 
+        return lJoy.GetY(); 
+    }else 
+    {
+        return 0;
+    }
 }
 /**
  * gets the input based on control method for turn
@@ -32,27 +38,42 @@ double Controls::turn()
         { 
             return value; 
         } else {return 0;} 
-    }else{ return -rJoy.GetX(); }
+    }else if(method == controlMethod::joysticks)
+    { 
+        return -rJoy.GetX(); 
+    }else 
+    {
+        return 0;
+    }
     
 }
 
-bool Controls::revShooter() { return lJoy.GetTrigger(); } //unfished for gamecube
+bool Controls::readyShot() { return lJoy.GetTrigger(); } //unfished for gamecube
 bool Controls::shoot() { return rJoy.GetTrigger(); } //unfished for gamecube
 
 int Controls::intake() 
 { 
-    return lJoy.GetRawButton(3) - rJoy.GetRawButton(2); //unfished for gamecube
+    if(method == controlMethod::gamecubeController)
+    {
+        return gamecube.GetRawButton(1) - gamecube.GetRawButton(2);
+    }else if(method == controlMethod::joysticks)
+    {
+        return lJoy.GetRawButton(3) - rJoy.GetRawButton(4);
+    }else 
+    {
+        return 0;
+    }
 }
-int Controls::deploy() { return lJoy.GetRawButton(1) - rJoy.GetRawButton(1); } //unfished for gamecube
+int Controls::deploy() { return lJoy.GetRawButton(2) - rJoy.GetRawButton(2); } //unfished for gamecube, probably don't need
 
-bool Controls::spinWheel() { return rJoy.GetRawButton(3); } //unfished for gamecube
+bool Controls::spinWheel() { return rJoy.GetRawButton(4); } //unfished for gamecube
 
 /*
 
-trigger 0 (check numbers)
-bottom 1
-left 2
-right 3
+trigger 1 (check numbers)
+bottom 2
+left 3
+right 4
 other stuff
 
 */

@@ -9,6 +9,8 @@
 #include "Controls.h"
 #include "Drive.h"
 #include "Intake.h"
+#include "Channel.h"
+#include "Shoot.h"
 
 class Robot : public frc::TimedRobot {
  public:
@@ -36,7 +38,10 @@ class Robot : public frc::TimedRobot {
   const std::string kAutoNameCustom = "My Auto";
   std::string m_autoSelected;*/
 
+  frc::Timer timer;
   Controls controls;
   Drive drive;
   Intake intake;
+  Channel channel;
+  Shoot shoot;
 };
