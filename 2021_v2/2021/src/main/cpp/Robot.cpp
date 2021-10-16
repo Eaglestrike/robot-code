@@ -54,7 +54,9 @@ void Robot::TeleopPeriodic() {
   //Drive & Manual turret movement
   _shooter.Manual_Turret(xbox.GetX(frc::GenericHID::kRightHand));
   _drivetrain.Periodic(l_joy.GetRawAxis(1), -1*r_joy.GetRawAxis(0));
-  
+  if (_climb.climbing)
+    _climb.Manual_Climb(xbox.GetY(frc::GenericHID::kLeftHand));
+
   //Aim Button A
   if(xbox.GetRawButton(1)){
       _shooter.setState(Shoot::State::Aiming);
@@ -86,8 +88,10 @@ void Robot::TeleopPeriodic() {
 
   //Climb
   else if(l_joy.GetTrigger() && r_joy.GetTrigger()){
-    
-  }
+    _climb.climbing = true;
+    _climb.Extend();
+  }  
+
 
   else {
     _intake.setState(Intake::State::Idle);
