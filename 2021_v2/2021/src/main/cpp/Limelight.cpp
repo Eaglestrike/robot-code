@@ -13,6 +13,15 @@ double Limelight::getYOff() {
     return network_table->GetNumber("ty", 10000.0);
 }
 
+bool Limelight::target_valid(){
+    double tv = network_table->GetNumber("tv", 0.0);
+    if(tv == 0.0){
+        //The target is not visible
+        return false;
+    }
+    return true;
+}
+
 void Limelight::setLEDMode(std::string mode) {
     if (mode == "OFF") network_table->PutNumber("ledMode", 1);
     if (mode == "ON") network_table->PutNumber("ledMode", 3);

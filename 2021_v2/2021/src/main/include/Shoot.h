@@ -11,7 +11,7 @@
 #include <cmath>
 #include <vector>
 #include <unordered_map>
-#include "AutoShoot.h"
+//#include "AutoShoot.h"
 #include "Channel.h"
 
 class Shoot{
@@ -26,7 +26,7 @@ class Shoot{
         Shoot();
         
         //Periodic
-        void Periodic();
+        void Periodic(double robot_yaw);
         void Manual_Turret(double turret_rot);
         void Zero();
         void Manual_Zero();
@@ -35,7 +35,8 @@ class Shoot{
         void setState(State newState);
         
         //Shooting & Aiming
-        void Aim();
+        void Aim(double robot_yaw);
+        void FindTarget(double robot_yaw);
         bool Its_gonna_shoot();
         bool interpolate(std::vector<double>& array, double p, double& p1, double& p2);
         double GetLimelightY();

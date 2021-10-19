@@ -15,16 +15,18 @@
 #include "Climb.h"
 #include <cmath>
 #include "cameraserver/CameraServer.h"
+#include "AHRS.h"
+#include "frc/SPI.h"
 
 frc::Joystick l_joy{0};
 frc::Joystick r_joy{1};
 frc::XboxController xbox{2};
 frc::Compressor compressor{0};
 
+AHRS * navx;
+
 //Check ports
-cs::UsbCamera camera;
-
-
+//cs::UsbCamera camera;
 
 class Robot : public frc::TimedRobot {
   public:
@@ -47,8 +49,6 @@ class Robot : public frc::TimedRobot {
     std::string m_autoSelected;
 
     frc::Timer Auto_timer;
-
-    bool compressorOn = true;
 
     Drive _drivetrain;
     Shoot _shooter;

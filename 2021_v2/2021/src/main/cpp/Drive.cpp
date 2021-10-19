@@ -18,6 +18,9 @@ Drive::Drive(){
     left_slave->SetExpiration(30);
     right_slave->SetExpiration(30);
     
+    m_yaw_controller.Reset();
+    m_yaw_controller.EnableContinuousInput(-180, 180);
+    m_yaw_controller.SetSetpoint(0.0);
 }
 
 void Drive::Periodic(double forward, double turn){
@@ -35,10 +38,12 @@ void Drive::Auto(){
     m_drive.SetRightSideInverted(false);
 }
 
-void Drive::Auto2(){
-    m_drive.ArcadeDrive(0.0,0.3, false);
-}
-
 void Drive::Stop(){
     m_drive.ArcadeDrive(0,0,false);
+}
+
+void Drive::navx_testing(float yaw){
+    pid_output = m_yaw_controller.Calculate(yaw);
+    pid_output = std::clamp(pid_output, -1.0, 1.0);
+    m_drive.ArcadeDrive(0, -pid_output);
 }

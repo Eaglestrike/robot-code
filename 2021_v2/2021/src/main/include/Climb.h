@@ -13,9 +13,6 @@ class Climb{
         void Extend();
         void Retract();
         void Secure();
-        void ReExtend();
-        void Manual_Climb(double joystick_val);
-        bool climbing;
 
     private:
         WPI_TalonFX * climb_master = new WPI_TalonFX(11);

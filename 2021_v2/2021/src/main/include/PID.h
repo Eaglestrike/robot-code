@@ -1,4 +1,3 @@
-
 class PID {
     public:
         PID(double Kp, double Ki, double Kd, double min_out, double max_out);

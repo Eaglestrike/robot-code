@@ -6,6 +6,7 @@ class Limelight{
         Limelight();
         double getXOff();
         double getYOff();
+        bool target_valid();
         void setLEDMode(std::string mode);
         std::shared_ptr<nt::NetworkTable> GetNetworkTable();
 
