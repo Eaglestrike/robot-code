@@ -28,7 +28,7 @@ class Shoot{
         //Periodic
         void Periodic(double robot_yaw);
         void Manual_Turret(double turret_rot);
-        void Zero();
+        //void Zero();
         void Manual_Zero();
 
         void Auto();
@@ -37,7 +37,6 @@ class Shoot{
         //Shooting & Aiming
         void Aim(double robot_yaw);
         void FindTarget(double robot_yaw);
-        bool Its_gonna_shoot();
         bool interpolate(std::vector<double>& array, double p, double& p1, double& p2);
         double GetLimelightY();
         double GetLimelightX();
@@ -45,6 +44,8 @@ class Shoot{
         //Calibrating Shooter
         void Shooter_Calibrate();
         void Turret_Calibrate();
+
+        bool target_found = false;
 
     private:
         WPI_TalonFX * turret = new WPI_TalonFX(4);
@@ -58,8 +59,12 @@ class Shoot{
 
         State state;
 
+        double turret_rot_limit = -20480;
+
         double TKi, TKp, TKd, x_off;
         double flywheel_out, hood_out, kicker_out;
+        double turret_yaw;
+        double total_yaw;
 
         frc::DigitalInput *turret_limit_switch = new frc::DigitalInput(1);
 

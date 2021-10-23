@@ -5,6 +5,8 @@ Climb::Climb(){
     climbing = false;
     climb_1.Set(true);
     climb_2.Set(true);
+    climb_master->SetNeutralMode(NeutralMode::Brake);
+    climb_slave->SetNeutralMode(NeutralMode::Brake);
 }
 
 void Climb::Extend(){
@@ -19,16 +21,17 @@ void Climb::Extend(){
 
 int hard_stop_ticks = 0; //set once we know
 void Climb::Manual_Climb(double joystick_val) { //mostly copied manual turret
-    if (!climbing) return; // just in case
-    if(abs(joystick_val) <= 0.05 || (joystick_val > 0 && climb_master->GetSelectedSensorPosition() >= hard_stop_ticks)
-        || (joystick_val < 0 && climb_master->GetSelectedSensorPosition() <= 0) ){
-        joystick_val = 0;
-    }
+    //Secure();
+    //if (!climbing) return; // just in case
+    // if(abs(joystick_val) <= 0.05 || (joystick_val > 0 && climb_master->GetSelectedSensorPosition() >= hard_stop_ticks)
+    //     || (joystick_val < 0 && climb_master->GetSelectedSensorPosition() <= 0) ){
+    //     joystick_val = 0;
+    // }
     //commented out part is so climb can go up and down, in place code is only going up
   /*  climb_master->Set(ControlMode::PercentOutput, joystick_val*0.9);
     climb_master->Set(ControlMode::PercentOutput, joystick_val*0.9); */
-    climb_master->Set(ControlMode::PercentOutput, std::max(0.0, joystick_val*0.9));
-    climb_master->Set(ControlMode::PercentOutput, std::max(0.0, joystick_val*0.9));
+    climb_master->Set(ControlMode::PercentOutput, joystick_val);
+    climb_slave->Set(ControlMode::PercentOutput, joystick_val);
 }
 
 
@@ -54,4 +57,3 @@ void Climb::ReExtend() {
         climb_slave->Set(ControlMode::PercentOutput, 0.6); //change if bad?
     }
 }
-

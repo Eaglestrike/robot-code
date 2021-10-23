@@ -11,7 +11,8 @@ class Intake{
         enum State {
             Idle,
             Deploy,
-            Unjam
+            Unjam,
+            Shoot
         };
 
         Intake();

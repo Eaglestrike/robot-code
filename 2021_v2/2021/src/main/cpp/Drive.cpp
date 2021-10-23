@@ -13,10 +13,6 @@ Drive::Drive(){
     right_master->SetSafetyEnabled(false);
     left_slave->SetSafetyEnabled(false);
     right_slave->SetSafetyEnabled(false);
-    left_master->SetExpiration(30);
-    right_master->SetExpiration(30);
-    left_slave->SetExpiration(30);
-    right_slave->SetExpiration(30);
     
     m_yaw_controller.Reset();
     m_yaw_controller.EnableContinuousInput(-180, 180);

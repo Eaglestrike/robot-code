@@ -11,9 +11,7 @@ Shoot::Shoot(){
     //shoot_slave->Follow(*shoot_master);
     turret->ConfigMotionCruiseVelocity(500);
     turret->ConfigMotionAcceleration(500);
-    turret->SetExpiration(30);
-    shoot_slave->SetExpiration(30);
-    shoot_master->SetExpiration(30);
+    turret->SetSafetyEnabled(false);
     shoot_master->SetSafetyEnabled(false);
     shoot_slave->SetSafetyEnabled(false);
     shoot_master->Config_kP(0, 0.25, 30);
@@ -22,6 +20,7 @@ Shoot::Shoot(){
     shoot_slave->Config_kP(0, 0.25, 30);
     shoot_slave->Config_kI(0, 0.0, 30);
     shoot_slave->Config_kD(0, 0.0, 30);
+    turret->SetNeutralMode(NeutralMode::Brake);
 
     //Hash map for hood and flywheel values
     dataMap[-3.8] = {0.47, 0.95};
@@ -39,7 +38,8 @@ Shoot::Shoot(){
 
 
 void Shoot::Periodic(double robot_yaw){
-    turret->SetNeutralMode(NeutralMode::Brake);
+    
+    std::cout << "turret_yaw" << turret_yaw << std::endl;
     switch(state){
         case State::Idle:
             limelight->setLEDMode("ON");
@@ -49,12 +49,10 @@ void Shoot::Periodic(double robot_yaw){
         case State::Aiming:
             limelight->setLEDMode("ON");
             Aim(robot_yaw);
-            shoot_master->Set(ControlMode::PercentOutput, 0.70);
-            shoot_slave->Set(ControlMode::PercentOutput, -0.70);
             break;
         case State::Shooting:
             limelight->setLEDMode("ON");
-            Its_gonna_shoot();
+            Aim(robot_yaw);
             break;
         case State::Calibrate:
             Shooter_Calibrate();
@@ -71,8 +69,21 @@ void Shoot::setState(Shoot::State newState) {
 }
 
 
-//Shoot - Find values from the limelight and set shooter values
-bool Shoot::Its_gonna_shoot(){
+
+double prev_xoff = 0;
+double acc_error = 0;
+void Shoot::Aim(double robot_yaw) {
+
+    // ----------------------- Check if the limelight sees the goal -----------------------
+    if(!limelight->target_valid()){
+        FindTarget(robot_yaw);
+        std::cout << "does not see target" << std::endl;
+        target_found = false;
+        return;
+    } else {
+        target_found = true;
+
+    // ----------------------- Find the angle and flywheel speed ------------------------
     double point = limelight->getYOff();
 	double angle, speed;
 
@@ -90,70 +101,59 @@ bool Shoot::Its_gonna_shoot(){
 			double angle1, speed1;
 			angle1 = data1.first;
 			speed1 = data1.second;
-			
+		
 			auto data2 = dataMap[point2];
 			double angle2, speed2;
 			angle2 = data2.first;
 			speed2 = data2.second;
-
 			// interpolate
 			angle = (angle1 + angle2) / 2;
 			speed = (speed1 + speed2) / 2;
-
 		} else {
-			return false;
+			speed = 0; angle = 0.01;
 		}
 	}
-    std::cout << "angle" << angle << std::endl;
-    shoot_master->Set(ControlMode::PercentOutput, speed);
-    shoot_slave->Set(ControlMode::PercentOutput, -speed);
+
+    // ----------------------- Aim the turret -----------------------
+    x_off = limelight->getXOff();
+    double power;
+    if (x_off > 500) {
+        power = 0;
+    }
+    double TKp = 0.015;
+    double TKi = 0.0003;
+    double TKd = 0.068;
+    double delta_xoff = (x_off - prev_xoff);
+    acc_error += x_off;
+    double heading_error = x_off;
+    power = 0.0;
+    power = TKp*heading_error + TKi*acc_error + TKd*delta_xoff;
+    prev_xoff = x_off;
+    if (power < -0.25) power = -0.25;
+    if (power > 0.25) power = 0.25;
+    if((turret->GetSelectedSensorPosition() > 0 ) || (turret->GetSelectedSensorPosition() < turret_rot_limit)){
+        power = 0;
+    }
+
+    // ----------------------- Set the hood, default flywheel, and aim -----------------------
+    turret->Set(ControlMode::PercentOutput, power);
     servo_left.Set(angle);
     servo_right.Set(angle);
-    return true;
-}
-
-
-//Aim the turret to the goal
-double prev_xoff = 0;
-double acc_error = 0;
-void Shoot::Aim(double robot_yaw) {
-
-    if(!limelight->target_valid()){
-        FindTarget(robot_yaw);
+    if(state == Shoot::State::Aiming){
+        shoot_master->Set(ControlMode::PercentOutput, 0.70);
+        shoot_slave->Set(ControlMode::PercentOutput, -0.70);
+    } else {
+        shoot_master->Set(ControlMode::PercentOutput, speed);
+        shoot_slave->Set(ControlMode::PercentOutput, -speed);
     }
-    else {
-        //Pid for turret speed output
-        x_off = limelight->getXOff();
-        double power;
-        if (x_off > 500) {
-            power = 0;
-        }
-
-        double TKp = 0.017;
-        double TKi = 0.0;
-        double TKd = 0.015;
-
-        double delta_xoff = (x_off - prev_xoff);
-        acc_error += x_off;
-
-        double heading_error = x_off;
-        power = 0.0;
-        power = TKp*heading_error + TKi*acc_error + TKd*delta_xoff;
-        prev_xoff = x_off;
-        
-        if (power < -0.25) power = -0.25;
-        if (power > 0.25) power = 0.25;
-        if((turret->GetSelectedSensorPosition() > 0 ) || (turret->GetSelectedSensorPosition() < -19870)){
-            power = 0;
-        }
-        turret->Set(ControlMode::PercentOutput, power);
     }
 }
 
 
 void Shoot::FindTarget(double robot_yaw){
-    double turret_rot = turret->GetSelectedSensorPosition();
-    //Find the turret location in comparison to robot location and find which direction to turn
+    //turret_yaw = abs(turret->GetSelectedSensorPosition()) / 2048.0 * 360.0 / 20.0; //convert to degrees
+    //total_yaw = robot_yaw + (turret_yaw - 90);
+    //  //+-
 }
 
 
@@ -170,20 +170,11 @@ void Shoot::Auto(){
 }
 
 //TalonFX integrated encoder: Units per rot = 2048
-void Shoot::Zero(){
-    turret->SetSelectedSensorPosition(0);
-    turret->Set(ControlMode::PercentOutput, 0);
-    //Please work
-    while(turret->GetSelectedSensorPosition() > -9500){
-        turret->Set(ControlMode::PercentOutput, -0.1);
-    }
-    turret->Set(ControlMode::PercentOutput, 0);
-}
 
 
 void Shoot::Manual_Zero(){
     while(turret_limit_switch->Get()){
-        turret->Set(ControlMode::PercentOutput, 0.12);
+        turret->Set(ControlMode::PercentOutput, 0.15);
     }
     turret->Set(ControlMode::PercentOutput, 0);
     turret->SetSelectedSensorPosition(0);
@@ -198,7 +189,7 @@ void Shoot::Manual_Turret(double turret_rot){
     if(turret_rot > 0 && turret->GetSelectedSensorPosition() > 0){
         turret_rot = 0;
     }
-    if(turret_rot < 0 && turret->GetSelectedSensorPosition() < -19870){
+    if(turret_rot < 0 && turret->GetSelectedSensorPosition() < turret_rot_limit){
         turret_rot = 0;
     }
     turret->Set(ControlMode::PercentOutput, turret_rot*0.12);
@@ -262,8 +253,8 @@ void Shoot::Turret_Calibrate(){
         power = 0;
     }
 
-   double delta_xoff = (x_off - prev_xoff);
-   acc_error += x_off;
+    double delta_xoff = (x_off - prev_xoff);
+    acc_error += x_off;
 
 	double heading_error = x_off;
 	power = 0.0;
@@ -272,7 +263,7 @@ void Shoot::Turret_Calibrate(){
     
     if (power < -0.25) power = -0.25;
     if (power > 0.25) power = 0.25;
-    if((turret->GetSelectedSensorPosition() > 0 ) || (turret->GetSelectedSensorPosition() < -19870)){
+    if((turret->GetSelectedSensorPosition() > 0 ) || (turret->GetSelectedSensorPosition() < turret_rot_limit)){
         power = 0;
     }
     turret->Set(ControlMode::PercentOutput, power);

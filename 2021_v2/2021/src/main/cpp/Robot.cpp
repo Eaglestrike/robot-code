@@ -21,7 +21,7 @@ void Robot::RobotPeriodic() {
 
 
 void Robot::AutonomousInit() {
-  _shooter.Zero();
+  _shooter.Manual_Zero();
   Auto_timer.Reset();
   Auto_timer.Start();
   navx->ZeroYaw();
@@ -59,6 +59,11 @@ void Robot::TeleopPeriodic() {
   //Drive & Manual turret movement
   _shooter.Manual_Turret(xbox.GetX(frc::GenericHID::kRightHand));
   _drivetrain.Periodic(l_joy.GetRawAxis(1), -1*r_joy.GetRawAxis(0));
+
+  //Enabling Climb operator left joystick
+  if(_climb.climbing){
+    _climb.Manual_Climb(xbox.GetY(frc::GenericHID::kLeftHand));
+  }
   
   //Aim Button A
   if(xbox.GetRawButton(1)){
@@ -72,8 +77,9 @@ void Robot::TeleopPeriodic() {
     _shooter.setState(Shoot::State::Shooting);
     _channel.setState(Channel::State::Idle);
     Auto_timer.Start();
-      if(Auto_timer.Get() > 1.0){
-      _channel.setState(Channel::State::Shooting);
+      if(Auto_timer.Get() > .7 && _shooter.target_found){
+        _channel.setState(Channel::State::Shooting);
+        _intake.setState(Intake::State::Shoot);
       }
   }
 
@@ -84,15 +90,15 @@ void Robot::TeleopPeriodic() {
     _shooter.setState(Shoot::State::Idle);
   } 
 
+  else if(l_joy.GetTriggerPressed() &&r_joy.GetTriggerPressed()){
+    _climb.climbing = true;
+    _climb.Extend();
+  }
+
   //Manual Zero
   else if(xbox.GetBackButton()){
     _shooter.Manual_Zero();
   }
-
-  //Climb
-  // else if(l_joy.GetTrigger() && r_joy.GetTrigger()){
-    
-  // }
 
   else {
     _intake.setState(Intake::State::Idle);
@@ -153,7 +159,7 @@ void Robot::TestPeriodic() {
   _channel.Periodic();
   _intake.Periodic();
 
-  //frc::SmartDashboard::PutNumber("yaw", navx->GetYaw());
+  frc::SmartDashboard::PutNumber("yaw", navx->GetYaw());
 }
 
 

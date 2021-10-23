@@ -1,7 +1,7 @@
 #include "Intake.h"
 
 Intake::Intake(){
-    intake_motor->SetExpiration(30);
+    intake_motor->SetSafetyEnabled(false);
 }
 
 void Intake::Periodic(){
@@ -19,6 +19,9 @@ void Intake::Periodic(){
             break;
         case State::Unjam:
             intake_motor->Set(ControlMode::PercentOutput, -0.25);
+            break;
+        case State::Shoot:
+            intake_motor->Set(ControlMode::PercentOutput, 0.25);
             break;
         default:
             break;
