@@ -4,7 +4,7 @@ void Robot::RobotInit() {
   m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
   m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
   frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
-
+  
   //camera = frc::CameraServer::GetInstance()->StartAutomaticCapture();
 
   try{
@@ -21,25 +21,26 @@ void Robot::RobotPeriodic() {
 
 
 void Robot::AutonomousInit() {
-  _shooter.Manual_Zero();
   Auto_timer.Reset();
   Auto_timer.Start();
   navx->ZeroYaw();
+  _shooter.Auto();
 }
 
 
 void Robot::AutonomousPeriodic() {
-  if(Auto_timer.Get() < 2){
+  
+  if(Auto_timer.Get() > 1 && Auto_timer.Get() < 3){
     _drivetrain.Auto();
   } 
-  else if(Auto_timer.Get() > 3 && Auto_timer.Get() < 5){
+  else if(Auto_timer.Get() > 4 && Auto_timer.Get() < 8){
     _shooter.Aim(navx->GetYaw());
     _shooter.setState(Shoot::State::Shooting);
   }
-  else if(Auto_timer.Get() > 5 && Auto_timer.Get() < 7){
+  else if(Auto_timer.Get() > 8 && Auto_timer.Get() < 13){
     _channel.setState(Channel::State::Shooting);
   }
-  else if(Auto_timer.Get() > 10){
+  else if(Auto_timer.Get() > 13){
     _shooter.setState(Shoot::State::Idle);
     _channel.setState(Channel::State::Idle);
   }
@@ -77,7 +78,7 @@ void Robot::TeleopPeriodic() {
     _shooter.setState(Shoot::State::Shooting);
     _channel.setState(Channel::State::Idle);
     Auto_timer.Start();
-      if(Auto_timer.Get() > .7 && _shooter.target_found){
+      if(Auto_timer.Get() > 1.0 && _shooter.target_found){
         _channel.setState(Channel::State::Shooting);
         _intake.setState(Intake::State::Shoot);
       }
@@ -91,6 +92,7 @@ void Robot::TeleopPeriodic() {
   } 
 
   else if(l_joy.GetTriggerPressed() &&r_joy.GetTriggerPressed()){
+    _intake.setState(Intake::State::Climb);
     _climb.climbing = true;
     _climb.Extend();
   }

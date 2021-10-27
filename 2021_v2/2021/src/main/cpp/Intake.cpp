@@ -7,13 +7,13 @@ Intake::Intake(){
 void Intake::Periodic(){
     switch (state){
         case State::Idle:
-            test1_pneumatic.Set(false);
+            //test1_pneumatic.Set(false);
             test2_pneumatic.Set(false);
             intake_motor->Set(ControlMode::PercentOutput, 0);
             break;
         case State::Deploy:
             //deployed = true;
-            test1_pneumatic.Set(true);
+            //test1_pneumatic.Set(true);
             test2_pneumatic.Set(true);
             Run();
             break;
@@ -23,6 +23,8 @@ void Intake::Periodic(){
         case State::Shoot:
             intake_motor->Set(ControlMode::PercentOutput, 0.25);
             break;
+        case State::Climb:
+            test2_pneumatic.Set(true);
         default:
             break;
     }
@@ -34,7 +36,7 @@ void Intake::setState(Intake::State newState){
 
 
 void Intake::Run(){
-    intake_motor->Set(ControlMode::PercentOutput, 0.30);
+    intake_motor->Set(ControlMode::PercentOutput, 0.40);
 }
 
 bool Intake::Deployed(){

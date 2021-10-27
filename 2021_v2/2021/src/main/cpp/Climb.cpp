@@ -3,17 +3,17 @@
 Climb::Climb(){
     //Gearbox motors in reverse?
     climbing = false;
-    climb_1.Set(true);
-    climb_2.Set(true);
+    //climb_1.Set(false);
+    //climb_2.Set(true);
     climb_master->SetNeutralMode(NeutralMode::Brake);
     climb_slave->SetNeutralMode(NeutralMode::Brake);
 }
 
 void Climb::Extend(){
-    climb_master->SetNeutralMode(NeutralMode::Coast);
-    climb_slave->SetNeutralMode(NeutralMode::Coast);
-    climb_1.Set(false);
-    climb_2.Set(false);
+    //climb_master->SetNeutralMode(NeutralMode::Coast);
+    //climb_slave->SetNeutralMode(NeutralMode::Coast);
+    climb_1.Set(true);
+    //climb_2.Set(false);
 
 //Gearbox stuff
 }
@@ -21,6 +21,12 @@ void Climb::Extend(){
 
 int hard_stop_ticks = 0; //set once we know
 void Climb::Manual_Climb(double joystick_val) { //mostly copied manual turret
+    //if(joystick_val < 0.05){
+        //joystick_val = -0.25;
+    //} 
+    //if(joystick_val > 0.05){
+        //joystick_val = 0.25;
+    //}
     //Secure();
     //if (!climbing) return; // just in case
     // if(abs(joystick_val) <= 0.05 || (joystick_val > 0 && climb_master->GetSelectedSensorPosition() >= hard_stop_ticks)
@@ -32,6 +38,7 @@ void Climb::Manual_Climb(double joystick_val) { //mostly copied manual turret
     climb_master->Set(ControlMode::PercentOutput, joystick_val*0.9); */
     climb_master->Set(ControlMode::PercentOutput, joystick_val);
     climb_slave->Set(ControlMode::PercentOutput, joystick_val);
+    std::cout<< climb_master->GetSelectedSensorPosition() << std::endl;
 }
 
 

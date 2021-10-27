@@ -12,7 +12,8 @@ class Intake{
             Idle,
             Deploy,
             Unjam,
-            Shoot
+            Shoot,
+            Climb
         };
 
         Intake();
@@ -24,7 +25,7 @@ class Intake{
     private:
 
         WPI_TalonFX * intake_motor = new WPI_TalonFX(9);
-        frc::Solenoid test1_pneumatic{2};
+        //frc::Solenoid test1_pneumatic{2};
         frc::Solenoid test2_pneumatic{3};
         bool deployed = false;
 

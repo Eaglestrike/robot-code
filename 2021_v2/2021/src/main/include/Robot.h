@@ -26,7 +26,7 @@ frc::Compressor compressor{0};
 AHRS * navx;
 
 //Check ports
-//cs::UsbCamera camera;
+cs::UsbCamera camera;
 
 class Robot : public frc::TimedRobot {
   public:

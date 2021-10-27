@@ -19,6 +19,6 @@ class Climb{
     private:
         WPI_TalonFX * climb_master = new WPI_TalonFX(10);
         WPI_TalonFX * climb_slave = new WPI_TalonFX(11);
-        frc::Solenoid climb_1{0};
-        frc::Solenoid climb_2{1};
+        frc::Solenoid climb_1{2};
+        //frc::Solenoid climb_2{1};
 };
