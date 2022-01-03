@@ -1,8 +1,0 @@
-See file:///C:/Users/sheeh/OneDrive/Documents/robot-code/2022/build/tmp/compileFrcUserProgramDebugExecutableFrcUserProgramCpp/output.txt for all output for compileFrcUserProgramDebugExecutableFrcUserProgramCpp.
-compiling SwerveModule.cpp successful.
-
-compiling Robot.cpp successful.
-
-compiling Drivetrain.cpp successful.
-
-Finished compileFrcUserProgramDebugExecutableFrcUserProgramCpp, see full log file:///C:/Users/sheeh/OneDrive/Documents/robot-code/2022/build/tmp/compileFrcUserProgramDebugExecutableFrcUserProgramCpp/output.txt.
