@@ -1,0 +1,60 @@
+[
+  {
+    "type": "native",
+    "name": "frcCpp",
+    "port": 8349,
+    "target": "10.1.14.2",
+    "launchfile": "C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2022\\build\\exe\\frcUserProgram\\release\\frcUserProgram",
+    "gdb": "C:\\Users\\Public\\wpilib\\2022\\roborio\\bin\\arm-frc2022-linux-gnueabi-gdb.exe",
+    "sysroot": "C:\\Users\\Public\\wpilib\\2022\\roborio",
+    "srcpaths": [
+      "C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2022\\src\\main\\cpp",
+      "C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2022\\src\\main\\include"
+    ],
+    "headerpaths": [
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\5710c59e3d7b792f670c109f160305be\\transformed\\wpilibNewCommands-cpp-2022.1.1-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\0b15f482ae641198824f7bf93822c65f\\transformed\\wpiapi-cpp-5.20.2-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\7752cfc0b49dd224037583187d102a80\\transformed\\api-cpp-5.20.2-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\5855cf39f556af267d64cb547c83e32c\\transformed\\cci-5.20.2-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\f78a52fb6e404f5ec270c622bfe72c19\\transformed\\wpiapi-cpp-sim-5.20.2-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\0f2230ed7e2eb079fa244a7236fc1358\\transformed\\api-cpp-sim-5.20.2-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\290c3fc0cd13b08f72fa5be270e7dd6d\\transformed\\cci-sim-5.20.2-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\c5a64f956ab1ed403ca74b9cce80800b\\transformed\\simTalonSRX-5.20.2-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\c268db995c46c7d73241a9b886b3491e\\transformed\\simTalonFX-5.20.2-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\8866c55b7fe0f5f3f8a23f74a101bb2f\\transformed\\simVictorSPX-5.20.2-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\4790774074609ed4a477a7a30053ffbd\\transformed\\simPigeonIMU-5.20.2-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\524865c3ee6fc2307d1310c39f66fdef\\transformed\\simCANCoder-5.20.2-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\57f626d1c2964b9957386e7ac0e4c5ab\\transformed\\wpilibOldCommands-cpp-2022.1.1-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\9b84f80eade2b7f8007c41ec48b6da35\\transformed\\navx-cpp-4.0.442-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\178114eb00f372730a0b1c89d5ebb019\\transformed\\wpilibc-cpp-2022.1.1-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\641643087ae9777ae75100ffdbc4697e\\transformed\\ntcore-cpp-2022.1.1-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\1a9cdc5d7555160eb1dcea208642f77f\\transformed\\hal-cpp-2022.1.1-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\a9434eb4c6f89ebba955d60fea0deea2\\transformed\\wpimath-cpp-2022.1.1-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\fea46de20e2869b0be986ea81684d897\\transformed\\wpiutil-cpp-2022.1.1-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\66a16582f6a200fa3a5e3581b24f0c3f\\transformed\\netcomm-2022.2.3-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\683856b648f7528f026e1684c6185c89\\transformed\\chipobject-2022.2.3-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\5d3969cbc3b439049cd8f46e118be0dd\\transformed\\visa-2022.2.3-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\b08b9f937e430cdef8c06ff4f3c7060e\\transformed\\cameraserver-cpp-2022.1.1-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\2a5a8c7196d96ca8c3653526d1ab3dd8\\transformed\\cscore-cpp-2022.1.1-headers",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\513d63680c462fd3c3f26d776e7a371b\\transformed\\opencv-cpp-4.5.2-1-headers",
+      "C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2022\\src\\main\\include"
+    ],
+    "libpaths": [
+      "C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2022\\build\\install\\frcUserProgram\\release\\lib",
+      "C:\\Users\\sheeh\\OneDrive\\Documents\\robot-code\\2022\\build\\install\\frcUserProgram\\release"
+    ],
+    "libsrcpaths": [
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\0f3db1c3623f43d63ba3d08c4213d4d2\\transformed\\wpilibNewCommands-cpp-2022.1.1-sources",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\faff728f86be11c0f75f69ffb5abbaed\\transformed\\wpilibOldCommands-cpp-2022.1.1-sources",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\160853b3f6f4ffba34657c59c76fcbce\\transformed\\navx-cpp-4.0.442-sources",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\e5ed294e2796233ce348092d86c3d615\\transformed\\wpilibc-cpp-2022.1.1-sources",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\c0deeec90f8e6eb3e8a25ccff43421d2\\transformed\\ntcore-cpp-2022.1.1-sources",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\d46324c78f10aa8edaf0bc3b4b0baaa8\\transformed\\hal-cpp-2022.1.1-sources",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\04f3d024c120655d91de6089c4b495d3\\transformed\\wpimath-cpp-2022.1.1-sources",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\9af9f5d2a1d01cbaf3f2074aa0b9ee8a\\transformed\\wpiutil-cpp-2022.1.1-sources",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\3a753a8bdf37261612cc4e6b9b5343c5\\transformed\\cameraserver-cpp-2022.1.1-sources",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\b15905425b937c6aad39c4fedd875979\\transformed\\cscore-cpp-2022.1.1-sources",
+      "C:\\Users\\sheeh\\.gradle\\caches\\transforms-3\\a93c6335346280fec03bf26b98b01b90\\transformed\\opencv-cpp-4.5.2-1-sources"
+    ]
+  }
+]
